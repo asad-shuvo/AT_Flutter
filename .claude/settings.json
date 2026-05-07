@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//d/Mobile Repo/old/l3-angular-sln-mobileat/src/app/app-customer-dashboard/components/customer-dashboard-header/**)",
+      "Read(//d/Mobile Repo/old/l3-angular-sln-mobileat/src/app/app-customer-dashboard/**)",
+      "Read(//d/Mobile Repo/old/l3-angular-sln-mobileat/src/**)"
+    ]
+  }
+}

@@ -1,0 +1,154 @@
+{
+  "project_info": {
+    "project_number": "420592002900",
+    "project_id": "filip-mobile",
+    "storage_bucket": "filip-mobile.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:420592002900:android:b99942c15fcbdd0360cac1",
+        "android_client_info": {
+          "package_name": "ch.selise.sln.at"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "420592002900-21mge5fhn215f8f86s991puho5e6ttfn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCpkFKlWcJhsqnKnsvyum2xa7JTM2IikXk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "420592002900-21mge5fhn215f8f86s991puho5e6ttfn.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "420592002900-1ng2a1bna3o71t0gupj2ldgfvsjocvha.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "ch.selise.sln-fccz"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:420592002900:android:ac0b999004250ea360cac1",
+        "android_client_info": {
+          "package_name": "ch.selise.sln.fccz"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "420592002900-21mge5fhn215f8f86s991puho5e6ttfn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCpkFKlWcJhsqnKnsvyum2xa7JTM2IikXk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "420592002900-21mge5fhn215f8f86s991puho5e6ttfn.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "420592002900-1ng2a1bna3o71t0gupj2ldgfvsjocvha.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "ch.selise.sln-fccz"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:420592002900:android:0873d39c9b3f9f2060cac1",
+        "android_client_info": {
+          "package_name": "ch.selise.sln.slcz"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "420592002900-21mge5fhn215f8f86s991puho5e6ttfn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCpkFKlWcJhsqnKnsvyum2xa7JTM2IikXk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "420592002900-21mge5fhn215f8f86s991puho5e6ttfn.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "420592002900-1ng2a1bna3o71t0gupj2ldgfvsjocvha.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "ch.selise.sln-fccz"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:420592002900:android:0a5a85e16e31ff9460cac1",
+        "android_client_info": {
+          "package_name": "ch.selise.slsk"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "420592002900-21mge5fhn215f8f86s991puho5e6ttfn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCpkFKlWcJhsqnKnsvyum2xa7JTM2IikXk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "420592002900-21mge5fhn215f8f86s991puho5e6ttfn.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "420592002900-1ng2a1bna3o71t0gupj2ldgfvsjocvha.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "ch.selise.sln-fccz"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

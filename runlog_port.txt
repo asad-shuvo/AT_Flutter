@@ -1,0 +1,120 @@
+Launching lib/main_stg.dart on sdk gphone64 x86 64 in debug mode...
+Running Gradle task 'assembleDebug'...                          
+
+D:\Mobile Repo\old\filip_at_flutter\android>if "Windows_NT" == "Windows_NT" setlocal
+
+D:\Mobile Repo\old\filip_at_flutter\android>set DEFAULT_JVM_OPTS= 
+
+D:\Mobile Repo\old\filip_at_flutter\android>set DIRNAME=D:\Mobile Repo\old\filip_at_flutter\android\ 
+
+D:\Mobile Repo\old\filip_at_flutter\android>if "D:\Mobile Repo\old\filip_at_flutter\android\" == "" set DIRNAME=. 
+
+D:\Mobile Repo\old\filip_at_flutter\android>set APP_BASE_NAME=gradlew 
+
+D:\Mobile Repo\old\filip_at_flutter\android>set APP_HOME=D:\Mobile Repo\old\filip_at_flutter\android\ 
+
+D:\Mobile Repo\old\filip_at_flutter\android>if defined JAVA_HOME goto findJavaFromJavaHome 
+
+D:\Mobile Repo\old\filip_at_flutter\android>set JAVA_HOME=C:\Program Files\Android\Android Studio\jbr 
+
+D:\Mobile Repo\old\filip_at_flutter\android>set JAVA_EXE=C:\Program Files\Android\Android Studio\jbr/bin/java.exe 
+
+D:\Mobile Repo\old\filip_at_flutter\android>if exist "C:\Program Files\Android\Android Studio\jbr/bin/java.exe" goto init 
+
+D:\Mobile Repo\old\filip_at_flutter\android>if not "Windows_NT" == "Windows_NT" goto win9xME_args 
+
+D:\Mobile Repo\old\filip_at_flutter\android>if "@eval[2+2]" == "4" goto 4NT_args 
+
+D:\Mobile Repo\old\filip_at_flutter\android>set CMD_LINE_ARGS= 
+
+D:\Mobile Repo\old\filip_at_flutter\android>set _SKIP=2 
+
+D:\Mobile Repo\old\filip_at_flutter\android>if "x-q" == "x" goto execute 
+
+D:\Mobile Repo\old\filip_at_flutter\android>set CMD_LINE_ARGS=-q -Ptarget-platform=android-x64 "-Ptarget=D:\Mobile Repo\old\filip_at_flutter\lib/main_stg.dart" -Pbase-application-name=android.app.Application -Pdart-defines=RkxVVFRFUl9WRVJTSU9OPTMuMzguNw==,RkxVVFRFUl9DSEFOTkVMPXN0YWJsZQ==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049M2I2MmVmYzJhMw==,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049NzhmYzMwMTJlNA==,RkxVVFRFUl9EQVJUX1ZFUlNJT049My4xMC43 -Pdart-obfuscation=false -Ptrack-widget-creation=true -Ptree-shake-icons=false -Pfilesystem-scheme=org-dartlang-root assembleDebug 
+
+D:\Mobile Repo\old\filip_at_flutter\android>goto execute 
+
+D:\Mobile Repo\old\filip_at_flutter\android>set CLASSPATH=D:\Mobile Repo\old\filip_at_flutter\android\\gradle\wrapper\gradle-wrapper.jar 
+
+D:\Mobile Repo\old\filip_at_flutter\android>"C:\Program Files\Android\Android Studio\jbr/bin/java.exe"    "-Dorg.gradle.appname=gradlew" -classpath "D:\Mobile Repo\old\filip_at_flutter\android\\gradle\wrapper\gradle-wrapper.jar" org.gradle.wrapper.GradleWrapperMain -q -Ptarget-platform=android-x64 "-Ptarget=D:\Mobile Repo\old\filip_at_flutter\lib/main_stg.dart" -Pbase-application-name=android.app.Application -Pdart-defines=RkxVVFRFUl9WRVJTSU9OPTMuMzguNw==,RkxVVFRFUl9DSEFOTkVMPXN0YWJsZQ==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049M2I2MmVmYzJhMw==,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049NzhmYzMwMTJlNA==,RkxVVFRFUl9EQVJUX1ZFUlNJT049My4xMC43 -Pdart-obfuscation=false -Ptrack-widget-creation=true -Ptree-shake-icons=false -Pfilesystem-scheme=org-dartlang-root assembleDebug 
+
+D:\Mobile Repo\old\filip_at_flutter\android>if "0" == "0" goto mainEnd 
+
+D:\Mobile Repo\old\filip_at_flutter\android>if "Windows_NT" == "Windows_NT" endlocal
+Running Gradle task 'assembleDebug'...                             13.7s
+√ Built build\app\outputs\flutter-apk\app-debug.apk
+Installing build\app\outputs\flutter-apk\app-debug.apk...        2,356ms
+D/FlutterJNI(19114): Beginning load of flutter...
+D/FlutterJNI(19114): flutter (null) was loaded normally!
+I/flutter (19114): [IMPORTANT:flutter/shell/platform/android/android_context_gl_impeller.cc(104)] Using the Impeller rendering backend (OpenGLES).
+W/HWUI    (19114): Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED, retrying without...
+W/HWUI    (19114): Failed to initialize 101010-2 format, error = EGL_SUCCESS
+I/Gralloc4(19114): mapper 4.x is not supported
+Syncing files to device sdk gphone64 x86 64...                  
+W/ilip_at_flutter(19114): Verification of boolean kotlinx.coroutines.channels.BufferedChannel.tryResumeSender(java.lang.Object, kotlinx.coroutines.channels.ChannelSegment, int) took 332.481ms (333.85 bytecodes/s) (4664B approximate peak alloc)
+Syncing files to device sdk gphone64 x86 64...                     183ms
+
+Flutter run key commands.
+r Hot reload. 
+R Hot restart.
+h List all available interactive commands.
+d Detach (terminate "flutter run" but leave application running).
+c Clear the screen
+q Quit (terminate the application on the device).
+
+A Dart VM Service on sdk gphone64 x86 64 is available at: http://127.0.0.1:52882/7SVLphowW-M=/
+The Flutter DevTools debugger and profiler on sdk gphone64 x86 64 is available at: http://127.0.0.1:52882/7SVLphowW-M=/devtools/?uri=ws://127.0.0.1:52882/7SVLphowW-M=/ws
+I/ilip_at_flutter(19114): Compiler allocated 5174KB to compile void android.view.ViewRootImpl.performTraversals()
+I/ilip_at_flutter(19114): Compiler allocated 5417KB to compile void android.view.ViewRootImpl.performTraversals()
+I/Choreographer(19114): Skipped 146 frames!  The application may be doing too much work on its main thread.
+D/ProfileInstaller(19114): Installing profile for com.example.filip_at_flutter
+I/Choreographer(19114): Skipped 152 frames!  The application may be doing too much work on its main thread.
+I/HWUI    (19114): Davey! duration=2698ms; Flags=1, FrameTimelineVsyncId=264314, IntendedVsync=20689408288192, Vsync=20691941621424, InputEventId=0, HandleInputStart=20691952408700, AnimationStart=20691952600400, PerformTraversalsStart=20691956925700, DrawStart=20691968590200, FrameDeadline=20689424954858, FrameInterval=20691950585100, FrameStartTime=16666666, SyncQueued=20691970778700, SyncStart=20691973971400, IssueDrawCommandsStart=20691976153200, SwapBuffers=20692045831300, FrameCompleted=20692110280900, DequeueBufferDuration=58110800, QueueBufferDuration=880600, GpuCompleted=20692059136900, SwapBuffersCompleted=20692110280900, DisplayPresentTime=72904454231359566, CommandSubmissionCompleted=20692045831300, 
+W/WindowOnBackDispatcher(19114): OnBackInvokedCallback is not enabled for the application.
+W/WindowOnBackDispatcher(19114): Set 'android:enableOnBackInvokedCallback="true"' in the application manifest.
+I/Choreographer(19114): Skipped 88 frames!  The application may be doing too much work on its main thread.
+D/EGL_emulation(19114): app_time_stats: avg=839.08ms min=471.52ms max=1206.63ms count=2
+D/EGL_emulation(19114): app_time_stats: avg=571.11ms min=40.75ms max=1803.63ms count=4
+D/EGL_emulation(19114): app_time_stats: avg=15.85ms min=3.89ms max=145.78ms count=28
+D/EGL_emulation(19114): app_time_stats: avg=36.56ms min=5.21ms max=122.73ms count=23
+W/WindowOnBackDispatcher(19114): OnBackInvokedCallback is not enabled for the application.
+W/WindowOnBackDispatcher(19114): Set 'android:enableOnBackInvokedCallback="true"' in the application manifest.
+W/ilip_at_flutter(19114): ApkAssets: Deleting an ApkAssets object '<empty> and /product/app/talkback/talkback.apk' with 1 weak references
+W/ilip_at_flutter(19114): ApkAssets: Deleting an ApkAssets object '/vendor/overlay/EmulatorTalkBackOverlay/EmulatorTalkBackOverlay.apk' with 1 weak references
+D/EGL_emulation(19114): app_time_stats: avg=4203.88ms min=15.47ms max=28593.66ms count=7
+W/WindowOnBackDispatcher(19114): OnBackInvokedCallback is not enabled for the application.
+W/WindowOnBackDispatcher(19114): Set 'android:enableOnBackInvokedCallback="true"' in the application manifest.
+D/EGL_emulation(19114): app_time_stats: avg=227.04ms min=22.65ms max=1078.21ms count=7
+D/EGL_emulation(19114): app_time_stats: avg=77.53ms min=8.03ms max=677.11ms count=15
+D/EGL_emulation(19114): app_time_stats: avg=36.99ms min=4.82ms max=320.28ms count=20
+D/EGL_emulation(19114): app_time_stats: avg=33.78ms min=5.59ms max=268.92ms count=22
+D/EGL_emulation(19114): app_time_stats: avg=3327.07ms min=4.32ms max=56357.00ms count=17
+D/EGL_emulation(19114): app_time_stats: avg=118.08ms min=5.03ms max=1545.01ms count=15
+D/EGL_emulation(19114): app_time_stats: avg=65.78ms min=4.61ms max=516.19ms count=12
+D/EGL_emulation(19114): app_time_stats: avg=87.42ms min=5.08ms max=690.48ms count=10
+D/EGL_emulation(19114): app_time_stats: avg=1912.15ms min=9.08ms max=11324.46ms count=6
+D/EGL_emulation(19114): app_time_stats: avg=6983.94ms min=13.24ms max=90306.05ms count=13
+D/EGL_emulation(19114): app_time_stats: avg=33.60ms min=6.30ms max=98.20ms count=22
+D/EGL_emulation(19114): app_time_stats: avg=32.11ms min=4.91ms max=118.90ms count=22
+D/EGL_emulation(19114): app_time_stats: avg=644.08ms min=8.49ms max=5566.21ms count=9
+D/EGL_emulation(19114): app_time_stats: avg=80.62ms min=4.92ms max=1501.15ms count=24
+W/WindowOnBackDispatcher(19114): OnBackInvokedCallback is not enabled for the application.
+W/WindowOnBackDispatcher(19114): Set 'android:enableOnBackInvokedCallback="true"' in the application manifest.
+D/EGL_emulation(19114): app_time_stats: avg=266.36ms min=5.66ms max=3186.90ms count=13
+W/WindowOnBackDispatcher(19114): OnBackInvokedCallback is not enabled for the application.
+W/WindowOnBackDispatcher(19114): Set 'android:enableOnBackInvokedCallback="true"' in the application manifest.
+D/EGL_emulation(19114): app_time_stats: avg=116.14ms min=6.29ms max=1113.62ms count=12
+D/EGL_emulation(19114): app_time_stats: avg=155.80ms min=3.86ms max=1777.85ms count=13
+W/WindowOnBackDispatcher(19114): OnBackInvokedCallback is not enabled for the application.
+W/WindowOnBackDispatcher(19114): Set 'android:enableOnBackInvokedCallback="true"' in the application manifest.
+D/EGL_emulation(19114): app_time_stats: avg=271.12ms min=6.70ms max=3279.35ms count=13
+D/EGL_emulation(19114): app_time_stats: avg=89.68ms min=7.01ms max=777.73ms count=12
+W/WindowOnBackDispatcher(19114): OnBackInvokedCallback is not enabled for the application.
+W/WindowOnBackDispatcher(19114): Set 'android:enableOnBackInvokedCallback="true"' in the application manifest.
+D/EGL_emulation(19114): app_time_stats: avg=81.13ms min=4.99ms max=699.34ms count=12
+D/EGL_emulation(19114): app_time_stats: avg=285.65ms min=5.34ms max=3144.65ms count=12
+D/EGL_emulation(19114): app_time_stats: avg=230.37ms min=4.34ms max=2033.15ms count=10
+D/VRI[MainActivity](19114): visibilityChanged oldVisibility=true newVisibility=false
+W/WindowOnBackDispatcher(19114): sendCancelIfRunning: isInProgress=false callback=android.view.ViewRootImpl$$ExternalSyntheticLambda11@3109264
+Lost connection to device.

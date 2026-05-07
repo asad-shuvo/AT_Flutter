@@ -1,0 +1,87 @@
+Launching lib/main_stg.dart on sdk gphone64 x86 64 in debug mode...
+Running Gradle task 'assembleDebug'...                          
+
+D:\Mobile Repo\old\filip_at_flutter\android>if "Windows_NT" == "Windows_NT" setlocal
+
+D:\Mobile Repo\old\filip_at_flutter\android>set DEFAULT_JVM_OPTS= 
+
+D:\Mobile Repo\old\filip_at_flutter\android>set DIRNAME=D:\Mobile Repo\old\filip_at_flutter\android\ 
+
+D:\Mobile Repo\old\filip_at_flutter\android>if "D:\Mobile Repo\old\filip_at_flutter\android\" == "" set DIRNAME=. 
+
+D:\Mobile Repo\old\filip_at_flutter\android>set APP_BASE_NAME=gradlew 
+
+D:\Mobile Repo\old\filip_at_flutter\android>set APP_HOME=D:\Mobile Repo\old\filip_at_flutter\android\ 
+
+D:\Mobile Repo\old\filip_at_flutter\android>if defined JAVA_HOME goto findJavaFromJavaHome 
+
+D:\Mobile Repo\old\filip_at_flutter\android>set JAVA_HOME=C:\Program Files\Android\Android Studio\jbr 
+
+D:\Mobile Repo\old\filip_at_flutter\android>set JAVA_EXE=C:\Program Files\Android\Android Studio\jbr/bin/java.exe 
+
+D:\Mobile Repo\old\filip_at_flutter\android>if exist "C:\Program Files\Android\Android Studio\jbr/bin/java.exe" goto init 
+
+D:\Mobile Repo\old\filip_at_flutter\android>if not "Windows_NT" == "Windows_NT" goto win9xME_args 
+
+D:\Mobile Repo\old\filip_at_flutter\android>if "@eval[2+2]" == "4" goto 4NT_args 
+
+D:\Mobile Repo\old\filip_at_flutter\android>set CMD_LINE_ARGS= 
+
+D:\Mobile Repo\old\filip_at_flutter\android>set _SKIP=2 
+
+D:\Mobile Repo\old\filip_at_flutter\android>if "x-q" == "x" goto execute 
+
+D:\Mobile Repo\old\filip_at_flutter\android>set CMD_LINE_ARGS=-q -Ptarget-platform=android-x64 "-Ptarget=D:\Mobile Repo\old\filip_at_flutter\lib/main_stg.dart" -Pbase-application-name=android.app.Application -Pdart-defines=RkxVVFRFUl9WRVJTSU9OPTMuMzguNw==,RkxVVFRFUl9DSEFOTkVMPXN0YWJsZQ==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049M2I2MmVmYzJhMw==,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049NzhmYzMwMTJlNA==,RkxVVFRFUl9EQVJUX1ZFUlNJT049My4xMC43 -Pdart-obfuscation=false -Ptrack-widget-creation=true -Ptree-shake-icons=false -Pfilesystem-scheme=org-dartlang-root assembleDebug 
+
+D:\Mobile Repo\old\filip_at_flutter\android>goto execute 
+
+D:\Mobile Repo\old\filip_at_flutter\android>set CLASSPATH=D:\Mobile Repo\old\filip_at_flutter\android\\gradle\wrapper\gradle-wrapper.jar 
+
+D:\Mobile Repo\old\filip_at_flutter\android>"C:\Program Files\Android\Android Studio\jbr/bin/java.exe"    "-Dorg.gradle.appname=gradlew" -classpath "D:\Mobile Repo\old\filip_at_flutter\android\\gradle\wrapper\gradle-wrapper.jar" org.gradle.wrapper.GradleWrapperMain -q -Ptarget-platform=android-x64 "-Ptarget=D:\Mobile Repo\old\filip_at_flutter\lib/main_stg.dart" -Pbase-application-name=android.app.Application -Pdart-defines=RkxVVFRFUl9WRVJTSU9OPTMuMzguNw==,RkxVVFRFUl9DSEFOTkVMPXN0YWJsZQ==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049M2I2MmVmYzJhMw==,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049NzhmYzMwMTJlNA==,RkxVVFRFUl9EQVJUX1ZFUlNJT049My4xMC43 -Pdart-obfuscation=false -Ptrack-widget-creation=true -Ptree-shake-icons=false -Pfilesystem-scheme=org-dartlang-root assembleDebug 
+
+D:\Mobile Repo\old\filip_at_flutter\android>if "0" == "0" goto mainEnd 
+
+D:\Mobile Repo\old\filip_at_flutter\android>if "Windows_NT" == "Windows_NT" endlocal
+Running Gradle task 'assembleDebug'...                              5.4s
+√ Built build\app\outputs\flutter-apk\app-debug.apk
+Installing build\app\outputs\flutter-apk\app-debug.apk...        2,847ms
+D/FlutterJNI(18081): Beginning load of flutter...
+D/FlutterJNI(18081): flutter (null) was loaded normally!
+I/flutter (18081): [IMPORTANT:flutter/shell/platform/android/android_context_gl_impeller.cc(104)] Using the Impeller rendering backend (OpenGLES).
+W/HWUI    (18081): Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED, retrying without...
+W/HWUI    (18081): Failed to initialize 101010-2 format, error = EGL_SUCCESS
+I/Gralloc4(18081): mapper 4.x is not supported
+Syncing files to device sdk gphone64 x86 64...                  
+I/ilip_at_flutter(18081): Compiler allocated 5174KB to compile void android.view.ViewRootImpl.performTraversals()
+Syncing files to device sdk gphone64 x86 64...                     211ms
+
+Flutter run key commands.
+r Hot reload. 
+R Hot restart.
+h List all available interactive commands.
+d Detach (terminate "flutter run" but leave application running).
+c Clear the screen
+q Quit (terminate the application on the device).
+
+A Dart VM Service on sdk gphone64 x86 64 is available at: http://127.0.0.1:63438/vl3F7WljoZY=/
+The Flutter DevTools debugger and profiler on sdk gphone64 x86 64 is available at: http://127.0.0.1:63438/vl3F7WljoZY=/devtools/?uri=ws://127.0.0.1:63438/vl3F7WljoZY=/ws
+I/Choreographer(18081): Skipped 93 frames!  The application may be doing too much work on its main thread.
+I/Choreographer(18081): Skipped 83 frames!  The application may be doing too much work on its main thread.
+W/WindowOnBackDispatcher(18081): OnBackInvokedCallback is not enabled for the application.
+W/WindowOnBackDispatcher(18081): Set 'android:enableOnBackInvokedCallback="true"' in the application manifest.
+D/ProfileInstaller(18081): Installing profile for com.example.filip_at_flutter
+I/Choreographer(18081): Skipped 57 frames!  The application may be doing too much work on its main thread.
+I/HWUI    (18081): Davey! duration=1075ms; Flags=1, FrameTimelineVsyncId=241786, IntendedVsync=19638908330212, Vsync=19639858330174, InputEventId=0, HandleInputStart=19639865886600, AnimationStart=19639866013800, PerformTraversalsStart=19639866068400, DrawStart=19639884198600, FrameDeadline=19638924996878, FrameInterval=19639865177800, FrameStartTime=16666666, SyncQueued=19639885974800, SyncStart=19639888176300, IssueDrawCommandsStart=19639889355400, SwapBuffers=19639917670000, FrameCompleted=19639986072500, DequeueBufferDuration=64559300, QueueBufferDuration=473700, GpuCompleted=19639926066100, SwapBuffersCompleted=19639986072500, DisplayPresentTime=72904454231359566, CommandSubmissionCompleted=19639917670000, 
+D/EGL_emulation(18081): app_time_stats: avg=216.13ms min=47.72ms max=534.11ms count=7
+D/EGL_emulation(18081): app_time_stats: avg=96.07ms min=62.32ms max=112.65ms count=11
+D/EGL_emulation(18081): app_time_stats: avg=45.94ms min=3.62ms max=289.05ms count=17
+W/WindowOnBackDispatcher(18081): OnBackInvokedCallback is not enabled for the application.
+W/WindowOnBackDispatcher(18081): Set 'android:enableOnBackInvokedCallback="true"' in the application manifest.
+W/ilip_at_flutter(18081): ApkAssets: Deleting an ApkAssets object '<empty> and /product/app/talkback/talkback.apk' with 1 weak references
+W/ilip_at_flutter(18081): ApkAssets: Deleting an ApkAssets object '/vendor/overlay/EmulatorTalkBackOverlay/EmulatorTalkBackOverlay.apk' with 1 weak references
+D/EGL_emulation(18081): app_time_stats: avg=12283.86ms min=27.74ms max=85102.30ms count=7
+D/EGL_emulation(18081): app_time_stats: avg=32.25ms min=5.68ms max=101.03ms count=25
+D/EGL_emulation(18081): app_time_stats: avg=25.18ms min=5.09ms max=105.84ms count=24
+W/WindowOnBackDispatcher(18081): OnBackInvokedCallback is not enabled for the application.
+W/WindowOnBackDispatcher(18081): Set 'android:enableOnBackInvokedCallback="true"' in the application manifest.
+Lost connection to device.
