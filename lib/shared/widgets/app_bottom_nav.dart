@@ -67,57 +67,70 @@ class AppBottomNav extends StatelessWidget {
                   height: barHeight,
                   child: Padding(
                     padding: EdgeInsets.only(bottom: bottomInset),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: _NavItem(
-                              assetPath:
-                                  'assets/images/dashboard/dashboard_duo.png',
-                              activeAssetPath:
-                                  'assets/images/dashboard/dashboard_duo_select.png',
-                              label: l10n.tr('dashboard.navDashboard'),
-                              isActive: activeTab == AppNavTab.dashboard,
-                              onTap: onDashboardTap,
-                            ),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: _NavItem(
+                                  assetPath:
+                                      'assets/images/dashboard/dashboard_duo.png',
+                                  activeAssetPath:
+                                      'assets/images/dashboard/dashboard_duo_select.png',
+                                  label: l10n.tr('dashboard.navDashboard'),
+                                  isActive: activeTab == AppNavTab.dashboard,
+                                  onTap: onDashboardTap,
+                                ),
+                              ),
+                              Expanded(
+                                child: _NavItem(
+                                  assetPath:
+                                      'assets/images/dashboard/contracts_duo.png',
+                                  activeAssetPath:
+                                      'assets/images/dashboard/contracts_duo_select.png',
+                                  label: l10n.tr('dashboard.navContracts'),
+                                  isActive: activeTab == AppNavTab.contracts,
+                                  onTap: onContractsTap,
+                                ),
+                              ),
+                              const SizedBox(width: _centerGapWidth),
+                              Expanded(
+                                child: _NavItem(
+                                  assetPath:
+                                      'assets/images/dashboard/real_estate_duo.png',
+                                  activeAssetPath:
+                                      'assets/images/dashboard/real_estate_duo_select.png',
+                                  label: l10n.tr('dashboard.navRealEstate'),
+                                  isActive: activeTab == AppNavTab.realEstate,
+                                  onTap: onRealEstateTap,
+                                ),
+                              ),
+                              Expanded(
+                                child: _NavItem(
+                                  assetPath:
+                                      'assets/images/dashboard/message_duo.png',
+                                  activeAssetPath:
+                                      'assets/images/dashboard/message_duo_select.png',
+                                  label: l10n.tr('dashboard.navMessage'),
+                                  isActive: activeTab == AppNavTab.message,
+                                  onTap: onMessagesTap,
+                                ),
+                              ),
+                            ],
                           ),
-                          Expanded(
-                            child: _NavItem(
-                              assetPath:
-                                  'assets/images/dashboard/contracts_duo.png',
-                              activeAssetPath:
-                                  'assets/images/dashboard/contracts_duo_select.png',
-                              label: l10n.tr('dashboard.navContracts'),
-                              isActive: activeTab == AppNavTab.contracts,
-                              onTap: onContractsTap,
-                            ),
+                        ),
+                        SizedBox(
+                          width: _centerGapWidth,
+                          height: double.infinity,
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.translucent,
+                            onTap: onHomeTap,
                           ),
-                          const SizedBox(width: _centerGapWidth),
-                          Expanded(
-                            child: _NavItem(
-                              assetPath:
-                                  'assets/images/dashboard/real_estate_duo.png',
-                              activeAssetPath:
-                                  'assets/images/dashboard/real_estate_duo_select.png',
-                              label: l10n.tr('dashboard.navRealEstate'),
-                              isActive: activeTab == AppNavTab.realEstate,
-                              onTap: onRealEstateTap,
-                            ),
-                          ),
-                          Expanded(
-                            child: _NavItem(
-                              assetPath:
-                                  'assets/images/dashboard/message_duo.png',
-                              activeAssetPath:
-                                  'assets/images/dashboard/message_duo_select.png',
-                              label: l10n.tr('dashboard.navMessage'),
-                              isActive: activeTab == AppNavTab.message,
-                              onTap: onMessagesTap,
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -127,6 +140,7 @@ class AppBottomNav extends StatelessWidget {
           Positioned(
             top: -(_outerCircleSize / 2) - _centerCircleLift,
             child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
               onTap: onHomeTap,
               child: Container(
                 width: _outerCircleSize,
@@ -177,10 +191,7 @@ class _NotchedRoundedRectClipper extends CustomClipper<Path> {
     final hostRect = Rect.fromLTWH(0, 0, size.width, size.height);
     final hostPath = Path()
       ..addRRect(
-        RRect.fromRectAndRadius(
-          hostRect,
-          Radius.circular(cornerRadius),
-        ),
+        RRect.fromRectAndRadius(hostRect, Radius.circular(cornerRadius)),
       );
 
     final guestRect = Rect.fromCircle(
@@ -189,10 +200,15 @@ class _NotchedRoundedRectClipper extends CustomClipper<Path> {
     );
 
     final rectPath = Path()..addRect(hostRect);
-    final notchedRectPath =
-        const _FilipNotchedRectangle().getOuterPath(hostRect, guestRect);
-    final removedArea =
-        Path.combine(PathOperation.difference, rectPath, notchedRectPath);
+    final notchedRectPath = const _FilipNotchedRectangle().getOuterPath(
+      hostRect,
+      guestRect,
+    );
+    final removedArea = Path.combine(
+      PathOperation.difference,
+      rectPath,
+      notchedRectPath,
+    );
 
     return Path.combine(PathOperation.difference, hostPath, removedArea);
   }

@@ -235,15 +235,18 @@ class _ContractsPageState extends State<ContractsPage> {
         onDashboardTap: () =>
             Navigator.of(context).popUntil((route) => route.isFirst),
         onHomeTap: () {
-          Navigator.of(context).popUntil((route) => route.isFirst);
-          _openPage(
-            FilipExplorerPage(
-              dashboardRepository: widget.dashboardRepository,
-              contractsRepository: widget.contractsRepository,
-              notificationsRepository: widget.notificationsRepository,
-              authSessionController: widget.authSessionController,
-              appVersion: widget.appVersion,
-              syncNotificationService: widget.syncNotificationService,
+          final navigator = Navigator.of(context);
+          navigator.popUntil((route) => route.isFirst);
+          navigator.push(
+            MaterialPageRoute<void>(
+              builder: (_) => FilipExplorerPage(
+                dashboardRepository: widget.dashboardRepository,
+                contractsRepository: widget.contractsRepository,
+                notificationsRepository: widget.notificationsRepository,
+                authSessionController: widget.authSessionController,
+                appVersion: widget.appVersion,
+                syncNotificationService: widget.syncNotificationService,
+              ),
             ),
           );
         },

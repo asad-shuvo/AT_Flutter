@@ -17,6 +17,8 @@ import 'package:filip_at_flutter/shared/widgets/app_side_drawer.dart';
 import 'package:filip_at_flutter/shared/widgets/app_top_bar.dart';
 import 'package:flutter/material.dart';
 
+const String _filipIconFamily = 'filip_at_iconpack_29022024';
+
 class FilipExplorerPage extends StatefulWidget {
   const FilipExplorerPage({
     super.key,
@@ -49,7 +51,8 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
   void initState() {
     super.initState();
     _userProfileFuture = widget.dashboardRepository.fetchUserProfile();
-    _unreadNotificationsFuture = widget.notificationsRepository.fetchUnreadCount();
+    _unreadNotificationsFuture = widget.notificationsRepository
+        .fetchUnreadCount();
     _sliderController = PageController(viewportFraction: 0.9);
   }
 
@@ -74,7 +77,8 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
     );
     if (!mounted) return;
     setState(() {
-      _unreadNotificationsFuture = widget.notificationsRepository.fetchUnreadCount();
+      _unreadNotificationsFuture = widget.notificationsRepository
+          .fetchUnreadCount();
     });
   }
 
@@ -94,7 +98,7 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
       _ExplorerSlideData(
         title: l10n.tr('explorer.slider.contracts.title'),
         description: l10n.tr('explorer.slider.contracts.description'),
-        icon: Icons.edit_note_outlined,
+        icon: const IconData(0xE9E8, fontFamily: _filipIconFamily),
         onTap: () => _openPage(
           ContractsPage(
             contractsRepository: widget.contractsRepository,
@@ -109,19 +113,19 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
       _ExplorerSlideData(
         title: l10n.tr('explorer.slider.realEstate.title'),
         description: l10n.tr('explorer.slider.realEstate.description'),
-        icon: Icons.home_outlined,
+        icon: const IconData(0xE9B4, fontFamily: _filipIconFamily),
         onTap: () => _openPage(const RealEstatePage()),
       ),
       _ExplorerSlideData(
         title: l10n.tr('explorer.slider.drive.title'),
         description: l10n.tr('explorer.slider.drive.description'),
-        icon: Icons.folder_open_outlined,
+        icon: const IconData(0xE9C9, fontFamily: _filipIconFamily),
         onTap: () => _openPage(const DocumentsPage()),
       ),
       _ExplorerSlideData(
         title: l10n.tr('explorer.slider.message.title'),
         description: l10n.tr('explorer.slider.message.description'),
-        icon: Icons.chat_bubble_outline,
+        icon: const IconData(0xEA03, fontFamily: _filipIconFamily),
         onTap: () => _openPage(const ChatPage()),
       ),
     ];
@@ -160,22 +164,8 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
                         alignment: Alignment.bottomCenter,
                       ),
                     ),
-                    Positioned.fill(
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Colors.white.withValues(alpha: 0.96),
-                              Colors.white.withValues(alpha: 0.88),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
                     SingleChildScrollView(
-                      padding: const EdgeInsets.fromLTRB(16, 18, 16, 120),
+                      padding: const EdgeInsets.fromLTRB(15, 8, 15, 120),
                       child: Column(
                         children: [
                           _ExplorerTileGrid(
@@ -191,7 +181,8 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
                                 authSessionController:
                                     widget.authSessionController,
                                 appVersion: widget.appVersion,
-                                syncNotificationService: widget.syncNotificationService,
+                                syncNotificationService:
+                                    widget.syncNotificationService,
                               ),
                             ),
                             onMessageTap: () => _openPage(const ChatPage()),
@@ -205,14 +196,14 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
                               style: const TextStyle(
                                 fontFamily: 'Calibri',
                                 fontSize: 18,
-                                fontWeight: FontWeight.w300,
-                                color: Color(0xFFB4868F),
-                                height: 1.3,
-                                letterSpacing: 0.3,
+                                fontWeight: FontWeight.w400,
+                                color: Color(0xFFC77786),
+                                height: 1.45,
+                                letterSpacing: 0.1,
                               ),
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 20),
                           _ExplorerSlider(
                             controller: _sliderController,
                             slides: slides,
@@ -278,7 +269,7 @@ class _ExplorerTileGrid extends StatelessWidget {
             Expanded(
               child: _ExplorerTile(
                 label: l10n.tr('dashboard.navRealEstate'),
-                icon: Icons.home_outlined,
+                icon: const IconData(0xE9B4, fontFamily: _filipIconFamily),
                 onTap: onMyRealEstateTap,
               ),
             ),
@@ -286,19 +277,19 @@ class _ExplorerTileGrid extends StatelessWidget {
             Expanded(
               child: _ExplorerTile(
                 label: l10n.tr('explorer.tileDrive'),
-                icon: Icons.folder_open_outlined,
+                icon: const IconData(0xE9C9, fontFamily: _filipIconFamily),
                 onTap: onDriveTap,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 15),
         Row(
           children: [
             Expanded(
               child: _ExplorerTile(
                 label: l10n.tr('dashboard.navContracts'),
-                icon: Icons.edit_note_outlined,
+                icon: const IconData(0xE9E8, fontFamily: _filipIconFamily),
                 onTap: onContractsTap,
               ),
             ),
@@ -306,7 +297,7 @@ class _ExplorerTileGrid extends StatelessWidget {
             Expanded(
               child: _ExplorerTile(
                 label: l10n.tr('dashboard.navMessage'),
-                icon: Icons.chat_bubble_outline,
+                icon: const IconData(0xEA03, fontFamily: _filipIconFamily),
                 onTap: onMessageTap,
               ),
             ),
@@ -332,13 +323,13 @@ class _ExplorerTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.circular(8),
       child: Container(
-        height: 132,
+        height: 120,
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: const Color(0xFFE2E2E2)),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: const Color(0xFFD8D8D8)),
           boxShadow: const [
             BoxShadow(
               color: Color(0x09000000),
@@ -351,18 +342,14 @@ class _ExplorerTile extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: 44,
-              height: 44,
+              width: 40,
+              height: 40,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(color: AppColors.primaryRed, width: 1.2),
               ),
               child: Center(
-                child: Icon(
-                  icon,
-                  size: 24,
-                  color: AppColors.primaryRed,
-                ),
+                child: Icon(icon, size: 22, color: AppColors.primaryRed),
               ),
             ),
             const SizedBox(height: 14),
@@ -371,9 +358,9 @@ class _ExplorerTile extends StatelessWidget {
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontFamily: 'Calibri',
-                fontSize: 18,
-                fontWeight: FontWeight.w400,
-                color: Color(0xFF9A9A9A),
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF797A76),
                 letterSpacing: 0.6,
               ),
             ),
@@ -423,11 +410,13 @@ class _ExplorerSlider extends StatelessWidget {
             final bool isActive = i == activeIndex;
             return AnimatedContainer(
               duration: const Duration(milliseconds: 160),
-              margin: const EdgeInsets.symmetric(horizontal: 4),
-              width: 10,
-              height: 10,
+              margin: const EdgeInsets.symmetric(horizontal: 8),
+              width: 8,
+              height: 8,
               decoration: BoxDecoration(
-                color: isActive ? AppColors.primaryRed : const Color(0xFFDADADA),
+                color: isActive
+                    ? AppColors.primaryRed
+                    : const Color(0x33D82034),
                 shape: BoxShape.circle,
               ),
             );
@@ -447,14 +436,14 @@ class _ExplorerSlideCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: data.onTap,
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.circular(8),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(8),
         child: Container(
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: const Color(0xFFE2E2E2)),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: const Color(0xFFD8D8D8)),
             boxShadow: const [
               BoxShadow(
                 color: Color(0x10000000),
@@ -467,17 +456,17 @@ class _ExplorerSlideCard extends StatelessWidget {
             fit: StackFit.expand,
             children: [
               Positioned.fill(
-                child: Image.asset(
-                  'assets/images/dashboard/filip_explorer_background.png',
-                  fit: BoxFit.cover,
-                  alignment: Alignment.center,
+                child: Opacity(
+                  opacity: 0.1,
+                  child: Image.asset(
+                    'assets/images/dashboard/exp_card_background.png',
+                    fit: BoxFit.cover,
+                    alignment: Alignment.center,
+                  ),
                 ),
               ),
-              Positioned.fill(
-                child: Container(color: Colors.white.withValues(alpha: 0.82)),
-              ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
                 child: Row(
                   children: [
                     Expanded(
@@ -491,10 +480,10 @@ class _ExplorerSlideCard extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
                               fontFamily: 'Calibri',
-                              fontSize: 20,
+                              fontSize: 18,
                               fontWeight: FontWeight.w400,
-                              color: Color(0xFF2F2F2F),
-                              height: 1.06,
+                              color: Color(0xFF333333),
+                              height: 1.2,
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -506,7 +495,7 @@ class _ExplorerSlideCard extends StatelessWidget {
                               fontFamily: 'Calibri',
                               fontSize: 14,
                               fontWeight: FontWeight.w400,
-                              color: Color(0xFF7A7A7A),
+                              color: Color(0xFF666666),
                               height: 1.25,
                             ),
                           ),
@@ -515,16 +504,19 @@ class _ExplorerSlideCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 14),
                     Container(
-                      width: 44,
-                      height: 44,
+                      width: 40,
+                      height: 40,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(color: AppColors.primaryRed, width: 1.2),
+                        border: Border.all(
+                          color: AppColors.primaryRed,
+                          width: 1.2,
+                        ),
                       ),
                       child: Center(
                         child: Icon(
                           data.icon,
-                          size: 24,
+                          size: 22,
                           color: AppColors.primaryRed,
                         ),
                       ),
