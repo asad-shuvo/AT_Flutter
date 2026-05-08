@@ -4,6 +4,7 @@ import 'package:filip_at_flutter/core/storage/secure_storage_service.dart';
 import 'package:filip_at_flutter/features/auth/application/auth_session_controller.dart';
 import 'package:filip_at_flutter/features/auth/application/user_session_cache.dart';
 import 'package:filip_at_flutter/features/auth/data/auth_repository.dart';
+import 'package:filip_at_flutter/features/auth/data/login_sync_repository.dart';
 import 'package:filip_at_flutter/features/contracts/data/contracts_repository.dart';
 import 'package:filip_at_flutter/features/dashboard/data/dashboard_repository.dart';
 import 'package:filip_at_flutter/features/notifications/data/notifications_repository.dart';
@@ -17,6 +18,7 @@ class AppServices {
     required this.authRepository,
     required this.authSessionController,
     required this.userSessionCache,
+    required this.loginSyncRepository,
     required this.dashboardRepository,
     required this.contractsRepository,
     required this.notificationsRepository,
@@ -30,6 +32,7 @@ class AppServices {
   final AuthRepository authRepository;
   final AuthSessionController authSessionController;
   final UserSessionCache userSessionCache;
+  final LoginSyncRepository loginSyncRepository;
   final DashboardRepository dashboardRepository;
   final ContractsRepository contractsRepository;
   final NotificationsRepository notificationsRepository;

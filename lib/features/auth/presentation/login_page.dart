@@ -93,7 +93,7 @@ class _LoginPageState extends State<LoginPage> {
         return;
       }
 
-      Navigator.of(context).pushReplacementNamed(AppRouter.dashboard);
+      Navigator.of(context).pushReplacementNamed(AppRouter.loginIntermediary);
     } on AuthException catch (error) {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()

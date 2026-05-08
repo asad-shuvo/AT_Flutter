@@ -59,6 +59,10 @@ class AuthSessionController extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<bool> tryRefreshTokens() {
+    return _authRepository.tryRefreshTokens();
+  }
+
   Future<RememberMeInfo> getRememberMeInfo() {
     return _authRepository.getRememberMeInfo();
   }

@@ -11,6 +11,7 @@ import 'package:filip_at_flutter/core/storage/secure_storage_service.dart';
 import 'package:filip_at_flutter/features/auth/application/auth_session_controller.dart';
 import 'package:filip_at_flutter/features/auth/application/user_session_cache.dart';
 import 'package:filip_at_flutter/features/auth/data/auth_repository.dart';
+import 'package:filip_at_flutter/features/auth/data/login_sync_repository.dart';
 import 'package:filip_at_flutter/features/contracts/data/contracts_repository.dart';
 import 'package:filip_at_flutter/features/dashboard/data/dashboard_repository.dart';
 import 'package:filip_at_flutter/features/notifications/data/notifications_repository.dart';
@@ -62,14 +63,17 @@ Future<void> bootstrap(AppFlavor flavor) async {
 
     isHandlingUnauthorized = true;
     try {
+      // Mirror NativeScript: try token refresh before forcing logout.
+      final refreshed = await authSessionController.tryRefreshTokens();
+      if (refreshed) return;
+
       await authSessionController.expireSession();
 
       final navigator = FilipAtApp.navigatorKey.currentState;
-      final context = FilipAtApp.navigatorKey.currentContext;
-
       navigator?.pushNamedAndRemoveUntil(AppRouter.login, (_) => false);
 
-      if (context != null) {
+      final context = FilipAtApp.navigatorKey.currentContext;
+      if (context != null && context.mounted) {
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
           ..showSnackBar(
@@ -86,6 +90,7 @@ Future<void> bootstrap(AppFlavor flavor) async {
     apiClient: apiClient,
     secureStorageService: secureStorageService,
   );
+  final loginSyncRepository = LoginSyncRepository(apiClient: apiClient);
   final dashboardRepository = DashboardRepository(
     apiClient: apiClient,
     userSessionCache: userSessionCache,
@@ -121,6 +126,7 @@ Future<void> bootstrap(AppFlavor flavor) async {
     authRepository: authRepository,
     authSessionController: authSessionController,
     userSessionCache: userSessionCache,
+    loginSyncRepository: loginSyncRepository,
     dashboardRepository: dashboardRepository,
     contractsRepository: contractsRepository,
     notificationsRepository: notificationsRepository,

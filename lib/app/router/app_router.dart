@@ -1,6 +1,7 @@
 import 'package:filip_at_flutter/app/config/app_config.dart';
 import 'package:filip_at_flutter/app/services/app_services.dart';
 import 'package:filip_at_flutter/features/auth/presentation/forgot_password_page.dart';
+import 'package:filip_at_flutter/features/auth/presentation/login_intermediary_page.dart';
 import 'package:filip_at_flutter/features/auth/presentation/login_page.dart';
 import 'package:filip_at_flutter/features/dashboard/presentation/dashboard_page.dart';
 import 'package:filip_at_flutter/features/onboarding/presentation/onboarding_page.dart';
@@ -16,6 +17,7 @@ class AppRouter {
   static const String splash = '/';
   static const String onboarding = '/onboarding';
   static const String login = '/login';
+  static const String loginIntermediary = '/login-intermediary';
   static const String forgotPassword = '/login/forgot-password';
   static const String dashboard = '/dashboard';
 
@@ -43,6 +45,14 @@ class AppRouter {
       case onboarding:
         return MaterialPageRoute<void>(
           builder: (_) => const OnboardingPage(),
+          settings: settings,
+        );
+      case loginIntermediary:
+        return MaterialPageRoute<void>(
+          builder: (_) => LoginIntermediaryPage(
+            userSessionCache: services.userSessionCache,
+            loginSyncRepository: services.loginSyncRepository,
+          ),
           settings: settings,
         );
       case forgotPassword:

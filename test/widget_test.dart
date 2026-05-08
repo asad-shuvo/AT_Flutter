@@ -8,6 +8,7 @@ import 'package:filip_at_flutter/core/storage/secure_storage_service.dart';
 import 'package:filip_at_flutter/features/auth/application/auth_session_controller.dart';
 import 'package:filip_at_flutter/features/auth/application/user_session_cache.dart';
 import 'package:filip_at_flutter/features/auth/data/auth_repository.dart';
+import 'package:filip_at_flutter/features/auth/data/login_sync_repository.dart';
 import 'package:filip_at_flutter/features/contracts/data/contracts_repository.dart';
 import 'package:filip_at_flutter/features/dashboard/data/dashboard_repository.dart';
 import 'package:filip_at_flutter/features/notifications/data/notifications_repository.dart';
@@ -35,6 +36,8 @@ void main() {
       notificationUrl: 'https://msblocks.selisestage.com/api/notification/v3',
       originUrl: 'https://sln-at.selisestage.com',
       dfsBaseUrl: 'http://pms-swisslife-frontend-test.additiv.com/',
+      storageServiceUrl: 'https://msblocks.selisestage.com/api/storage/',
+      dmsServiceUrl: 'https://msblocks.selisestage.com/api/dms/',
     );
     final authRepository = AuthRepository(
       apiClient: apiClient,
@@ -61,6 +64,8 @@ void main() {
       dfsBaseUrl: 'http://pms-swisslife-frontend-test.additiv.com/',
       originUrl: 'https://sln-at.selisestage.com',
       cdnBaseUrl: 'https://cdn.selise.biz/slnetwork/',
+      storageServiceUrl: 'https://msblocks.selisestage.com/api/storage/',
+      dmsServiceUrl: 'https://msblocks.selisestage.com/api/dms/',
       appVersion: '1.0.4',
       investmentPushNotificationKey: '033c1c1a-3b1c-4bd2-bf9a-dc8009f2de63',
     );
@@ -96,6 +101,7 @@ void main() {
       authRepository: authRepository,
       authSessionController: authSessionController,
       userSessionCache: userSessionCache,
+      loginSyncRepository: LoginSyncRepository(apiClient: apiClient),
       dashboardRepository: dashboardRepository,
       contractsRepository: contractsRepository,
       notificationsRepository: notificationsRepository,

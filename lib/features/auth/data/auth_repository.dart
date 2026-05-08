@@ -91,6 +91,10 @@ class AuthRepository {
     await _secureStorageService.delete(AppStorageKeys.userId);
     await _secureStorageService.delete(AppStorageKeys.customerId);
     await _secureStorageService.delete(AppStorageKeys.firebaseTopic);
+    // Clear anonymous tokens so the next login flow re-fetches a fresh
+    // anonymous session (mirrors NativeScript clearAllCacheData behavior).
+    await _secureStorageService.delete(AppStorageKeys.anonymousAccessToken);
+    await _secureStorageService.delete(AppStorageKeys.anonymousRefreshToken);
   }
 
   Future<void> clearSessionLocally() async {
@@ -99,6 +103,52 @@ class AuthRepository {
     await _secureStorageService.delete(AppStorageKeys.userId);
     await _secureStorageService.delete(AppStorageKeys.customerId);
     await _secureStorageService.delete(AppStorageKeys.firebaseTopic);
+    await _secureStorageService.delete(AppStorageKeys.anonymousAccessToken);
+    await _secureStorageService.delete(AppStorageKeys.anonymousRefreshToken);
+  }
+
+  /// Attempts a silent token refresh using the stored refresh token.
+  /// Returns true if new tokens were saved, false if refresh failed.
+  Future<bool> tryRefreshTokens() async {
+    final refreshToken = await _secureStorageService.read(
+      AppStorageKeys.refreshToken,
+    );
+    if (refreshToken == null || refreshToken.isEmpty) return false;
+
+    try {
+      final response = await _apiClient.postForm(
+        url: _apiClient.tokenUrl,
+        body: <String, String>{
+          'grant_type': 'refresh_token',
+          'refresh_token': refreshToken,
+        },
+        headers: <String, String>{'Origin': _apiClient.originUrl},
+        suppressUnauthorizedHandling: true,
+      );
+
+      final statusCode = response['statusCode'] as int? ?? 0;
+      if (statusCode < 200 || statusCode >= 300) return false;
+
+      final body = response['body'] as Map<String, dynamic>;
+      final newAccessToken = body['access_token'] as String?;
+      final newRefreshToken = body['refresh_token'] as String?;
+
+      if (newAccessToken == null || newAccessToken.isEmpty) return false;
+
+      await _secureStorageService.write(
+        key: AppStorageKeys.accessToken,
+        value: newAccessToken,
+      );
+      if (newRefreshToken != null && newRefreshToken.isNotEmpty) {
+        await _secureStorageService.write(
+          key: AppStorageKeys.refreshToken,
+          value: newRefreshToken,
+        );
+      }
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   Future<void> _logoutFromPlatform() async {
