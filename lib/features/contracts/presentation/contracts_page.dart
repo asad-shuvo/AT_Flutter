@@ -1265,6 +1265,7 @@ class _NonLifeInsuranceTabState extends State<_NonLifeInsuranceTab> {
         insuranceAmount: contract.maturityBenefits?.toString(),
         notes: contract.notes,
         status: contract.status,
+        isLifeTime: contract.isLifeTime,
         syncDisabledProperties: contract.syncDisabledProperties,
       ),
     );
@@ -2008,11 +2009,12 @@ class _LoanTabState extends State<_LoanTab> {
         tradeInValue: contract.maturityBenefits?.toString(),
         startDate: contract.startDate,
         endDate: contract.endDate,
-        startOfRepayment: contract.startDate,
+        startOfRepayment: null,
         remainingDebtDate: contract.dueDate,
-        remainingAmount: contract.grossPremium?.toString(),
+        remainingAmount: null,
         notes: contract.notes,
         status: contract.status,
+        syncDisabledProperties: contract.syncDisabledProperties,
       ),
     );
     if (!mounted || updated != true) return;
@@ -2452,7 +2454,7 @@ class _InvestmentTabState extends State<_InvestmentTab> {
         interestRate: contract.interestRate?.toString(),
         couponRate: contract.couponRate?.toString(),
         couponTypeValueOrLabel: contract.couponType,
-        couponPeriodValueOrLabel: contract.couponType,
+        couponPeriodValueOrLabel: null,
         currencyValueOrLabel: contract.currency,
         issuer: contract.issuer,
         bondPrice: contract.bondPrice?.toString(),

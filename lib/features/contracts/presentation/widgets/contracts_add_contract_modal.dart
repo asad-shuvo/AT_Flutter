@@ -136,6 +136,7 @@ class _ContractsAddContractModalState
       remainingDebtDate: initialData.remainingDebtDate ?? _readDateTime(fullDetails['DateOfReaminingDept']),
       startOfRepayment: initialData.startOfRepayment ?? _readDateTime(fullDetails['StartOfRepayment']),
       syncDisabledProperties: initialData.syncDisabledProperties ?? _readStringList(fullDetails['SyncDisabledProperties']),
+      isLifeTime: initialData.isLifeTime ?? (fullDetails['IsLifeTime'] is bool ? fullDetails['IsLifeTime'] as bool : null),
     );
   }
 
@@ -321,6 +322,7 @@ class _InsuranceContractFormModalState
   ContractsPartnerOption? _selectedPartner;
   DateTime? _startDate;
   DateTime? _endDate;
+  bool? _isLifeTime;
   bool _isSubmitting = false;
 
   bool get _canSubmitRequiredFields {
@@ -342,16 +344,13 @@ class _InsuranceContractFormModalState
       _notesController.text = initial.notes ?? '';
       _startDate = initial.startDate;
       _endDate = initial.endDate;
+      _isLifeTime = initial.isLifeTime;
       _selectedType = _findLookupByAny(widget.types, initial.typeValueOrLabel);
       _selectedFrequency = _findLookupByAny(
         _insuranceFrequencyOptions,
         initial.premiumFrequencyValueOrLabel,
       );
       _selectedPartner = _findPartner(widget.partners, initial.partnerName);
-      // Initialize other fields if they exist in the API response
-      if (initial.isEdit == true) {
-        // Additional fields for edit mode
-      }
     }
     _titleController.addListener(_onRequiredFieldsChanged);
     _grossPremiumController.addListener(_onRequiredFieldsChanged);
@@ -390,8 +389,9 @@ class _InsuranceContractFormModalState
         'GrossPremium': _parseNumber(_grossPremiumController.text),
         'PremiumFrequency': _selectedFrequency!.value,
         'MaturityBenefits': _parseNumber(_maturityBenefitsController.text),
-        'IsLifeTime': false,
+        'IsLifeTime': _isLifeTime ?? false,
         'Status': null,
+        'Source': 'FILIP',
         'AdviserVisibility': true,
         'PartnerId': _selectedPartner?.itemId,
         'PartnerName': _selectedPartner?.name,
@@ -664,6 +664,7 @@ class _RetirementContractFormModalState
         'EndDate': _toIsoDate(_endDate),
         'GrossPremium': _parseNumber(_grossPremiumController.text),
         'PremiumFrequency': _selectedFrequency!.value,
+        'Source': 'FILIP',
         'AdviserVisibility': true,
         'Term': _calculateTermYear(_startDate, _endDate),
         'PartnerId': _selectedPartner?.itemId,
@@ -1997,10 +1998,12 @@ class ContractsAddInitialData {
     this.remainingDebtDate,
     this.startOfRepayment,
     this.syncDisabledProperties,
+    this.isLifeTime,
   });
 
   final bool isEdit;
   final List<String>? syncDisabledProperties;
+  final bool? isLifeTime;
   final String? contractId;
   final String? typeValueOrLabel;
   final String? title;

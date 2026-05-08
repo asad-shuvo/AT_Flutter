@@ -7,7 +7,6 @@ import 'package:filip_at_flutter/features/contracts/data/insure_contract_model.d
 import 'package:filip_at_flutter/features/contracts/data/investment_contract_model.dart';
 import 'package:filip_at_flutter/features/contracts/presentation/widgets/contracts_add_contract_modal.dart';
 import 'package:filip_at_flutter/features/contracts/presentation/widgets/contract_document_add_sheet.dart';
-import 'package:filip_at_flutter/features/contracts/presentation/widgets/contracts_add_form_sheet.dart';
 import 'package:filip_at_flutter/shared/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 
@@ -467,7 +466,7 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
             ? _freshDouble('CouponRate')?.toString()
             : c?.couponRate?.toString(),
         couponTypeValueOrLabel: d != null ? _fresh('CouponType') : c?.couponType,
-        couponPeriodValueOrLabel: d != null ? _fresh('CouponPeriod') : c?.couponType,
+        couponPeriodValueOrLabel: d != null ? _fresh('CouponPeriod') : null,
         currencyValueOrLabel: d != null ? _fresh('Currency') : c?.currency,
         issuer: d != null ? _fresh('Issuer') : c?.issuer,
         bondPrice: d != null
@@ -543,6 +542,9 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
       dueDate: _isRetirement
           ? (d != null ? _freshDate('DueDate') : c?.dueDate)
           : null,
+      isLifeTime: d != null
+          ? (d['IsLifeTime'] is bool ? d['IsLifeTime'] as bool : null)
+          : c?.isLifeTime,
       syncDisabledProperties: c?.syncDisabledProperties,
     );
   }
@@ -1170,6 +1172,8 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
               contractItemId: widget.itemId,
               resourceTitle: resourceTitle,
               urlAddress: urlAddress,
+              entityName: widget.entityName,
+              personId: widget.currentPersonId,
             );
           } else if (uploadedFilePath != null) {
             await widget.contractsRepository.uploadContractDocument(
@@ -1177,6 +1181,7 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
               resourceTitle: resourceTitle,
               filePath: uploadedFilePath,
               personId: widget.currentPersonId,
+              entityName: widget.entityName,
             );
           }
         },
@@ -2003,96 +2008,162 @@ class _ContractNoteEditorSheetState extends State<_ContractNoteEditorSheet> {
     final textLength = _controller.text.length;
 
     return AnimatedPadding(
-      duration: const Duration(milliseconds: 180),
+      duration: const Duration(milliseconds: 200),
       padding: EdgeInsets.only(bottom: bottomInset),
-      child: ContractsAddFormSheet(
-        title: widget.title,
-        isSubmitting: effectiveSubmitting,
-        onSubmit: _submit,
-        submitLabel: l10n.tr('tns.save').toUpperCase(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(
-                  IconData(0xE976, fontFamily: 'filip_at_iconpack_29022024'),
-                  size: 26,
-                  color: Color(0xFF888888),
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  l10n.tr('tns.notes'),
-                  style: const TextStyle(
-                    fontFamily: 'Calibri',
-                    fontSize: 18,
-                    color: Color(0xFF333333),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            ContractsFormSectionTitle(l10n.tr('tns.notes')),
-            TextField(
-              controller: _controller,
-              enabled: !effectiveSubmitting,
-              maxLength: 300,
-              maxLines: 7,
-              minLines: 7,
-              decoration: InputDecoration(
-                hintText: '${l10n.tr('tns.writeTextHere')}...',
-                counterText: '$textLength/300',
-                errorText: _errorText,
-                filled: true,
-                fillColor: Colors.white,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 18,
-                  vertical: 18,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: Color(0xFFA11C36)),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(
-                    color: Color(0xFFA11C36),
-                    width: 1.2,
-                  ),
-                ),
-                disabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: Color(0xFFD9D9D9)),
-                ),
-                errorBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: AppColors.primaryRed),
-                ),
-                focusedErrorBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(
-                    color: AppColors.primaryRed,
-                    width: 1.2,
-                  ),
-                ),
-                hintStyle: const TextStyle(
-                  fontFamily: 'Calibri',
-                  fontSize: 16,
-                  color: Color(0xFFB5B5B5),
-                ),
-                counterStyle: const TextStyle(
-                  fontFamily: 'Calibri',
-                  fontSize: 13,
-                  color: Color(0xFF8C8C8C),
+      child: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(0)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 8, 12),
+                child: Row(
+                  children: [
+                    const Icon(
+                      IconData(0xE976, fontFamily: 'filip_at_iconpack_29022024'),
+                      size: 22,
+                      color: Color(0xFF333333),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        widget.title,
+                        style: const TextStyle(
+                          fontFamily: 'Calibri',
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF333333),
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: effectiveSubmitting
+                          ? null
+                          : () => Navigator.of(context).pop(),
+                      icon: const Icon(
+                        Icons.close,
+                        color: Color(0xFF666666),
+                        size: 22,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              style: const TextStyle(
-                fontFamily: 'Calibri',
-                fontSize: 16,
-                color: Color(0xFF333333),
+              const Divider(height: 1, color: Color(0xFFEEEEEE)),
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+                  child: TextField(
+                    controller: _controller,
+                    enabled: !effectiveSubmitting,
+                    maxLength: 300,
+                    maxLines: 7,
+                    minLines: 7,
+                    decoration: InputDecoration(
+                      hintText: '${l10n.tr('tns.writeTextHere')}...',
+                      counterText: '$textLength/300',
+                      errorText: _errorText,
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 18,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: const BorderSide(color: Color(0xFFA11C36)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: const BorderSide(
+                          color: Color(0xFFA11C36),
+                          width: 1.2,
+                        ),
+                      ),
+                      disabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide:
+                            const BorderSide(color: Color(0xFFD9D9D9)),
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide:
+                            const BorderSide(color: AppColors.primaryRed),
+                      ),
+                      focusedErrorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: const BorderSide(
+                          color: AppColors.primaryRed,
+                          width: 1.2,
+                        ),
+                      ),
+                      hintStyle: const TextStyle(
+                        fontFamily: 'Calibri',
+                        fontSize: 16,
+                        color: Color(0xFFB5B5B5),
+                      ),
+                      counterStyle: const TextStyle(
+                        fontFamily: 'Calibri',
+                        fontSize: 13,
+                        color: Color(0xFF8C8C8C),
+                      ),
+                    ),
+                    style: const TextStyle(
+                      fontFamily: 'Calibri',
+                      fontSize: 16,
+                      color: Color(0xFF333333),
+                    ),
+                  ),
+                ),
               ),
-            ),
-          ],
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: effectiveSubmitting ? null : _submit,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryRed,
+                      disabledBackgroundColor:
+                          AppColors.primaryRed.withValues(alpha: 0.55),
+                      elevation: 0,
+                      minimumSize: const Size.fromHeight(56),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ),
+                    child: effectiveSubmitting
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
+                          )
+                        : Text(
+                            l10n.tr('tns.save').toUpperCase(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 17,
+                              fontFamily: 'Calibri',
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 1.4,
+                            ),
+                          ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

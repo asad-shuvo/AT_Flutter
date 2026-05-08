@@ -4,6 +4,10 @@ import 'package:flutter/material.dart';
 
 enum DocumentAddMode { externalLink, upload }
 
+final _urlRegex = RegExp(
+  r'^(http://www\.|https://www\.|http://|https://)?[a-zA-Z0-9]+([\-\.]{1}[a-zA-Z0-9]+)*\.[a-zA-Z]{2,5}(:[0-9]{1,5})?(\/.*)?$',
+);
+
 class _PickedFile {
   const _PickedFile({required this.path, required this.name});
   final String path;
@@ -63,10 +67,10 @@ class _ContractDocumentAddSheetState extends State<ContractDocumentAddSheet> {
 
   bool get _isFormValid {
     final title = _titleController.text.trim();
-    if (title.length < 3) return false;
+    if (title.length < 4) return false;
     if (_mode == DocumentAddMode.externalLink) {
       final url = _urlController.text.trim();
-      return url.startsWith('http://') || url.startsWith('https://');
+      return url.isNotEmpty && _urlRegex.hasMatch(url);
     }
     return _hasFile;
   }
@@ -107,8 +111,8 @@ class _ContractDocumentAddSheetState extends State<ContractDocumentAddSheet> {
       _showError('Resource Title is required');
       return;
     }
-    if (title.length < 3) {
-      _showError('Resource Title must be at least 3 characters');
+    if (title.length < 4) {
+      _showError('Resource Title must be at least 4 characters');
       return;
     }
 
@@ -118,8 +122,8 @@ class _ContractDocumentAddSheetState extends State<ContractDocumentAddSheet> {
         _showError('URL Address is required');
         return;
       }
-      if (!url.startsWith('http://') && !url.startsWith('https://')) {
-        _showError('URL must start with http:// or https://');
+      if (!_urlRegex.hasMatch(url)) {
+        _showError('Please enter a valid URL');
         return;
       }
       await _submit(resourceTitle: title, urlAddress: url, filePath: null);
@@ -385,6 +389,8 @@ class _ContractDocumentAddSheetState extends State<ContractDocumentAddSheet> {
           controller: _urlController,
           enabled: !_isSubmitting,
           keyboardType: TextInputType.url,
+          autocorrect: false,
+          textCapitalization: TextCapitalization.none,
           onChanged: (_) => setState(() {}),
           decoration: InputDecoration(
             hintText: 'URL Address',

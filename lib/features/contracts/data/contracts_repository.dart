@@ -891,26 +891,99 @@ class ContractsRepository {
     required String contractItemId,
     required String resourceTitle,
     required String urlAddress,
+    required String entityName,
+    required String personId,
   }) async {
-    final context = await _getAuthorizedPersonContext();
-    if (context == null) throw StateError('No authorized context available');
+    final authCtx = await _getAuthorizedPersonContext();
+    if (authCtx == null) throw StateError('No authorized context');
 
-    final response = await _apiClient.postJson(
-      url: '${_apiClient.slsnBusinessUrl}SlSnCommand/CreateSourceDocument',
-      body: <String, dynamic>{
-        'SourceId': contractItemId,
-        'ResourceTitle': resourceTitle,
-        'ResourceType': 'ExternalLink',
-        'ExternalLink': urlAddress,
-        'MessageCorrelationId': _newGuid(),
-      },
-      headers: _authorizedHeaders(context.accessToken),
+    final workspaceId = await _fetchOrCreateWorkspaceId(
+      authCtx.userId,
+      authCtx.accessToken,
     );
 
-    final statusCode = response['statusCode'] as int? ?? 0;
-    if (statusCode < 200 || statusCode >= 300) {
-      throw StateError('Failed to create external link document');
+    final objectArtifactId = _newGuid();
+
+    final dmsResponse = await _apiClient.postJson(
+      url: '${_apiClient.dmsServiceUrl}DmsCommand/UploadFile',
+      body: <String, dynamic>{
+        'ParentId': null,
+        'ObjectArtifactId': objectArtifactId,
+        'FileStorageId': 'b5e8549a-52d6-4ee5-a7d9-4c27a9d2e7e3',
+        'Tags': <String>['portal-url'],
+        'FileName': 'link.url',
+        'WorkspaceId': workspaceId,
+        'GenerateThumbnail': false,
+        'MetaData': <String, dynamic>{
+          'DocumentSize': <String, dynamic>{
+            'Type': 'String',
+            'Value': '0',
+          },
+          'ExternalDocumentCreateDate': <String, dynamic>{
+            'Type': 'String',
+            'Value': DateTime.now().toIso8601String(),
+          },
+          'FileType': <String, dynamic>{
+            'Type': 'String',
+            'Value': 'url',
+          },
+          'RelatedTo': <String, dynamic>{
+            'Type': 'String',
+            'Value': 'Drive',
+          },
+          'Source': <String, dynamic>{
+            'Type': 'String',
+            'Value': 'Filip',
+          },
+          'SourceEntityName': <String, dynamic>{
+            'Type': 'String',
+            'Value': entityName,
+          },
+          'SourceId': <String, dynamic>{
+            'Type': 'String',
+            'Value': contractItemId,
+          },
+          'DocumentId': <String, dynamic>{
+            'Type': 'String',
+            'Value': resourceTitle,
+          },
+          'Url': <String, dynamic>{
+            'Type': 'String',
+            'Value': urlAddress,
+          },
+        },
+      },
+      headers: _authorizedHeaders(authCtx.accessToken),
+    );
+
+    final dmsStatus = dmsResponse['statusCode'] as int? ?? 0;
+    if (dmsStatus < 200 || dmsStatus >= 300) {
+      throw StateError(
+          'Failed to create external link document (status $dmsStatus)');
     }
+
+    _apiClient
+        .postJson(
+          url: '${_apiClient.dataCoreUrl}DataManipulationCommand/Insert',
+          body: <String, dynamic>{
+            'EntityName': 'SnActivityLog',
+            'JsonString': jsonEncode(<String, dynamic>{
+              'ItemId': _newGuid(),
+              'Tags': <String>['Is-A-FilipUpdate', 'portal-url'],
+              'Language': 'en-US',
+              'ActionType': 'Insert',
+              'ActivityEntityName': 'ObjectArtifact',
+              'ActivityEntityId': objectArtifactId,
+              'ActivityTitle': resourceTitle,
+              'OrganizerPersonId': personId,
+              'ActivitySource': 'MANUAL',
+              'IsLatest': true,
+            }),
+            'EventData': null,
+          },
+          headers: _authorizedHeaders(authCtx.accessToken),
+        )
+        .ignore();
   }
 
   Future<String> _fetchOrCreateWorkspaceId(
@@ -973,6 +1046,7 @@ class ContractsRepository {
     required String resourceTitle,
     required String filePath,
     required String personId,
+    required String entityName,
   }) async {
     final authCtx = await _getAuthorizedPersonContext();
     if (authCtx == null) throw StateError('No authorized context');
@@ -1033,7 +1107,7 @@ class ContractsRepository {
 
     // Step 3: Register file in DMS
     final workspaceId = await _fetchOrCreateWorkspaceId(
-      authCtx.personId,
+      authCtx.userId,
       authCtx.accessToken,
     );
     final objectArtifactId = _newGuid();
@@ -1070,11 +1144,11 @@ class ContractsRepository {
           },
           'SourceEntityName': <String, dynamic>{
             'Type': 'String',
-            'Value': 'Person',
+            'Value': entityName,
           },
           'SourceId': <String, dynamic>{
             'Type': 'String',
-            'Value': personId,
+            'Value': contractItemId,
           },
           'DocumentId': <String, dynamic>{
             'Type': 'String',
@@ -1093,7 +1167,7 @@ class ContractsRepository {
     // Step 4: Insert SnActivityLog (fire-and-forget — do not fail upload if this errors)
     final activityJsonString = jsonEncode(<String, dynamic>{
       'ItemId': _newGuid(),
-      'Tags': <String>['IsAFilipUpdate', 'drive-file'],
+      'Tags': <String>['Is-A-FilipUpdate', 'upload-file'],
       'Language': 'en-US',
       'ActionType': 'Insert',
       'ActivityEntityName': 'ObjectArtifact',
@@ -1407,6 +1481,7 @@ class ContractsRepository {
     if (session == null) return null;
     return _ContractsPersonContext(
       accessToken: session.accessToken,
+      userId: session.userId,
       personId: session.personId,
       customerId: session.customerId,
       displayName: session.displayName,
@@ -1638,12 +1713,14 @@ class ContractsRepository {
 class _ContractsPersonContext {
   const _ContractsPersonContext({
     required this.accessToken,
+    required this.userId,
     required this.personId,
     required this.customerId,
     required this.displayName,
   });
 
   final String accessToken;
+  final String userId;
   final String personId;
   final String customerId;
   final String? displayName;
