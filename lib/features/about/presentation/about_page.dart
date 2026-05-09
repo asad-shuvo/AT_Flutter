@@ -64,40 +64,51 @@ class AboutPage extends StatelessWidget {
           child: Column(
             children: [
               // ── Logo row ──
-              IntrinsicHeight(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: Image.asset(
-                          'assets/images/login/splash_logo.png',
-                          height: 36,
-                          fit: BoxFit.contain,
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final rowWidth = constraints.maxWidth > 320
+                      ? 320.0
+                      : constraints.maxWidth;
+                  return SizedBox(
+                    width: rowWidth,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: Image.asset(
+                              'assets/images/login/splash_logo.png',
+                              width: 100,
+                              height: 35,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: VerticalDivider(
-                        width: 1,
-                        thickness: 1,
-                        color: Color(0xFFCCCCCC),
-                      ),
-                    ),
-                    Expanded(
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Image.asset(
-                          'assets/images/login/swisslife_logo.png',
-                          height: 42,
-                          fit: BoxFit.contain,
+                        SizedBox(
+                          width: 40,
+                          child: Center(
+                            child: Container(
+                              width: 1,
+                              height: 45,
+                              color: const Color(0xFFCCCCCC),
+                            ),
+                          ),
                         ),
-                      ),
+                        Expanded(
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Image.asset(
+                              'assets/images/login/swisslife_logo.png',
+                              width: 120,
+                              height: 45,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  );
+                },
               ),
 
               const SizedBox(height: 42),
@@ -151,9 +162,7 @@ class AboutPage extends StatelessWidget {
                         ),
                         TextSpan(
                           text: l10n.tr('about.selise'),
-                          style: const TextStyle(
-                            color: Color(0xFFD82034),
-                          ),
+                          style: const TextStyle(color: Color(0xFFD82034)),
                         ),
                       ],
                     ),

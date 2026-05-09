@@ -26,6 +26,10 @@ class AppSideDrawer extends StatelessWidget {
   final DashboardRepository dashboardRepository;
   final AuthSessionController authSessionController;
   final String appVersion;
+  static const String _legalUrl =
+      'https://www.swisslife-select.at/home/footer/nutzungsbedingungen_filip.html';
+  static const String _dataPrivacyUrl =
+      'https://www.swisslife-select.at/home/footer/datenschutz.html';
 
   @override
   Widget build(BuildContext context) {
@@ -59,9 +63,31 @@ class AppSideDrawer extends StatelessWidget {
                       color: AppColors.primaryRed,
                     ),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
+                        Row(
+                          children: [
+                            Image.asset(
+                              'assets/images/dashboard/filip_white.png',
+                              width: 25,
+                              height: 25,
+                              fit: BoxFit.contain,
+                            ),
+                            const SizedBox(width: 8),
+                            const Text(
+                              'FiLiP',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontFamily: 'Calibri',
+                                fontSize: 22,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0.4,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
                         if (profile != null && profile.displayName.isNotEmpty)
                           Text(
                             profile.displayName,
@@ -221,12 +247,20 @@ class AppSideDrawer extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.only(top: 12),
+            child: Image.asset(
+              'assets/images/login/swisslife_logo.png',
+              height: 54,
+              fit: BoxFit.contain,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 12, bottom: 12),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () => _launchUrl(_legalUrl),
                   style: TextButton.styleFrom(
                     padding: EdgeInsets.zero,
                     minimumSize: Size.zero,
@@ -249,7 +283,7 @@ class AppSideDrawer extends StatelessWidget {
                   ),
                 ),
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () => _launchUrl(_dataPrivacyUrl),
                   style: TextButton.styleFrom(
                     padding: EdgeInsets.zero,
                     minimumSize: Size.zero,
@@ -287,10 +321,7 @@ class AppSideDrawer extends StatelessWidget {
 
   Future<void> _handleLogout(BuildContext context) async {
     Navigator.of(context).pop();
-    await performLogout(
-      context,
-      authSessionController: authSessionController,
-    );
+    await performLogout(context, authSessionController: authSessionController);
   }
 }
 
