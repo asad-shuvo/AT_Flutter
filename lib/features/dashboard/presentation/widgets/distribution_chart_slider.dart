@@ -180,7 +180,11 @@ class _DistributionSliderCardState extends State<_DistributionSliderCard>
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor = Color(widget.card.chartBackgroundColorValue);
+    const emptyBackgroundColor = Color(0xFFF2F2F2);
+    final hasSegments = widget.card.segments.isNotEmpty;
+    final backgroundColor = hasSegments
+        ? Color(widget.card.chartBackgroundColorValue)
+        : emptyBackgroundColor;
     final totalValueColor = Color(widget.card.totalValueColorValue);
 
     return Container(
@@ -289,6 +293,7 @@ class _DistributionSliderCardState extends State<_DistributionSliderCard>
   }
 
   Widget _buildChartView() {
+    final hasSegments = widget.card.segments.isNotEmpty;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -306,22 +311,27 @@ class _DistributionSliderCardState extends State<_DistributionSliderCard>
             child: SizedBox(
               width: 232,
               height: 232,
-              child: CustomPaint(
-                painter: _DonutChartPainter(
-                  segments: widget.card.segments,
-                  emptyRingColor: Color(widget.card.chartBackgroundColorValue),
+                child: CustomPaint(
+                  painter: _DonutChartPainter(
+                    segments: widget.card.segments,
+                    emptyRingColor: hasSegments
+                        ? Color(widget.card.chartBackgroundColorValue)
+                        : const Color(0xFFE0E0E0),
+                  ),
                 ),
               ),
-            ),
           ),
         ),
         const SizedBox(height: 8),
         if (widget.card.segments.isEmpty)
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            child: Text(
-              context.l10n.tr('dashboard.noDataAdded'),
-              style: const TextStyle(fontSize: 14, color: Color(0xFF9D9D9D)),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            child: Center(
+              child: Text(
+                context.l10n.tr('dashboard.noDataAdded'),
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 14, color: Color(0xFF9D9D9D)),
+              ),
             ),
           )
         else

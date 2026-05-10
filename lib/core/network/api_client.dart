@@ -4,6 +4,7 @@ import 'dart:io';
 class ApiClient {
   static const Duration _requestTimeout = Duration(seconds: 20);
   static const Duration _uploadTimeout = Duration(seconds: 60);
+  static const String _tenantId = 'EDB4E319-4CCE-49CE-B877-275C8A8E5568';
 
   ApiClient({
     required this.baseUrl,
@@ -29,6 +30,41 @@ class ApiClient {
   final String storageServiceUrl;
   final String dmsServiceUrl;
   Future<void> Function()? _onUnauthorized;
+
+  String? resolveProfileImageUrl(String? imagePath) {
+    final value = imagePath?.trim();
+    if (value == null || value.isEmpty) return null;
+    if (value.startsWith('data:image')) return value;
+    if (value.startsWith('//')) return 'https:$value';
+
+    final uri = Uri.tryParse(value);
+    if (uri != null && uri.hasScheme) return value;
+
+    final parts = value.split('/');
+    final bucketBase = _storageBucketBaseUrl;
+    if (bucketBase != null && parts.isNotEmpty && parts.first == _tenantId) {
+      return bucketBase + value;
+    }
+
+    return value;
+  }
+
+  String? get _storageBucketBaseUrl {
+    final normalized = baseUrl.toLowerCase();
+    if (normalized.contains('seliselocal')) {
+      return 'https://slnfalcon.blob.core.windows.net/public-dev/';
+    }
+    if (normalized.contains('selisestage')) {
+      return 'https://slnfalcon.blob.core.windows.net/public-stg/';
+    }
+    if (normalized.contains('seliseuat')) {
+      return 'https://slnfalcon.blob.core.windows.net/public-uat/';
+    }
+    if (normalized.contains('filip.at')) {
+      return 'https://slnfalcon.blob.core.windows.net/public-prod/';
+    }
+    return null;
+  }
 
   void setUnauthorizedHandler(Future<void> Function() handler) {
     _onUnauthorized = handler;

@@ -52,18 +52,32 @@ class UserProfile {
     required this.email,
     required this.phoneNumber,
     required this.avatarColorValue,
+    required this.profileImageUrl,
   });
 
   final String displayName;
   final String email;
   final String phoneNumber;
   final int avatarColorValue;
+  final String? profileImageUrl;
 
   String get initials {
     final name = displayName.trim();
     if (name.isEmpty) return '';
     return name[0].toUpperCase();
   }
+
+  String? get resolvedProfileImageUrl {
+    final value = profileImageUrl?.trim();
+    if (value == null || value.isEmpty) return null;
+    if (value.startsWith('//')) return 'https:$value';
+
+    final uri = Uri.tryParse(value);
+    if (uri != null && uri.hasScheme) return value;
+    return null;
+  }
+
+  bool get hasRenderableProfileImage => resolvedProfileImageUrl != null;
 }
 
 class DashboardAdvisorInfo {

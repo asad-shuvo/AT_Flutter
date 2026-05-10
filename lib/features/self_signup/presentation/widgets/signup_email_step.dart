@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/features/self_signup/application/self_signup_controller.dart';
 import 'package:filip_at_flutter/features/self_signup/presentation/widgets/signup_shared.dart';
 import 'package:flutter/material.dart';
@@ -40,10 +41,12 @@ class _SignupEmailStepState extends State<SignupEmailStep> {
   }
 
   void _checkValid() {
-    final ok = _emailController.text.trim().isNotEmpty &&
+    final ok =
+        _emailController.text.trim().isNotEmpty &&
         _captchaController.text.trim().isNotEmpty &&
-        RegExp(r'^[\w.+-]+@[\w-]+\.[a-zA-Z]{2,}$')
-            .hasMatch(_emailController.text.trim());
+        RegExp(
+          r'^[\w.+-]+@[\w-]+\.[a-zA-Z]{2,}$',
+        ).hasMatch(_emailController.text.trim());
     if (ok != _isValid) setState(() => _isValid = ok);
   }
 
@@ -61,6 +64,7 @@ class _SignupEmailStepState extends State<SignupEmailStep> {
   @override
   Widget build(BuildContext context) {
     final c = widget.controller;
+    final l10n = context.l10n;
     return Column(
       children: [
         Expanded(
@@ -73,9 +77,9 @@ class _SignupEmailStepState extends State<SignupEmailStep> {
                   const SizedBox(height: 24),
                   _buildIllustration(),
                   const SizedBox(height: 20),
-                  const Text(
-                    'Your Email Address',
-                    style: TextStyle(
+                  Text(
+                    l10n.tr('tns.yourEmailAddress'),
+                    style: const TextStyle(
                       fontFamily: 'Calibri',
                       fontStyle: FontStyle.italic,
                       fontSize: 28,
@@ -84,10 +88,12 @@ class _SignupEmailStepState extends State<SignupEmailStep> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  const Text(
-                    'Please provide your email address to register a new account',
+                  Text(
+                    l10n.tr(
+                      'tns.pleaseProvideYourEmailAddressToRegisterANewAccount',
+                    ),
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontFamily: 'Calibri',
                       fontSize: 14,
                       color: Color(0xFF7A7A7A),
@@ -95,7 +101,7 @@ class _SignupEmailStepState extends State<SignupEmailStep> {
                     ),
                   ),
                   const SizedBox(height: 28),
-                  signupFieldLabel('Email *'),
+                  signupFieldLabel('${l10n.tr('tns.email')} *'),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _emailController,
@@ -103,7 +109,7 @@ class _SignupEmailStepState extends State<SignupEmailStep> {
                     textInputAction: TextInputAction.next,
                     onChanged: (_) => _checkValid(),
                     style: signupInputStyle,
-                    decoration: signupInputDecoration('Email'),
+                    decoration: signupInputDecoration(l10n.tr('tns.email')),
                   ),
                   const SizedBox(height: 20),
                   if (c.isCaptchaLoading)
@@ -119,7 +125,7 @@ class _SignupEmailStepState extends State<SignupEmailStep> {
                   else
                     _buildCaptchaImage(c),
                   const SizedBox(height: 10),
-                  signupFieldLabel('Captcha *'),
+                  signupFieldLabel('${l10n.tr('tns.captcha')} *'),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _captchaController,
@@ -127,7 +133,7 @@ class _SignupEmailStepState extends State<SignupEmailStep> {
                     onChanged: (_) => _checkValid(),
                     onFieldSubmitted: (_) => _submit(),
                     style: signupInputStyle,
-                    decoration: signupInputDecoration('Captcha'),
+                    decoration: signupInputDecoration(l10n.tr('tns.captcha')),
                   ),
                   const SizedBox(height: 24),
                 ],
@@ -136,7 +142,7 @@ class _SignupEmailStepState extends State<SignupEmailStep> {
           ),
         ),
         signupBottomButton(
-          label: 'CONTINUE >',
+          label: '${l10n.tr('tns.continue').toUpperCase()} >',
           isEnabled: _isValid && !c.isLoading,
           isLoading: c.isLoading,
           onTap: _submit,
@@ -151,11 +157,8 @@ class _SignupEmailStepState extends State<SignupEmailStep> {
       width: 130,
       height: 130,
       fit: BoxFit.contain,
-      errorBuilder: (context, error, stack) => const Icon(
-        Icons.mail_outline,
-        size: 80,
-        color: Color(0xFFD91F32),
-      ),
+      errorBuilder: (context, error, stack) =>
+          const Icon(Icons.mail_outline, size: 80, color: Color(0xFFD91F32)),
     );
   }
 

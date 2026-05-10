@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/features/self_signup/application/self_signup_controller.dart';
 import 'package:filip_at_flutter/features/self_signup/data/country_data.dart';
 import 'package:filip_at_flutter/features/self_signup/presentation/widgets/signup_shared.dart';
@@ -63,6 +64,7 @@ class _SignupPhoneStepState extends State<SignupPhoneStep> {
   @override
   Widget build(BuildContext context) {
     final c = widget.controller;
+    final l10n = context.l10n;
     return Column(
       children: [
         Expanded(
@@ -74,10 +76,10 @@ class _SignupPhoneStepState extends State<SignupPhoneStep> {
                 const SizedBox(height: 24),
                 Center(child: _buildIllustration()),
                 const SizedBox(height: 20),
-                const Center(
+                Center(
                   child: Text(
-                    'Your Phone Number',
-                    style: TextStyle(
+                    l10n.tr('tns.yourPhoneNumber'),
+                    style: const TextStyle(
                       fontFamily: 'Calibri',
                       fontStyle: FontStyle.italic,
                       fontSize: 28,
@@ -87,11 +89,11 @@ class _SignupPhoneStepState extends State<SignupPhoneStep> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                const Center(
+                Center(
                   child: Text(
-                    'Your email address was successfully verified. Please enter your phone number',
+                    l10n.tr('tns.yourEmailAddressSuccessfullyVerified'),
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontFamily: 'Calibri',
                       fontSize: 14,
                       color: Color(0xFF7A7A7A),
@@ -100,7 +102,7 @@ class _SignupPhoneStepState extends State<SignupPhoneStep> {
                   ),
                 ),
                 const SizedBox(height: 28),
-                signupFieldLabel('Mobile Number *'),
+                signupFieldLabel('${l10n.tr('tns.mobileNumber')} *'),
                 const SizedBox(height: 8),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,7 +119,9 @@ class _SignupPhoneStepState extends State<SignupPhoneStep> {
                         ],
                         onChanged: (_) => _checkValid(),
                         style: signupInputStyle,
-                        decoration: signupInputDecoration('Phone Number'),
+                        decoration: signupInputDecoration(
+                          l10n.tr('tns.phoneNumber'),
+                        ),
                       ),
                     ),
                   ],
@@ -136,7 +140,7 @@ class _SignupPhoneStepState extends State<SignupPhoneStep> {
                 else
                   _buildCaptchaImage(c),
                 const SizedBox(height: 10),
-                signupFieldLabel('Captcha *'),
+                signupFieldLabel('${l10n.tr('tns.captcha')} *'),
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _captchaController,
@@ -144,7 +148,7 @@ class _SignupPhoneStepState extends State<SignupPhoneStep> {
                   onChanged: (_) => _checkValid(),
                   onFieldSubmitted: (_) => _submit(),
                   style: signupInputStyle,
-                  decoration: signupInputDecoration('Captcha'),
+                  decoration: signupInputDecoration(l10n.tr('tns.captcha')),
                 ),
                 const SizedBox(height: 24),
               ],
@@ -152,7 +156,7 @@ class _SignupPhoneStepState extends State<SignupPhoneStep> {
           ),
         ),
         signupBottomButton(
-          label: 'CONTINUE >',
+          label: '${l10n.tr('tns.continue').toUpperCase()} >',
           isEnabled: _isValid && !c.isLoading,
           isLoading: c.isLoading,
           onTap: _submit,
@@ -167,11 +171,8 @@ class _SignupPhoneStepState extends State<SignupPhoneStep> {
       width: 130,
       height: 130,
       fit: BoxFit.contain,
-      errorBuilder: (context, error, stack) => const Icon(
-        Icons.phone_android,
-        size: 80,
-        color: Color(0xFFD91F32),
-      ),
+      errorBuilder: (context, error, stack) =>
+          const Icon(Icons.phone_android, size: 80, color: Color(0xFFD91F32)),
     );
   }
 
@@ -198,8 +199,11 @@ class _SignupPhoneStepState extends State<SignupPhoneStep> {
               ),
             ),
             const SizedBox(width: 4),
-            const Icon(Icons.arrow_drop_down,
-                size: 18, color: Color(0xFF555555)),
+            const Icon(
+              Icons.arrow_drop_down,
+              size: 18,
+              color: Color(0xFF555555),
+            ),
           ],
         ),
       ),
@@ -258,10 +262,7 @@ class _SignupPhoneStepState extends State<SignupPhoneStep> {
 }
 
 class _CountryPickerSheet extends StatefulWidget {
-  const _CountryPickerSheet({
-    required this.selected,
-    required this.onSelect,
-  });
+  const _CountryPickerSheet({required this.selected, required this.onSelect});
 
   final CountryInfo selected;
   final ValueChanged<CountryInfo> onSelect;
@@ -286,16 +287,19 @@ class _CountryPickerSheetState extends State<_CountryPickerSheet> {
       _filtered = q.isEmpty
           ? kAllCountries
           : kAllCountries
-              .where((c) =>
-                  c.name.toLowerCase().contains(q) ||
-                  c.dialCode.contains(q))
-              .toList();
+                .where(
+                  (c) =>
+                      c.name.toLowerCase().contains(q) ||
+                      c.dialCode.contains(q),
+                )
+                .toList();
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
+    final l10n = context.l10n;
     return SizedBox(
       height: screenHeight * 0.75,
       child: Column(
@@ -318,14 +322,17 @@ class _CountryPickerSheetState extends State<_CountryPickerSheet> {
               autofocus: false,
               style: const TextStyle(fontFamily: 'Calibri', fontSize: 14),
               decoration: InputDecoration(
-                hintText: 'Search country or code...',
+                hintText: l10n.tr('tns.search'),
                 hintStyle: const TextStyle(
                   fontFamily: 'Calibri',
                   fontSize: 14,
                   color: Color(0xFFAAAAAA),
                 ),
-                prefixIcon: const Icon(Icons.search,
-                    size: 20, color: Color(0xFFAAAAAA)),
+                prefixIcon: const Icon(
+                  Icons.search,
+                  size: 20,
+                  color: Color(0xFFAAAAAA),
+                ),
                 contentPadding: const EdgeInsets.symmetric(vertical: 10),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -333,8 +340,10 @@ class _CountryPickerSheetState extends State<_CountryPickerSheet> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide:
-                      const BorderSide(color: Color(0xFFD91F32), width: 1.5),
+                  borderSide: const BorderSide(
+                    color: Color(0xFFD91F32),
+                    width: 1.5,
+                  ),
                 ),
               ),
             ),
@@ -353,7 +362,9 @@ class _CountryPickerSheetState extends State<_CountryPickerSheet> {
                   onTap: () => widget.onSelect(country),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 14),
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
                     child: Row(
                       children: [
                         _FlagEmoji(emoji: country.flagEmoji),
@@ -378,8 +389,11 @@ class _CountryPickerSheetState extends State<_CountryPickerSheet> {
                           ),
                         ),
                         if (isSelected)
-                          const Icon(Icons.check,
-                              size: 20, color: Color(0xFFD91F32)),
+                          const Icon(
+                            Icons.check,
+                            size: 20,
+                            color: Color(0xFFD91F32),
+                          ),
                       ],
                     ),
                   ),

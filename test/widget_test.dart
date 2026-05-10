@@ -9,6 +9,7 @@ import 'package:filip_at_flutter/features/auth/application/auth_session_controll
 import 'package:filip_at_flutter/features/auth/application/user_session_cache.dart';
 import 'package:filip_at_flutter/features/auth/data/auth_repository.dart';
 import 'package:filip_at_flutter/features/auth/data/login_sync_repository.dart';
+import 'package:filip_at_flutter/features/contracts/application/contracts_household_controller.dart';
 import 'package:filip_at_flutter/features/contracts/data/contracts_repository.dart';
 import 'package:filip_at_flutter/features/dashboard/data/dashboard_repository.dart';
 import 'package:filip_at_flutter/features/notifications/data/notifications_repository.dart';
@@ -119,6 +120,9 @@ void main() {
       syncNotificationService: syncNotificationService,
       fcmService: fcmService,
       selfSignupRepository: selfSignupRepository,
+      householdController: ContractsHouseholdController(
+        contractsRepository: contractsRepository,
+      ),
     );
 
     await tester.pumpWidget(FilipAtApp(config: config, services: services));

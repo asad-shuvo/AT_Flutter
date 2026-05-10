@@ -1,6 +1,7 @@
 import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/features/auth/application/auth_session_controller.dart';
 import 'package:filip_at_flutter/features/chat/presentation/chat_page.dart';
+import 'package:filip_at_flutter/features/contracts/application/contracts_household_controller.dart';
 import 'package:filip_at_flutter/features/contracts/data/contracts_repository.dart';
 import 'package:filip_at_flutter/features/contracts/presentation/contracts_page.dart';
 import 'package:filip_at_flutter/features/dashboard/data/dashboard_models.dart';
@@ -28,6 +29,7 @@ class FilipExplorerPage extends StatefulWidget {
     required this.authSessionController,
     required this.appVersion,
     required this.syncNotificationService,
+    required this.householdController,
   });
 
   final DashboardRepository dashboardRepository;
@@ -36,6 +38,7 @@ class FilipExplorerPage extends StatefulWidget {
   final AuthSessionController authSessionController;
   final String appVersion;
   final SyncNotificationService syncNotificationService;
+  final ContractsHouseholdController householdController;
 
   @override
   State<FilipExplorerPage> createState() => _FilipExplorerPageState();
@@ -72,6 +75,7 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
           authSessionController: widget.authSessionController,
           appVersion: widget.appVersion,
           syncNotificationService: widget.syncNotificationService,
+          householdController: widget.householdController,
         ),
       ),
     );
@@ -107,6 +111,7 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
             authSessionController: widget.authSessionController,
             appVersion: widget.appVersion,
             syncNotificationService: widget.syncNotificationService,
+            householdController: widget.householdController,
           ),
         ),
       ),
@@ -135,8 +140,12 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
       drawer: AppSideDrawer(
         userProfileFuture: _userProfileFuture,
         dashboardRepository: widget.dashboardRepository,
+        contractsRepository: widget.contractsRepository,
+        notificationsRepository: widget.notificationsRepository,
         authSessionController: widget.authSessionController,
         appVersion: widget.appVersion,
+        syncNotificationService: widget.syncNotificationService,
+        householdController: widget.householdController,
       ),
       body: Builder(
         builder: (innerContext) => SafeArea(
@@ -183,6 +192,7 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
                                 appVersion: widget.appVersion,
                                 syncNotificationService:
                                     widget.syncNotificationService,
+                                householdController: widget.householdController,
                               ),
                             ),
                             onMessageTap: () => _openPage(const ChatPage()),
@@ -236,6 +246,7 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
             authSessionController: widget.authSessionController,
             appVersion: widget.appVersion,
             syncNotificationService: widget.syncNotificationService,
+            householdController: widget.householdController,
           ),
         ),
         onRealEstateTap: () => _openPage(const RealEstatePage()),

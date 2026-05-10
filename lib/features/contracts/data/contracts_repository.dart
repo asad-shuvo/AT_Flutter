@@ -52,7 +52,11 @@ class ContractsRepository {
         fallback: 0xFFD82034,
       ),
       isCurrentUser: true,
-      profileImageUrl: _readString(data['ProfileImage']),
+      profileImageUrl: _apiClient.resolveProfileImageUrl(
+        _readString(data['ProfileImage']),
+      ),
+      email: _readString(data['Email']),
+      phoneNumber: _readString(data['PhoneNumber']),
       proposedUserId: _readString(data['ProposedUserId']),
       managerNr: _readString(data['ManagerNr']),
       totalContracts: _readInt(data['TotalContracts']),
@@ -177,6 +181,25 @@ class ContractsRepository {
     final statusCode = response['statusCode'] as int? ?? 0;
     if (statusCode < 200 || statusCode >= 300) {
       throw StateError('Failed to sync customer document.');
+    }
+  }
+
+  Future<void> sendLeaveHouseholdEmail() async {
+    final context = await _getAuthorizedPersonContext();
+    if (context == null || context.customerId.isEmpty) return;
+
+    final response = await _apiClient.postJson(
+      url: '${_apiClient.slsnBusinessUrl}SlSnCommand/SendLeaveHouseHoldEmail',
+      body: <String, dynamic>{
+        'Pnr': context.customerId,
+        'MessageCorrelationId': _newGuid(),
+      },
+      headers: _authorizedHeaders(context.accessToken),
+    );
+
+    final statusCode = response['statusCode'] as int? ?? 0;
+    if (statusCode < 200 || statusCode >= 300) {
+      throw StateError('Failed to send leave household email.');
     }
   }
 
@@ -747,7 +770,7 @@ class ContractsRepository {
               personId: _readString(item['PersonId']),
               partnerName: _readString(item['PartnerName']),
               lastUpdateDate: _readDateTime(item['LastUpdateDate']),
-              insuredPersons: const <String>[],
+              insuredPersons: _readStringList(item['InsuredPersons']),
               syncDisabledProperties: _readStringList(item['SyncDisabledProperties']),
             ),
           )
@@ -1583,7 +1606,11 @@ class ContractsRepository {
               fallback: 0xFFD82034,
             ),
             isCurrentUser: personId == currentPersonId,
-            profileImageUrl: _readString(item['ProfileImage']),
+            profileImageUrl: _apiClient.resolveProfileImageUrl(
+              _readString(item['ProfileImage']),
+            ),
+            email: _readString(item['Email']),
+            phoneNumber: _readString(item['PhoneNumber']),
             lastName: _readLastName(
               explicitLastName: _readString(item['LastName']),
               displayName: displayName,

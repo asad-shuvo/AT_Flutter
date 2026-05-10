@@ -85,6 +85,12 @@ class AppLocalizations {
       'tns.me': 'Me',
       'tns.household': 'Household',
       'tns.business': 'Business',
+      'tns.contractsAvailable': 'Contracts available',
+      'tns.leaveHousehold': 'Leave household',
+      'tns.leaveHouseholdBottomSheetTitle':
+          'Are you sure you want to leave this household?',
+      'tns.leaveHouseholdBottomSheetSubTitle':
+          "Click 'Confirm' to leave this household or click 'Cancel' to go back.",
       'tns.myContracts': 'My Contracts',
       'tns.investment': 'Investments',
       'tns.nonLifeinsurance': 'Non-Life Insurance',
@@ -236,8 +242,7 @@ class AppLocalizations {
       'tns.contractTypeHouseholdInsurance': 'Household insurance',
       'tns.contractTypeHouseholdAndHomeInsurance':
           'Household and home insurance',
-      'tns.contractTypeLegalProtectionInsurance':
-          'Legal protection insurance',
+      'tns.contractTypeLegalProtectionInsurance': 'Legal protection insurance',
       'tns.contractTypeCarInsurance': 'Car insurance',
       'tns.contractTypeOtherInsurance': 'Other insurance',
       'tns.contractTypeBuildingSavings': 'Building savings',
@@ -293,7 +298,7 @@ class AppLocalizations {
       'dashboard.monthlyPayment': 'Monthly Payment',
       'dashboard.yearlyPayment': 'Yearly Payment',
       'dashboard.monthlyPensionDistribution': 'Monthly Pension Distribution',
-      'dashboard.noDataAdded': 'No data added',
+      'dashboard.noDataAdded': 'No chart data found',
       'dashboard.otherCategories': 'Other Categories',
       'dashboard.investmentPortalUnavailable':
           'The investment portal is not available right now.',
@@ -466,7 +471,13 @@ class AppLocalizations {
       'tns.me': 'Ich',
       'tns.household': 'Haushalt',
       'tns.business': 'Business',
-      'tns.myContracts': 'Meine Verträge',
+      'tns.contractsAvailable': 'Verfugbare Vertrage',
+      'tns.leaveHousehold': 'Haushalt auflosen',
+      'tns.leaveHouseholdBottomSheetTitle':
+          'Ich mochte meinen Haushalt auflosen',
+      'tns.leaveHouseholdBottomSheetSubTitle':
+          'Ihr Financial Planner wird sich fur die Auflosung ihres Haushalts mit ihnen in Verbindung setzten.',
+      'tns.myContracts': 'Meine Vertrage',
       'tns.investment': 'Investment',
       'tns.nonLifeinsurance': 'Versicherung',
       'tns.insurance': 'Versicherung',
@@ -678,7 +689,7 @@ class AppLocalizations {
       'dashboard.monthlyPayment': 'Monatliche Zahlung',
       'dashboard.yearlyPayment': 'Jahrliche Zahlung',
       'dashboard.monthlyPensionDistribution': 'Verteilung der Monatspension',
-      'dashboard.noDataAdded': 'Keine Daten hinzugefugt',
+      'dashboard.noDataAdded': 'Keine Diagrammdaten gefunden',
       'dashboard.otherCategories': 'Weitere Kategorien',
       'dashboard.investmentPortalUnavailable':
           'Das Investment-Portal ist derzeit nicht verfugbar.',
@@ -882,8 +893,12 @@ class AppLocalizations {
     return localizedMap['tns.$key'];
   }
 
-  static Future<Map<String, String>> _loadLanguageJson(String languageCode) async {
-    final source = await rootBundle.loadString('assets/i18n/$languageCode.json');
+  static Future<Map<String, String>> _loadLanguageJson(
+    String languageCode,
+  ) async {
+    final source = await rootBundle.loadString(
+      'assets/i18n/$languageCode.json',
+    );
     final decoded = jsonDecode(source);
     if (decoded is! Map<String, dynamic>) {
       return const <String, String>{};

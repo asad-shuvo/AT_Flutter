@@ -2,8 +2,13 @@ import 'package:filip_at_flutter/app/localization/app_language_scope.dart';
 import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/features/about/presentation/about_page.dart';
 import 'package:filip_at_flutter/features/auth/application/auth_session_controller.dart';
+import 'package:filip_at_flutter/features/contracts/application/contracts_household_controller.dart';
+import 'package:filip_at_flutter/features/contracts/data/contracts_repository.dart';
 import 'package:filip_at_flutter/features/dashboard/data/dashboard_models.dart';
 import 'package:filip_at_flutter/features/dashboard/data/dashboard_repository.dart';
+import 'package:filip_at_flutter/features/household/presentation/household_members_page.dart';
+import 'package:filip_at_flutter/features/notifications/application/sync_notification_service.dart';
+import 'package:filip_at_flutter/features/notifications/data/notifications_repository.dart';
 import 'package:filip_at_flutter/features/profile/presentation/profile_page.dart';
 import 'package:filip_at_flutter/features/settings/presentation/settings_page.dart';
 import 'package:filip_at_flutter/features/support/presentation/support_page.dart';
@@ -18,14 +23,22 @@ class AppSideDrawer extends StatelessWidget {
     super.key,
     required this.userProfileFuture,
     required this.dashboardRepository,
+    required this.contractsRepository,
+    required this.notificationsRepository,
     required this.authSessionController,
     required this.appVersion,
+    required this.syncNotificationService,
+    required this.householdController,
   });
 
   final Future<UserProfile?> userProfileFuture;
   final DashboardRepository dashboardRepository;
+  final ContractsRepository contractsRepository;
+  final NotificationsRepository notificationsRepository;
   final AuthSessionController authSessionController;
   final String appVersion;
+  final SyncNotificationService syncNotificationService;
+  final ContractsHouseholdController householdController;
   static const String _legalUrl =
       'https://www.swisslife-select.at/home/footer/nutzungsbedingungen_filip.html';
   static const String _dataPrivacyUrl =
@@ -117,24 +130,10 @@ class AppSideDrawer extends StatelessWidget {
                   ),
                   Positioned(
                     bottom: -40,
-                    child: Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        color: avatarColor,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: Text(
-                          initials,
-                          style: const TextStyle(
-                            color: Color(0xFF2D2D2D),
-                            fontFamily: 'Calibri',
-                            fontSize: 30,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
+                    child: _DrawerAvatar(
+                      profile: profile,
+                      initials: initials,
+                      avatarColor: avatarColor,
                     ),
                   ),
                 ],
@@ -142,44 +141,91 @@ class AppSideDrawer extends StatelessWidget {
             },
           ),
           const SizedBox(height: 52),
-          _DrawerItem(
-            icon: FilipIcons.personOutline,
-            label: l10n.tr('dashboard.drawerAccount'),
-            onTap: () => _openPage(
-              context,
-              ProfilePage(
-                dashboardRepository: dashboardRepository,
-                authSessionController: authSessionController,
-              ),
-            ),
-          ),
-          _DrawerItem(
-            icon: FilipIcons.preferences,
-            label: l10n.tr('dashboard.drawerPreferences'),
-            onTap: () => _openPage(
-              context,
-              SettingsPage(authSessionController: authSessionController),
-            ),
-          ),
-          _DrawerItem(
-            icon: FilipIcons.household,
-            label: l10n.tr('dashboard.drawerHousehold'),
-            onTap: () => Navigator.of(context).pop(),
-          ),
-          _DrawerItem(
-            icon: FilipIcons.survey,
-            label: l10n.tr('dashboard.drawerSurvey'),
-            onTap: () => Navigator.of(context).pop(),
-          ),
-          _DrawerItem(
-            icon: FilipIcons.support,
-            label: l10n.tr('dashboard.drawerSupport'),
-            onTap: () => _openPage(context, const SupportPage()),
-          ),
-          _DrawerItem(
-            icon: FilipIcons.about,
-            label: l10n.tr('dashboard.drawerAbout'),
-            onTap: () => _openPage(context, AboutPage(appVersion: appVersion)),
+          AnimatedBuilder(
+            animation: householdController,
+            builder: (context, _) {
+              final hasHouseholdMembers =
+                  householdController.householdMembers.length > 1;
+              final hasBusinessMembers =
+                  householdController.businessMembers.isNotEmpty;
+              return Column(
+                children: [
+                  _DrawerItem(
+                    icon: FilipIcons.personOutline,
+                    label: l10n.tr('dashboard.drawerAccount'),
+                    onTap: () => _openPage(
+                      context,
+                      ProfilePage(
+                        dashboardRepository: dashboardRepository,
+                        authSessionController: authSessionController,
+                      ),
+                    ),
+                  ),
+                  _DrawerItem(
+                    icon: FilipIcons.preferences,
+                    label: l10n.tr('dashboard.drawerPreferences'),
+                    onTap: () => _openPage(
+                      context,
+                      SettingsPage(
+                        authSessionController: authSessionController,
+                      ),
+                    ),
+                  ),
+                  if (hasHouseholdMembers)
+                    _DrawerItem(
+                      icon: FilipIcons.household,
+                      label: l10n.tr('dashboard.drawerHousehold'),
+                      onTap: () => _openPage(
+                        context,
+                        HouseholdMembersPage(
+                          dashboardRepository: dashboardRepository,
+                          contractsRepository: contractsRepository,
+                          notificationsRepository: notificationsRepository,
+                          authSessionController: authSessionController,
+                          appVersion: appVersion,
+                          syncNotificationService: syncNotificationService,
+                          householdController: householdController,
+                          isBusiness: false,
+                        ),
+                      ),
+                    ),
+                  if (hasBusinessMembers)
+                    _DrawerItem(
+                      icon: FilipIcons.business,
+                      label: l10n.tr('tns.business').toUpperCase(),
+                      onTap: () => _openPage(
+                        context,
+                        HouseholdMembersPage(
+                          dashboardRepository: dashboardRepository,
+                          contractsRepository: contractsRepository,
+                          notificationsRepository: notificationsRepository,
+                          authSessionController: authSessionController,
+                          appVersion: appVersion,
+                          syncNotificationService: syncNotificationService,
+                          householdController: householdController,
+                          isBusiness: true,
+                        ),
+                      ),
+                    ),
+                  _DrawerItem(
+                    icon: FilipIcons.survey,
+                    label: l10n.tr('dashboard.drawerSurvey'),
+                    onTap: () => Navigator.of(context).pop(),
+                  ),
+                  _DrawerItem(
+                    icon: FilipIcons.support,
+                    label: l10n.tr('dashboard.drawerSupport'),
+                    onTap: () => _openPage(context, const SupportPage()),
+                  ),
+                  _DrawerItem(
+                    icon: FilipIcons.about,
+                    label: l10n.tr('dashboard.drawerAbout'),
+                    onTap: () =>
+                        _openPage(context, AboutPage(appVersion: appVersion)),
+                  ),
+                ],
+              );
+            },
           ),
           const Spacer(),
           Padding(
@@ -322,6 +368,57 @@ class AppSideDrawer extends StatelessWidget {
   Future<void> _handleLogout(BuildContext context) async {
     Navigator.of(context).pop();
     await performLogout(context, authSessionController: authSessionController);
+  }
+}
+
+class _DrawerAvatar extends StatelessWidget {
+  const _DrawerAvatar({
+    required this.profile,
+    required this.initials,
+    required this.avatarColor,
+  });
+
+  final UserProfile? profile;
+  final String initials;
+  final Color avatarColor;
+
+  @override
+  Widget build(BuildContext context) {
+    const textStyle = TextStyle(
+      color: Color(0xFF2D2D2D),
+      fontFamily: 'Calibri',
+      fontSize: 30,
+      fontWeight: FontWeight.w600,
+    );
+
+    final imageUrl = profile?.resolvedProfileImageUrl;
+    if (imageUrl != null) {
+      return Container(
+        width: 80,
+        height: 80,
+        decoration: const BoxDecoration(shape: BoxShape.circle),
+        clipBehavior: Clip.antiAlias,
+        child: Image.network(
+          imageUrl,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              color: avatarColor,
+              alignment: Alignment.center,
+              child: Text(initials, style: textStyle),
+            );
+          },
+        ),
+      );
+    }
+
+    return Container(
+      width: 80,
+      height: 80,
+      decoration: BoxDecoration(color: avatarColor, shape: BoxShape.circle),
+      alignment: Alignment.center,
+      child: Text(initials, style: textStyle),
+    );
   }
 }
 

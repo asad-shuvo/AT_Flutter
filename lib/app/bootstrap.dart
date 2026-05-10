@@ -12,6 +12,7 @@ import 'package:filip_at_flutter/features/auth/application/auth_session_controll
 import 'package:filip_at_flutter/features/auth/application/user_session_cache.dart';
 import 'package:filip_at_flutter/features/auth/data/auth_repository.dart';
 import 'package:filip_at_flutter/features/auth/data/login_sync_repository.dart';
+import 'package:filip_at_flutter/features/contracts/application/contracts_household_controller.dart';
 import 'package:filip_at_flutter/features/contracts/data/contracts_repository.dart';
 import 'package:filip_at_flutter/features/dashboard/data/dashboard_repository.dart';
 import 'package:filip_at_flutter/features/notifications/data/notifications_repository.dart';
@@ -125,6 +126,11 @@ Future<void> bootstrap(AppFlavor flavor) async {
   await fcmService.setupMessaging(config.investmentPushNotificationKey);
   fcmService.startListening();
 
+  // App-level singleton — NativeScript parity: ContractHouseholdService @Injectable root
+  final householdController = ContractsHouseholdController(
+    contractsRepository: contractsRepository,
+  );
+
   await authSessionController.restoreSession();
   await languageController.restoreLocale();
 
@@ -142,6 +148,7 @@ Future<void> bootstrap(AppFlavor flavor) async {
     syncNotificationService: syncNotificationService,
     fcmService: fcmService,
     selfSignupRepository: selfSignupRepository,
+    householdController: householdController,
   );
 
   // Wire auth state changes for FCM topic subscription and session cache invalidation
@@ -153,12 +160,21 @@ Future<void> bootstrap(AppFlavor flavor) async {
       contractsRepository,
       syncNotificationService,
       userSessionCache,
+      householdController,
     );
   });
 
   // Wire external contract sync completion to trigger document download
   syncNotificationService.externalContractSyncCompleted.stream.listen((_) {
     _handleExternalContractSync(secureStorageService, contractsRepository);
+  });
+
+  // Reload household data on contract sync notifications (NativeScript: root-level listener)
+  syncNotificationService.contractSyncCompleted.stream.listen((_) {
+    householdController.load();
+  });
+  syncNotificationService.synccustomercontract.stream.listen((_) {
+    householdController.load();
   });
 
   runApp(FilipAtApp(config: config, services: services));
@@ -171,6 +187,7 @@ Future<void> _handleAuthStateChange(
   ContractsRepository contractsRepository,
   SyncNotificationService syncNotificationService,
   UserSessionCache userSessionCache,
+  ContractsHouseholdController householdController,
 ) async {
   final isAuthenticated = authSessionController.isAuthenticated;
 
@@ -181,6 +198,10 @@ Future<void> _handleAuthStateChange(
       if (userId.isNotEmpty) {
         await fcmService.subscribeToUserTopic(userId);
       }
+    }
+    // Initial one-time load (NativeScript: root getUserHouseholdAndBusiness on login)
+    if (!householdController.isInitialized) {
+      unawaited(householdController.load());
     }
   } else {
     userSessionCache.invalidate();

@@ -1,6 +1,14 @@
+import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/features/self_signup/application/self_signup_controller.dart';
 import 'package:filip_at_flutter/features/self_signup/presentation/widgets/signup_shared.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+const String _termsUrl =
+    'https://www.swisslife-select.at/home/footer/nutzungsbedingungen_filip.html';
+const String _dataProtectionUrl =
+    'https://www.swisslife-select.at/home/footer/datenschutz.html';
 
 class SignupPasswordStep extends StatefulWidget {
   const SignupPasswordStep({super.key, required this.controller});
@@ -17,6 +25,8 @@ class _SignupPasswordStepState extends State<SignupPasswordStep> {
   bool _agreedToTerms = false;
   bool _isPasswordHidden = true;
   bool _isRepeatPasswordHidden = true;
+  late final TapGestureRecognizer _termsRecognizer;
+  late final TapGestureRecognizer _dataProtectionRecognizer;
 
   static final _passwordRegex = RegExp(
     r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[-_!*@#$,.;?§%^&+=/]).{6,300}$',
@@ -24,10 +34,25 @@ class _SignupPasswordStepState extends State<SignupPasswordStep> {
   bool _passwordTouched = false;
 
   @override
+  void initState() {
+    super.initState();
+    _termsRecognizer = TapGestureRecognizer()
+      ..onTap = () => _openExternalUrl(_termsUrl);
+    _dataProtectionRecognizer = TapGestureRecognizer()
+      ..onTap = () => _openExternalUrl(_dataProtectionUrl);
+  }
+
+  @override
   void dispose() {
+    _termsRecognizer.dispose();
+    _dataProtectionRecognizer.dispose();
     _passwordCtrl.dispose();
     _repeatPasswordCtrl.dispose();
     super.dispose();
+  }
+
+  Future<void> _openExternalUrl(String url) async {
+    await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
   }
 
   bool get _isFormValid {
@@ -69,6 +94,7 @@ class _SignupPasswordStepState extends State<SignupPasswordStep> {
   @override
   Widget build(BuildContext context) {
     final c = widget.controller;
+    final l10n = context.l10n;
     return Column(
       children: [
         Expanded(
@@ -84,28 +110,36 @@ class _SignupPasswordStepState extends State<SignupPasswordStep> {
                     children: [
                       const SizedBox(height: 20),
                       signupSectionHeader(
-                        'Password',
-                        const Icon(Icons.lock_outline,
-                            size: 22, color: Color(0xFFD91F32)),
+                        l10n.tr('tns.password'),
+                        const Icon(
+                          Icons.lock_outline,
+                          size: 22,
+                          color: Color(0xFFD91F32),
+                        ),
                       ),
-                      signupFieldLabel('Date of Birth *'),
+                      signupFieldLabel('${l10n.tr('tns.dateofBirth')} *'),
                       const SizedBox(height: 6),
                       _buildDateField(),
                       const SizedBox(height: 14),
-                      signupFieldLabel('Password *'),
+                      signupFieldLabel('${l10n.tr('tns.password')} *'),
                       const SizedBox(height: 6),
-                      _passwordField(_passwordCtrl, 'Password',
-                          _isPasswordHidden, () {
-                        setState(
-                            () => _isPasswordHidden = !_isPasswordHidden);
-                      }),
+                      _passwordField(
+                        _passwordCtrl,
+                        l10n.tr('tns.password'),
+                        _isPasswordHidden,
+                        () {
+                          setState(
+                            () => _isPasswordHidden = !_isPasswordHidden,
+                          );
+                        },
+                      ),
                       if (_passwordTouched &&
                           !_passwordRegex.hasMatch(_passwordCtrl.text))
-                        const Padding(
-                          padding: EdgeInsets.only(top: 4),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
                           child: Text(
-                            'Password must contain at least 6 characters. Must include one UPPERCASE letter, one lowercase letter, one special character and one digit.',
-                            style: TextStyle(
+                            l10n.tr('tns.passwordFromatMsg'),
+                            style: const TextStyle(
                               fontFamily: 'Calibri',
                               fontSize: 12,
                               color: Color(0xFFD91F32),
@@ -114,22 +148,27 @@ class _SignupPasswordStepState extends State<SignupPasswordStep> {
                           ),
                         ),
                       const SizedBox(height: 14),
-                      signupFieldLabel('Repeat Password *'),
+                      signupFieldLabel('${l10n.tr('tns.repeatPassword')} *'),
                       const SizedBox(height: 6),
                       _passwordField(
-                          _repeatPasswordCtrl, 'Repeat Password',
-                          _isRepeatPasswordHidden, () {
-                        setState(() => _isRepeatPasswordHidden =
-                            !_isRepeatPasswordHidden);
-                      }),
+                        _repeatPasswordCtrl,
+                        l10n.tr('tns.repeatPassword'),
+                        _isRepeatPasswordHidden,
+                        () {
+                          setState(
+                            () => _isRepeatPasswordHidden =
+                                !_isRepeatPasswordHidden,
+                          );
+                        },
+                      ),
                       if (_passwordTouched &&
                           _repeatPasswordCtrl.text.isNotEmpty &&
                           _passwordCtrl.text != _repeatPasswordCtrl.text)
-                        const Padding(
-                          padding: EdgeInsets.only(top: 4),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
                           child: Text(
-                            'Passwords do not match.',
-                            style: TextStyle(
+                            l10n.tr('tns.retypePasswordMsg'),
+                            style: const TextStyle(
                               fontFamily: 'Calibri',
                               fontSize: 12,
                               color: Color(0xFFD91F32),
@@ -149,7 +188,7 @@ class _SignupPasswordStepState extends State<SignupPasswordStep> {
           ),
         ),
         signupBottomButton(
-          label: 'COMPLETE PROFILE',
+          label: l10n.tr('tns.completeProfile').toUpperCase(),
           isEnabled: _isFormValid && !c.isLoading,
           isLoading: c.isLoading,
           onTap: _submit,
@@ -159,6 +198,7 @@ class _SignupPasswordStepState extends State<SignupPasswordStep> {
   }
 
   Widget _buildAlmostFinishedHeader() {
+    final l10n = context.l10n;
     return Container(
       color: Colors.white,
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
@@ -168,10 +208,10 @@ class _SignupPasswordStepState extends State<SignupPasswordStep> {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 Text(
-                  'Almost Finished!',
-                  style: TextStyle(
+                  l10n.tr('tns.almostFinished'),
+                  style: const TextStyle(
                     fontFamily: 'Calibri',
                     fontStyle: FontStyle.italic,
                     fontSize: 22,
@@ -179,10 +219,10 @@ class _SignupPasswordStepState extends State<SignupPasswordStep> {
                     color: Color(0xFF2D2D2D),
                   ),
                 ),
-                SizedBox(height: 6),
+                const SizedBox(height: 6),
                 Text(
-                  'Please setup password below to finish the process',
-                  style: TextStyle(
+                  l10n.tr('tns.sortFormSubtitle'),
+                  style: const TextStyle(
                     fontFamily: 'Calibri',
                     fontSize: 13,
                     color: Color(0xFF7A7A7A),
@@ -207,8 +247,11 @@ class _SignupPasswordStepState extends State<SignupPasswordStep> {
                   border: Border.all(color: const Color(0xFFE0E0E0)),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(Icons.description_outlined,
-                    size: 32, color: Color(0xFFD91F32)),
+                child: const Icon(
+                  Icons.description_outlined,
+                  size: 32,
+                  color: Color(0xFFD91F32),
+                ),
               ),
             ),
           ),
@@ -218,6 +261,7 @@ class _SignupPasswordStepState extends State<SignupPasswordStep> {
   }
 
   Widget _buildDateField() {
+    final l10n = context.l10n;
     return GestureDetector(
       onTap: _pickDate,
       child: Container(
@@ -232,7 +276,7 @@ class _SignupPasswordStepState extends State<SignupPasswordStep> {
               child: Text(
                 _dateOfBirth != null
                     ? '${_dateOfBirth!.month}/${_dateOfBirth!.day}/${_dateOfBirth!.year}'
-                    : 'Date of Birth',
+                    : l10n.tr('tns.dateofBirth'),
                 style: TextStyle(
                   fontFamily: 'Calibri',
                   fontSize: 15,
@@ -242,8 +286,11 @@ class _SignupPasswordStepState extends State<SignupPasswordStep> {
                 ),
               ),
             ),
-            const Icon(Icons.calendar_today_outlined,
-                size: 18, color: Color(0xFF888888)),
+            const Icon(
+              Icons.calendar_today_outlined,
+              size: 18,
+              color: Color(0xFF888888),
+            ),
           ],
         ),
       ),
@@ -276,6 +323,7 @@ class _SignupPasswordStepState extends State<SignupPasswordStep> {
   }
 
   Widget _buildTermsRow() {
+    final l10n = context.l10n;
     return GestureDetector(
       onTap: () => setState(() => _agreedToTerms = !_agreedToTerms),
       child: Row(
@@ -299,12 +347,14 @@ class _SignupPasswordStepState extends State<SignupPasswordStep> {
                 : null,
           ),
           const SizedBox(width: 10),
-          const Text(
-            'I agree to continue.',
-            style: TextStyle(
-              fontFamily: 'Calibri',
-              fontSize: 14,
-              color: Color(0xFF2D2D2D),
+          Expanded(
+            child: Text(
+              l10n.tr('tns.iagreewiththetermsofuse'),
+              style: const TextStyle(
+                fontFamily: 'Calibri',
+                fontSize: 14,
+                color: Color(0xFF2D2D2D),
+              ),
             ),
           ),
         ],
@@ -313,33 +363,29 @@ class _SignupPasswordStepState extends State<SignupPasswordStep> {
   }
 
   Widget _buildTermsText() {
+    final l10n = context.l10n;
     return RichText(
-      text: const TextSpan(
-        style: TextStyle(
+      text: TextSpan(
+        style: const TextStyle(
           fontFamily: 'Calibri',
           fontSize: 12,
           color: Color(0xFF7A7A7A),
           height: 1.5,
         ),
         children: [
+          TextSpan(text: '${l10n.tr('tns.selfSignupAgreeText1')} '),
           TextSpan(
-            text: "By clicking on 'Continue/Next' you agree to our ",
+            text: l10n.tr('tns.selfSignupAgreeText2'),
+            style: const TextStyle(color: Color(0xFFD91F32)),
+            recognizer: _termsRecognizer,
           ),
+          TextSpan(text: ' ${l10n.tr('tns.selfSignupAgreeText3')} '),
           TextSpan(
-            text: 'terms of use',
-            style: TextStyle(color: Color(0xFFD91F32)),
+            text: l10n.tr('tns.selfSignupAgreeText4'),
+            style: const TextStyle(color: Color(0xFFD91F32)),
+            recognizer: _dataProtectionRecognizer,
           ),
-          TextSpan(
-            text: ' and confirm that you have read through the information on ',
-          ),
-          TextSpan(
-            text: 'data protection',
-            style: TextStyle(color: Color(0xFFD91F32)),
-          ),
-          TextSpan(
-            text:
-                '. Please read the terms of use and information on data protection carefully.',
-          ),
+          TextSpan(text: '. ${l10n.tr('tns.selfSignupAgreeText5')}'),
         ],
       ),
     );

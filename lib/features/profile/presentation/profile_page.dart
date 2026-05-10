@@ -211,6 +211,36 @@ class _ProfileAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final imageUrl = profile.resolvedProfileImageUrl;
+    if (imageUrl != null) {
+      return Container(
+        width: 96,
+        height: 96,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white, width: 2),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Image.network(
+          imageUrl,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return _ProfileAvatarFallback(profile: profile);
+          },
+        ),
+      );
+    }
+    return _ProfileAvatarFallback(profile: profile);
+  }
+}
+
+class _ProfileAvatarFallback extends StatelessWidget {
+  const _ProfileAvatarFallback({required this.profile});
+
+  final UserProfile profile;
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       width: 96,
       height: 96,
@@ -482,4 +512,5 @@ const UserProfile _emptyProfile = UserProfile(
   email: '-',
   phoneNumber: '-',
   avatarColorValue: 0xFF10B377,
+  profileImageUrl: null,
 );

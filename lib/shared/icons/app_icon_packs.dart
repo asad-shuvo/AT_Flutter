@@ -53,6 +53,7 @@ class FilipIcons {
   static const IconData personOutline = IconData(0xE963, fontFamily: _family);
   static const IconData preferences = IconData(0xEA3C, fontFamily: _family);
   static const IconData household = IconData(0xE9CD, fontFamily: _family);
+  static const IconData business = IconData(0xEA24, fontFamily: _family);
   static const IconData survey = IconData(0xE9E5, fontFamily: _family);
   static const IconData support = IconData(0xE9BC, fontFamily: _family);
   static const IconData about = IconData(0xE903, fontFamily: _family);

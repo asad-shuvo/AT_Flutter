@@ -10,6 +10,8 @@ class ContractsHouseholdMember {
     required this.isCurrentUser,
     this.customerId,
     this.profileImageUrl,
+    this.email,
+    this.phoneNumber,
     this.lastName,
     this.proposedUserId,
     this.managerNr,
@@ -23,6 +25,8 @@ class ContractsHouseholdMember {
   final bool isCurrentUser;
   final String? customerId;
   final String? profileImageUrl;
+  final String? email;
+  final String? phoneNumber;
   final String? lastName;
   final String? proposedUserId;
   final String? managerNr;
@@ -53,8 +57,17 @@ class ContractsHouseholdMember {
     return parts.last;
   }
 
-  bool get hasRenderableProfileImage =>
-      profileImageUrl != null && profileImageUrl!.startsWith('http');
+  String? get resolvedProfileImageUrl {
+    final value = profileImageUrl?.trim();
+    if (value == null || value.isEmpty) return null;
+    if (value.startsWith('//')) return 'https:$value';
+
+    final uri = Uri.tryParse(value);
+    if (uri != null && uri.hasScheme) return value;
+    return null;
+  }
+
+  bool get hasRenderableProfileImage => resolvedProfileImageUrl != null;
 
   ContractsHouseholdMember copyWith({
     String? personId,
@@ -63,6 +76,8 @@ class ContractsHouseholdMember {
     bool? isCurrentUser,
     String? customerId,
     String? profileImageUrl,
+    String? email,
+    String? phoneNumber,
     String? lastName,
     String? proposedUserId,
     String? managerNr,
@@ -76,6 +91,8 @@ class ContractsHouseholdMember {
       isCurrentUser: isCurrentUser ?? this.isCurrentUser,
       customerId: customerId ?? this.customerId,
       profileImageUrl: profileImageUrl ?? this.profileImageUrl,
+      email: email ?? this.email,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
       lastName: lastName ?? this.lastName,
       proposedUserId: proposedUserId ?? this.proposedUserId,
       managerNr: managerNr ?? this.managerNr,

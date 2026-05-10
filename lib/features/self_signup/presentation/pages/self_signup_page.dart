@@ -1,4 +1,5 @@
 import 'package:filip_at_flutter/app/router/app_router.dart';
+import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/features/self_signup/application/self_signup_controller.dart';
 import 'package:filip_at_flutter/features/self_signup/data/self_signup_repository.dart';
 import 'package:filip_at_flutter/features/self_signup/presentation/widgets/signup_captcha_view.dart';
@@ -34,6 +35,12 @@ class _SelfSignupPageState extends State<SelfSignupPage> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _controller.setLanguageCode(Localizations.localeOf(context).languageCode);
+  }
+
+  @override
   void dispose() {
     _controller.removeListener(_onStateChange);
     _controller.dispose();
@@ -58,7 +65,9 @@ class _SelfSignupPageState extends State<SelfSignupPage> {
           ..hideCurrentSnackBar()
           ..showSnackBar(
             SnackBar(
-              content: Text(_controller.errorMessage!),
+              content: Text(
+                context.l10n.trBestEffort(_controller.errorMessage!),
+              ),
               backgroundColor: const Color(0xFF333333),
             ),
           );
@@ -77,8 +86,9 @@ class _SelfSignupPageState extends State<SelfSignupPage> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (_) => SignupSuccessView(
-        onGoToLogin: () => Navigator.of(context)
-            .pushNamedAndRemoveUntil(AppRouter.login, (_) => false),
+        onGoToLogin: () => Navigator.of(
+          context,
+        ).pushNamedAndRemoveUntil(AppRouter.login, (_) => false),
       ),
     );
   }
@@ -99,6 +109,7 @@ class _SelfSignupPageState extends State<SelfSignupPage> {
   }
 
   Widget _buildHeader() {
+    final l10n = context.l10n;
     return Container(
       height: 50,
       padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -116,9 +127,9 @@ class _SelfSignupPageState extends State<SelfSignupPage> {
               minimumSize: Size.zero,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
-            child: const Text(
-              'CANCEL',
-              style: TextStyle(
+            child: Text(
+              l10n.tr('tns.cancel').toUpperCase(),
+              style: const TextStyle(
                 fontFamily: 'Calibri',
                 fontWeight: FontWeight.w700,
                 fontSize: 14,
@@ -130,7 +141,7 @@ class _SelfSignupPageState extends State<SelfSignupPage> {
           Padding(
             padding: const EdgeInsets.only(right: 16),
             child: Text(
-              'REGISTRATION STEP ${_controller.currentStep}/3',
+              '${l10n.tr('tns.registrationStep').toUpperCase()} ${_controller.currentStep}/3',
               style: const TextStyle(
                 fontFamily: 'Calibri',
                 fontSize: 13,

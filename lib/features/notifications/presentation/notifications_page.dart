@@ -1,6 +1,7 @@
 import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/features/auth/application/auth_session_controller.dart';
 import 'package:filip_at_flutter/features/chat/presentation/chat_page.dart';
+import 'package:filip_at_flutter/features/contracts/application/contracts_household_controller.dart';
 import 'package:filip_at_flutter/features/contracts/data/contracts_repository.dart';
 import 'package:filip_at_flutter/features/contracts/presentation/contracts_page.dart';
 import 'package:filip_at_flutter/features/dashboard/data/dashboard_models.dart';
@@ -25,6 +26,7 @@ class NotificationsPage extends StatefulWidget {
     required this.authSessionController,
     required this.appVersion,
     required this.syncNotificationService,
+    required this.householdController,
   });
 
   final DashboardRepository dashboardRepository;
@@ -33,6 +35,7 @@ class NotificationsPage extends StatefulWidget {
   final AuthSessionController authSessionController;
   final String appVersion;
   final SyncNotificationService syncNotificationService;
+  final ContractsHouseholdController householdController;
 
   @override
   State<NotificationsPage> createState() => _NotificationsPageState();
@@ -56,7 +59,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
   void initState() {
     super.initState();
     _userProfileFuture = widget.dashboardRepository.fetchUserProfile();
-    _unreadNotificationsFuture = widget.notificationsRepository.fetchUnreadCount();
+    _unreadNotificationsFuture = widget.notificationsRepository
+        .fetchUnreadCount();
     _scrollController = ScrollController()..addListener(_handleScroll);
     _loadInitial();
   }
@@ -89,10 +93,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
     await _loadPage(pageNumber: _pageNumber + 1, reset: false);
   }
 
-  Future<void> _loadPage({
-    required int pageNumber,
-    required bool reset,
-  }) async {
+  Future<void> _loadPage({required int pageNumber, required bool reset}) async {
     try {
       final data = await widget.notificationsRepository.fetchNotifications(
         pageNumber: pageNumber,
@@ -121,7 +122,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
         _isInitialLoading = false;
         _isLoadingMore = false;
         _loadError = null;
-        _unreadNotificationsFuture = widget.notificationsRepository.fetchUnreadCount();
+        _unreadNotificationsFuture = widget.notificationsRepository
+            .fetchUnreadCount();
       });
     } catch (error) {
       if (!mounted) return;
@@ -152,6 +154,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
           authSessionController: widget.authSessionController,
           appVersion: widget.appVersion,
           syncNotificationService: widget.syncNotificationService,
+          householdController: widget.householdController,
         ),
       ),
     );
@@ -166,8 +169,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
       drawer: AppSideDrawer(
         userProfileFuture: _userProfileFuture,
         dashboardRepository: widget.dashboardRepository,
+        contractsRepository: widget.contractsRepository,
+        notificationsRepository: widget.notificationsRepository,
         authSessionController: widget.authSessionController,
         appVersion: widget.appVersion,
+        syncNotificationService: widget.syncNotificationService,
+        householdController: widget.householdController,
       ),
       body: Builder(
         builder: (innerContext) => SafeArea(
@@ -185,16 +192,15 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 },
               ),
               _NotificationHeader(title: context.l10n.tr('tns.notification')),
-              Expanded(
-                child: _buildBody(context),
-              ),
+              Expanded(child: _buildBody(context)),
             ],
           ),
         ),
       ),
       bottomNavigationBar: AppBottomNav(
         activeTab: null,
-        onDashboardTap: () => Navigator.of(context).popUntil((route) => route.isFirst),
+        onDashboardTap: () =>
+            Navigator.of(context).popUntil((route) => route.isFirst),
         onHomeTap: () {
           final navigator = Navigator.of(context);
           navigator.popUntil((route) => route.isFirst);
@@ -207,6 +213,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 authSessionController: widget.authSessionController,
                 appVersion: widget.appVersion,
                 syncNotificationService: widget.syncNotificationService,
+                householdController: widget.householdController,
               ),
             ),
           );
@@ -262,7 +269,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   height: 18,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryRed),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      AppColors.primaryRed,
+                    ),
                   ),
                 ),
               ),

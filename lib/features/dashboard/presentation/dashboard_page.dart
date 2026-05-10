@@ -5,6 +5,7 @@ import 'package:filip_at_flutter/app/localization/app_language_scope.dart';
 import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/features/auth/application/auth_session_controller.dart';
 import 'package:filip_at_flutter/features/chat/presentation/chat_page.dart';
+import 'package:filip_at_flutter/features/contracts/application/contracts_household_controller.dart';
 import 'package:filip_at_flutter/features/contracts/data/contracts_repository.dart';
 import 'package:filip_at_flutter/features/contracts/presentation/contracts_page.dart';
 import 'package:filip_at_flutter/features/dashboard/data/dashboard_models.dart';
@@ -39,6 +40,7 @@ class DashboardPage extends StatefulWidget {
     required this.notificationsRepository,
     required this.authSessionController,
     required this.syncNotificationService,
+    required this.householdController,
   });
 
   final AppConfig config;
@@ -47,6 +49,7 @@ class DashboardPage extends StatefulWidget {
   final NotificationsRepository notificationsRepository;
   final AuthSessionController authSessionController;
   final SyncNotificationService syncNotificationService;
+  final ContractsHouseholdController householdController;
 
   @override
   State<DashboardPage> createState() => _DashboardPageState();
@@ -146,8 +149,12 @@ class _DashboardPageState extends State<DashboardPage> with RouteAware {
       drawer: AppSideDrawer(
         userProfileFuture: _userProfileFuture,
         dashboardRepository: widget.dashboardRepository,
+        contractsRepository: widget.contractsRepository,
+        notificationsRepository: widget.notificationsRepository,
         authSessionController: widget.authSessionController,
         appVersion: widget.config.appVersion,
+        syncNotificationService: widget.syncNotificationService,
+        householdController: widget.householdController,
       ),
       body: Builder(
         builder: (innerContext) => SafeArea(
@@ -231,6 +238,7 @@ class _DashboardPageState extends State<DashboardPage> with RouteAware {
             authSessionController: widget.authSessionController,
             appVersion: widget.config.appVersion,
             syncNotificationService: widget.syncNotificationService,
+            householdController: widget.householdController,
           ),
         ),
         onContractsTap: () => _openPage(
@@ -242,6 +250,7 @@ class _DashboardPageState extends State<DashboardPage> with RouteAware {
             authSessionController: widget.authSessionController,
             appVersion: widget.config.appVersion,
             syncNotificationService: widget.syncNotificationService,
+            householdController: widget.householdController,
           ),
         ),
         onRealEstateTap: () => _openPage(context, const RealEstatePage()),
@@ -260,6 +269,7 @@ class _DashboardPageState extends State<DashboardPage> with RouteAware {
           authSessionController: widget.authSessionController,
           appVersion: widget.config.appVersion,
           syncNotificationService: widget.syncNotificationService,
+          householdController: widget.householdController,
         ),
       ),
     );

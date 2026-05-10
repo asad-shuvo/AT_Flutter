@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/features/self_signup/application/self_signup_controller.dart';
 import 'package:filip_at_flutter/features/self_signup/presentation/widgets/signup_shared.dart';
 import 'package:flutter/material.dart';
@@ -30,6 +31,7 @@ class _SignupCaptchaViewState extends State<SignupCaptchaView> {
   @override
   Widget build(BuildContext context) {
     final c = widget.controller;
+    final l10n = context.l10n;
     return Column(
       children: [
         Expanded(
@@ -40,9 +42,9 @@ class _SignupCaptchaViewState extends State<SignupCaptchaView> {
                 const SizedBox(height: 24),
                 _buildIllustration(),
                 const SizedBox(height: 20),
-                const Text(
-                  'Submit Captcha',
-                  style: TextStyle(
+                Text(
+                  l10n.tr('tns.submitCaptcha'),
+                  style: const TextStyle(
                     fontFamily: 'Calibri',
                     fontStyle: FontStyle.italic,
                     fontSize: 28,
@@ -51,10 +53,10 @@ class _SignupCaptchaViewState extends State<SignupCaptchaView> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                const Text(
-                  'Enter the captcha code into the box to continue the process.',
+                Text(
+                  l10n.tr('tns.entercaptchaCodeSub'),
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontFamily: 'Calibri',
                     fontSize: 14,
                     color: Color(0xFF7A7A7A),
@@ -109,7 +111,7 @@ class _SignupCaptchaViewState extends State<SignupCaptchaView> {
                     ],
                   ),
                 const SizedBox(height: 12),
-                signupFieldLabel('Captcha *'),
+                signupFieldLabel('${l10n.tr('tns.captcha')} *'),
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _captchaController,
@@ -117,15 +119,17 @@ class _SignupCaptchaViewState extends State<SignupCaptchaView> {
                   onChanged: (_) => setState(() {}),
                   onFieldSubmitted: (_) => _submit(),
                   style: signupInputStyle,
-                  decoration: signupInputDecoration('Enter Captcha'),
+                  decoration: signupInputDecoration(
+                    l10n.tr('tns.setYourEmailPlaceholder2'),
+                  ),
                 ),
                 if (c.isCaptchaInvalid) ...[
                   const SizedBox(height: 8),
-                  const Align(
+                  Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      'Captcha code does not match. Please try again.',
-                      style: TextStyle(
+                      l10n.tr('tns.captchaNotMatchError'),
+                      style: const TextStyle(
                         fontFamily: 'Calibri',
                         fontSize: 12,
                         color: Color(0xFFD91F32),
@@ -138,7 +142,7 @@ class _SignupCaptchaViewState extends State<SignupCaptchaView> {
           ),
         ),
         signupBottomButton(
-          label: 'SUBMIT >',
+          label: '${l10n.tr('tns.submitCaptcha').toUpperCase()} >',
           isEnabled: _captchaController.text.trim().isNotEmpty && !c.isLoading,
           isLoading: c.isLoading,
           onTap: _submit,
@@ -153,11 +157,8 @@ class _SignupCaptchaViewState extends State<SignupCaptchaView> {
       width: 200,
       height: 200,
       fit: BoxFit.contain,
-      errorBuilder: (context, error, stack) => const Icon(
-        Icons.security,
-        size: 80,
-        color: Color(0xFFD91F32),
-      ),
+      errorBuilder: (context, error, stack) =>
+          const Icon(Icons.security, size: 80, color: Color(0xFFD91F32)),
     );
   }
 }

@@ -25,6 +25,7 @@ class SelfSignupController extends ChangeNotifier {
 
   SelfSignupView view = SelfSignupView.emailInput;
   CaptchaTarget captchaTarget = CaptchaTarget.email;
+  String language = 'de-DE';
 
   // Captcha state
   String captchaId = '';
@@ -46,9 +47,18 @@ class SelfSignupController extends ChangeNotifier {
       case SelfSignupView.emailInput:
       case SelfSignupView.emailOtp:
         return 1;
-      default:
+      case SelfSignupView.captchaView:
+        return captchaTarget == CaptchaTarget.email ? 1 : 2;
+      case SelfSignupView.phoneInput:
+      case SelfSignupView.phoneOtp:
         return 2;
+      default:
+        return 3;
     }
+  }
+
+  void setLanguageCode(String languageCode) {
+    language = languageCode == 'de' ? 'de-DE' : 'en-US';
   }
 
   @override
@@ -69,7 +79,7 @@ class SelfSignupController extends ChangeNotifier {
       captchaId = result.id;
       captchaImageBase64 = result.imageBase64;
     } catch (_) {
-      errorMessage = 'Failed to load CAPTCHA. Please try again.';
+      errorMessage = 'SOMETHING_WENT_WRONG';
     } finally {
       isCaptchaLoading = false;
       notifyListeners();
@@ -91,7 +101,7 @@ class SelfSignupController extends ChangeNotifier {
       session.captchaVerificationCode = res.verificationCode;
       return true;
     } catch (_) {
-      errorMessage = 'CAPTCHA verification failed.';
+      errorMessage = 'tns.captchaNotMatchError';
       isLoading = false;
       notifyListeners();
       return false;
@@ -109,13 +119,14 @@ class SelfSignupController extends ChangeNotifier {
       await repository.sendEmailVerificationCode(
         email: session.userEmail,
         captchaVerificationCode: session.captchaVerificationCode,
+        language: language,
       );
       _startOtpTimer();
       view = SelfSignupView.emailOtp;
     } on SelfSignupException catch (e) {
       errorMessage = _mapError(e.code);
     } catch (_) {
-      errorMessage = 'Something went wrong. Please try again.';
+      errorMessage = 'SOMETHING_WENT_WRONG';
     } finally {
       isLoading = false;
       notifyListeners();
@@ -132,12 +143,12 @@ class SelfSignupController extends ChangeNotifier {
       await loadCaptcha();
     } on SelfSignupException catch (e) {
       if (e.code == 'USER_EXIST_FOR_THIS_EMAIL') {
-        errorMessage = 'This email is already registered. Please log in.';
+        errorMessage = 'tns.emailAlreadyTaken';
       } else {
         errorMessage = _mapError(e.code);
       }
     } catch (_) {
-      errorMessage = 'Something went wrong. Please try again.';
+      errorMessage = 'SOMETHING_WENT_WRONG';
     } finally {
       isLoading = false;
       notifyListeners();
@@ -155,13 +166,14 @@ class SelfSignupController extends ChangeNotifier {
       await repository.sendPhoneVerificationCode(
         phoneNumber: phone,
         captchaVerificationCode: session.captchaVerificationCode,
+        language: language,
       );
       _startOtpTimer();
       view = SelfSignupView.phoneOtp;
     } on SelfSignupException catch (e) {
       errorMessage = _mapError(e.code);
     } catch (_) {
-      errorMessage = 'Something went wrong. Please try again.';
+      errorMessage = 'SOMETHING_WENT_WRONG';
     } finally {
       isLoading = false;
       notifyListeners();
@@ -180,7 +192,7 @@ class SelfSignupController extends ChangeNotifier {
     } on SelfSignupException catch (e) {
       errorMessage = _mapError(e.code);
     } catch (_) {
-      errorMessage = 'Something went wrong. Please try again.';
+      errorMessage = 'SOMETHING_WENT_WRONG';
     } finally {
       isLoading = false;
       notifyListeners();
@@ -205,12 +217,14 @@ class SelfSignupController extends ChangeNotifier {
       if (captchaTarget == CaptchaTarget.email) {
         await repository.resendEmailVerificationCode(
           captchaVerificationCode: session.captchaVerificationCode,
+          language: language,
         );
         _startOtpTimer();
         view = SelfSignupView.emailOtp;
       } else {
         await repository.resendPhoneVerificationCode(
           captchaVerificationCode: session.captchaVerificationCode,
+          language: language,
         );
         _startOtpTimer();
         view = SelfSignupView.phoneOtp;
@@ -218,7 +232,7 @@ class SelfSignupController extends ChangeNotifier {
     } on SelfSignupException catch (e) {
       errorMessage = _mapError(e.code);
     } catch (_) {
-      errorMessage = 'Something went wrong. Please try again.';
+      errorMessage = 'SOMETHING_WENT_WRONG';
     } finally {
       isLoading = false;
       notifyListeners();
@@ -265,7 +279,7 @@ class SelfSignupController extends ChangeNotifier {
     } on SelfSignupException catch (e) {
       errorMessage = _mapError(e.code);
     } catch (_) {
-      errorMessage = 'Account creation failed. Please try again.';
+      errorMessage = 'tns.selfSignupFailedMsg';
     } finally {
       isLoading = false;
       notifyListeners();
@@ -290,7 +304,7 @@ class SelfSignupController extends ChangeNotifier {
     } on SelfSignupException catch (e) {
       errorMessage = _mapError(e.code);
     } catch (_) {
-      errorMessage = 'Account creation failed. Please try again.';
+      errorMessage = 'tns.selfSignupFailedMsg';
     } finally {
       isLoading = false;
       notifyListeners();
@@ -330,14 +344,14 @@ class SelfSignupController extends ChangeNotifier {
       case 'EMAIL_VERIFICATION_CODE_INVALID':
       case 'EMAIL_VALIDATE_FAILED':
       case 'PHONE_VALIDATE_FAILED':
-        return 'Invalid verification code.';
+        return 'INVALID_VERIFICATION_CODE';
       case 'EMAIL_VERIFICATION_CODE_SEND_FAILED':
       case 'PHONE_VERIFICATION_CODE_SEND_FAILED':
-        return 'Failed to send verification code.';
+        return 'FAILED_TO_SEND_VERIFICATION_CODE';
       case 'USER_EXIST_FOR_THIS_EMAIL':
-        return 'This email is already registered. Please log in.';
+        return 'tns.emailAlreadyTaken';
       default:
-        return 'Something went wrong. Please try again.';
+        return 'SOMETHING_WENT_WRONG';
     }
   }
 }

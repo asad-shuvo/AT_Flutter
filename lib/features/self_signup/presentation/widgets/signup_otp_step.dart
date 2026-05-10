@@ -1,3 +1,4 @@
+import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/features/self_signup/application/self_signup_controller.dart';
 import 'package:filip_at_flutter/features/self_signup/presentation/widgets/signup_shared.dart';
 import 'package:flutter/material.dart';
@@ -38,9 +39,13 @@ class _SignupOtpStepState extends State<SignupOtpStep> {
   @override
   Widget build(BuildContext context) {
     final c = widget.controller;
+    final l10n = context.l10n;
     final maskedContact = widget.isEmail
         ? c.session.userEmail
         : c.session.userPhoneNumber;
+    final bodyKey = widget.isEmail
+        ? 'tns.pleaseEnter4DigitSecurityCodeSentToYourEmail'
+        : 'tns.pleaseEnter4DigitSecurityCodeSentToYourMobileNo';
 
     return Column(
       children: [
@@ -54,7 +59,9 @@ class _SignupOtpStepState extends State<SignupOtpStep> {
                 _buildIllustration(),
                 const SizedBox(height: 12),
                 Text(
-                  widget.isEmail ? 'Email Verification' : 'Phone Number Verification',
+                  widget.isEmail
+                      ? l10n.tr('tns.emailVerification')
+                      : l10n.tr('tns.phoneVerification'),
                   style: const TextStyle(
                     fontFamily: 'Calibri',
                     fontStyle: FontStyle.italic,
@@ -65,8 +72,7 @@ class _SignupOtpStepState extends State<SignupOtpStep> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Please enter the 4 digit security code sent to your '
-                  '${widget.isEmail ? 'email address' : 'mobile no.'} $maskedContact',
+                  '${l10n.tr(bodyKey)} $maskedContact',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontFamily: 'Calibri',
@@ -116,9 +122,9 @@ class _SignupOtpStepState extends State<SignupOtpStep> {
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    const Text(
-                      'TIME LEFT  ',
-                      style: TextStyle(
+                    Text(
+                      '${l10n.tr('tns.timeLeft')}  ',
+                      style: const TextStyle(
                         fontFamily: 'Calibri',
                         fontSize: 13,
                         color: Color(0xFF8B8B8B),
@@ -142,7 +148,9 @@ class _SignupOtpStepState extends State<SignupOtpStep> {
           ),
         ),
         signupBottomButton(
-          label: widget.isEmail ? 'VERIFY >' : 'CONTINUE >',
+          label: widget.isEmail
+              ? '${l10n.tr('tns.verify').toUpperCase()} >'
+              : '${l10n.tr('tns.continue').toUpperCase()} >',
           isEnabled: _otpController.text.trim().length == 4 && !c.isLoading,
           isLoading: c.isLoading,
           onTap: _verify,
@@ -170,11 +178,12 @@ class _SignupOtpStepState extends State<SignupOtpStep> {
 
   Widget _buildResendButton(SelfSignupController c) {
     final enabled = c.canResend;
+    final l10n = context.l10n;
     return GestureDetector(
       onTap: enabled
           ? () => c.showResendCaptcha(
-                widget.isEmail ? CaptchaTarget.email : CaptchaTarget.phone,
-              )
+              widget.isEmail ? CaptchaTarget.email : CaptchaTarget.phone,
+            )
           : null,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -192,7 +201,7 @@ class _SignupOtpStepState extends State<SignupOtpStep> {
             ),
             const SizedBox(width: 4),
             Text(
-              'RESEND NOW',
+              l10n.tr('tns.resendNow'),
               style: TextStyle(
                 fontFamily: 'Calibri',
                 fontSize: 12,

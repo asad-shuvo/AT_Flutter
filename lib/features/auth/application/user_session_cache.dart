@@ -18,6 +18,7 @@ class UserSessionData {
     required this.email,
     required this.phoneNumber,
     required this.avatarColorValue,
+    required this.profileImageUrl,
   });
 
   final String accessToken;
@@ -28,6 +29,7 @@ class UserSessionData {
   final String email;
   final String phoneNumber;
   final int avatarColorValue;
+  final String? profileImageUrl;
 }
 
 class UserSessionCache {
@@ -73,7 +75,7 @@ class UserSessionCache {
       body: <String, dynamic>{
         'EntityName': 'Person',
         'Text':
-            'Select <ItemId,CustomerId,DisplayName,Email,PhoneNumber,ColorCode>from<Person>where<ProposedUserId=__eql($userId)>pageNumber=<0>pageSize=<1>',
+            'Select <ItemId,CustomerId,DisplayName,Email,PhoneNumber,ColorCode,ProfileImage,ProfileImageId>from<Person>where<ProposedUserId=__eql($userId)>pageNumber=<0>pageSize=<1>',
         'ExcludeCount': true,
       },
       headers: <String, String>{
@@ -118,6 +120,9 @@ class UserSessionCache {
       avatarColorValue: _parseColorHex(
         _readString(data['ColorCode']),
         fallback: 0xFF3BAF8E,
+      ),
+      profileImageUrl: _apiClient.resolveProfileImageUrl(
+        _readString(data['ProfileImage']) ?? _readString(data['ProfileImageId']),
       ),
     );
   }

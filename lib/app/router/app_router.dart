@@ -78,6 +78,7 @@ class AppRouter {
             notificationsRepository: services.notificationsRepository,
             authSessionController: services.authSessionController,
             syncNotificationService: services.syncNotificationService,
+            householdController: services.householdController,
           ),
           settings: settings,
         );

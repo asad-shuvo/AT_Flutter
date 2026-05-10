@@ -23,6 +23,7 @@ class ContractsHouseholdController extends ChangeNotifier {
   List<ContractsHouseholdMember> get businessMembers =>
       List<ContractsHouseholdMember>.unmodifiable(_businessMembers);
 
+  bool get isInitialized => _householdMembers.isNotEmpty;
   bool get hasBusinessMembers => _businessMembers.isNotEmpty;
   bool get shouldShowFilter =>
       _householdMembers.length > 1 || _businessMembers.isNotEmpty;
@@ -62,11 +63,44 @@ class ContractsHouseholdController extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
+    // Preserve selection across notification-triggered reloads (NativeScript parity:
+    // _selectedHouseholdData BehaviorSubject survives re-fetch and restores IsSelected).
+    final bool isReload =
+        _householdMembers.isNotEmpty || _businessMembers.isNotEmpty;
+    final Set<String> savedHouseholdIds = isReload
+        ? _householdMembers
+            .where((m) => m.isSelected)
+            .map((m) => m.personId)
+            .toSet()
+        : const <String>{};
+    final Set<String> savedBusinessIds = isReload
+        ? _businessMembers
+            .where((m) => m.isSelected)
+            .map((m) => m.personId)
+            .toSet()
+        : const <String>{};
+
     try {
       final householdData = await _contractsRepository.fetchHouseholdData();
       if (householdData != null) {
-        _householdMembers = householdData.householdMembers;
-        _businessMembers = householdData.businessMembers;
+        if (isReload) {
+          // Restore selection: current user always selected (NativeScript: isLoggedInUser → true).
+          _householdMembers = householdData.householdMembers
+              .map((m) => m.copyWith(
+                    isSelected: m.isCurrentUser
+                        ? true
+                        : savedHouseholdIds.contains(m.personId),
+                  ))
+              .toList(growable: false);
+          _businessMembers = householdData.businessMembers
+              .map((m) => m.copyWith(
+                    isSelected: savedBusinessIds.contains(m.personId),
+                  ))
+              .toList(growable: false);
+        } else {
+          _householdMembers = householdData.householdMembers;
+          _businessMembers = householdData.businessMembers;
+        }
       }
     } catch (_) {
       _householdMembers = const <ContractsHouseholdMember>[];

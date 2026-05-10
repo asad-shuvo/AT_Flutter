@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'package:filip_at_flutter/features/auth/application/auth_session_controller.dart';
 import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/features/chat/presentation/chat_page.dart';
@@ -34,6 +34,7 @@ class ContractsPage extends StatefulWidget {
     required this.authSessionController,
     required this.appVersion,
     required this.syncNotificationService,
+    required this.householdController,
   });
 
   final ContractsRepository contractsRepository;
@@ -42,6 +43,7 @@ class ContractsPage extends StatefulWidget {
   final AuthSessionController authSessionController;
   final String appVersion;
   final SyncNotificationService syncNotificationService;
+  final ContractsHouseholdController householdController;
 
   @override
   State<ContractsPage> createState() => _ContractsPageState();
@@ -50,42 +52,43 @@ class ContractsPage extends StatefulWidget {
 class _ContractsPageState extends State<ContractsPage> {
   int _activeContractTab = 0;
   late final Future<UserProfile?> _userProfileFuture;
-  late final ContractsHouseholdController _householdController;
   late Future<int> _unreadNotificationsFuture;
   late StreamSubscription<Map<String, dynamic>> _contractSyncSubscription;
-  late StreamSubscription<Map<String, dynamic>> _syncCustomerContractSubscription;
+
+  ContractsHouseholdController get _householdController =>
+      widget.householdController;
 
   @override
   void initState() {
     super.initState();
     _userProfileFuture = widget.dashboardRepository.fetchUserProfile();
-    _householdController = ContractsHouseholdController(
-      contractsRepository: widget.contractsRepository,
-    )..load();
-    _unreadNotificationsFuture = widget.notificationsRepository
-        .fetchUnreadCount();
+    _unreadNotificationsFuture =
+        widget.notificationsRepository.fetchUnreadCount();
 
-    _contractSyncSubscription = widget.syncNotificationService.contractSyncCompleted.stream.listen((event) {
-      if (!mounted) return;
+    // Bootstrap loads household data on auth + notifications.
+    // Only load here if somehow not yet initialized (e.g. deep-link before auth listener fires).
+    if (!_householdController.isInitialized) {
       _householdController.load();
-      if (_activeContractTab != 0 && !_shouldSkipContractSyncSnackbar(event)) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.l10n.tr('CONTRACT_SYNC_COMPLETED'))),
-        );
-      }
-    });
+    }
 
-    _syncCustomerContractSubscription = widget.syncNotificationService.synccustomercontract.stream.listen((_) {
-      if (!mounted) return;
-      _householdController.load();
-    });
+    _contractSyncSubscription =
+        widget.syncNotificationService.contractSyncCompleted.stream.listen(
+      (event) {
+        if (!mounted) return;
+        if (_activeContractTab != 0 &&
+            !_shouldSkipContractSyncSnackbar(event)) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text(context.l10n.tr('CONTRACT_SYNC_COMPLETED'))),
+          );
+        }
+      },
+    );
   }
 
   @override
   void dispose() {
-    _householdController.dispose();
     _contractSyncSubscription.cancel();
-    _syncCustomerContractSubscription.cancel();
     super.dispose();
   }
 
@@ -107,6 +110,7 @@ class _ContractsPageState extends State<ContractsPage> {
           authSessionController: widget.authSessionController,
           appVersion: widget.appVersion,
           syncNotificationService: widget.syncNotificationService,
+          householdController: widget.householdController,
         ),
       ),
     );
@@ -177,6 +181,18 @@ class _ContractsPageState extends State<ContractsPage> {
     return personIds.join('|');
   }
 
+  Map<String, ContractsHouseholdMember> get _ownerMembersByPersonId {
+    final members = <ContractsHouseholdMember>[
+      ..._householdController.householdMembers,
+      ..._householdController.businessMembers,
+    ];
+    final map = <String, ContractsHouseholdMember>{};
+    for (final member in members) {
+      map[member.personId] = member;
+    }
+    return map;
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -186,8 +202,12 @@ class _ContractsPageState extends State<ContractsPage> {
       drawer: AppSideDrawer(
         userProfileFuture: _userProfileFuture,
         dashboardRepository: widget.dashboardRepository,
+        contractsRepository: widget.contractsRepository,
+        notificationsRepository: widget.notificationsRepository,
         authSessionController: widget.authSessionController,
         appVersion: widget.appVersion,
+        syncNotificationService: widget.syncNotificationService,
+        householdController: widget.householdController,
       ),
       body: SafeArea(
         child: AnimatedBuilder(
@@ -220,6 +240,7 @@ class _ContractsPageState extends State<ContractsPage> {
                     contractsRepository: widget.contractsRepository,
                     syncNotificationService: widget.syncNotificationService,
                     selectedPersonIds: _householdController.selectedPersonIds,
+                    ownerMembersByPersonId: _ownerMembersByPersonId,
                     selectionSignature: _selectionSignature,
                     canAddContracts:
                         _householdController.canOpenAddContractForSelection,
@@ -246,6 +267,7 @@ class _ContractsPageState extends State<ContractsPage> {
                 authSessionController: widget.authSessionController,
                 appVersion: widget.appVersion,
                 syncNotificationService: widget.syncNotificationService,
+                householdController: widget.householdController,
               ),
             ),
           );
@@ -397,7 +419,8 @@ class _MemberAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (member.hasRenderableProfileImage) {
+    final imageUrl = member.resolvedProfileImageUrl;
+    if (imageUrl != null) {
       return Container(
         width: size,
         height: size,
@@ -407,7 +430,7 @@ class _MemberAvatar extends StatelessWidget {
         ),
         clipBehavior: Clip.antiAlias,
         child: Image.network(
-          member.profileImageUrl!,
+          imageUrl,
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) {
             return _MemberAvatarFallback(member: member, size: size);
@@ -949,6 +972,7 @@ class _ContractTabContent extends StatelessWidget {
     required this.contractsRepository,
     required this.syncNotificationService,
     required this.selectedPersonIds,
+    required this.ownerMembersByPersonId,
     required this.selectionSignature,
     required this.canAddContracts,
   });
@@ -957,6 +981,7 @@ class _ContractTabContent extends StatelessWidget {
   final ContractsRepository contractsRepository;
   final SyncNotificationService syncNotificationService;
   final List<String> selectedPersonIds;
+  final Map<String, ContractsHouseholdMember> ownerMembersByPersonId;
   final String selectionSignature;
   final bool canAddContracts;
 
@@ -968,24 +993,28 @@ class _ContractTabContent extends StatelessWidget {
         contractsRepository: contractsRepository,
         syncNotificationService: syncNotificationService,
         personIds: selectedPersonIds,
+        ownerMembersByPersonId: ownerMembersByPersonId,
         canAddContracts: canAddContracts,
       ),
       1 => _NonLifeInsuranceTab(
         key: ValueKey<String>('insure-$selectionSignature'),
         contractsRepository: contractsRepository,
         personIds: selectedPersonIds,
+        ownerMembersByPersonId: ownerMembersByPersonId,
         canAddContracts: canAddContracts,
       ),
       2 => _RetirementTab(
         key: ValueKey<String>('retirement-$selectionSignature'),
         contractsRepository: contractsRepository,
         personIds: selectedPersonIds,
+        ownerMembersByPersonId: ownerMembersByPersonId,
         canAddContracts: canAddContracts,
       ),
       3 => _LoanTab(
         key: ValueKey<String>('loan-$selectionSignature'),
         contractsRepository: contractsRepository,
         personIds: selectedPersonIds,
+        ownerMembersByPersonId: ownerMembersByPersonId,
         canAddContracts: canAddContracts,
       ),
       _ => const SizedBox.shrink(),
@@ -1182,11 +1211,13 @@ class _NonLifeInsuranceTab extends StatefulWidget {
     super.key,
     required this.contractsRepository,
     required this.personIds,
+    required this.ownerMembersByPersonId,
     required this.canAddContracts,
   });
 
   final ContractsRepository contractsRepository;
   final List<String> personIds;
+  final Map<String, ContractsHouseholdMember> ownerMembersByPersonId;
   final bool canAddContracts;
 
   @override
@@ -1420,6 +1451,8 @@ class _NonLifeInsuranceTabState extends State<_NonLifeInsuranceTab> {
                           child: _InsureContractCard(
                             contract: contractsData.contracts[index],
                             currentPersonId: contractsData.currentPersonId,
+                            ownerMembersByPersonId:
+                                widget.ownerMembersByPersonId,
                             formatCurrency: _formatCurrency,
                             formatDate: _formatDate,
                             formatType: _formatType,
@@ -1543,11 +1576,13 @@ class _RetirementTab extends StatefulWidget {
     super.key,
     required this.contractsRepository,
     required this.personIds,
+    required this.ownerMembersByPersonId,
     required this.canAddContracts,
   });
 
   final ContractsRepository contractsRepository;
   final List<String> personIds;
+  final Map<String, ContractsHouseholdMember> ownerMembersByPersonId;
   final bool canAddContracts;
 
   @override
@@ -1787,6 +1822,8 @@ class _RetirementTabState extends State<_RetirementTab> {
                           child: _InsureContractCard(
                             contract: contractsData.contracts[index],
                             currentPersonId: contractsData.currentPersonId,
+                            ownerMembersByPersonId:
+                                widget.ownerMembersByPersonId,
                             formatCurrency: _formatCurrency,
                             formatDate: _formatDate,
                             formatType: _formatType,
@@ -1912,12 +1949,14 @@ class _InvestmentTab extends StatefulWidget {
     required this.contractsRepository,
     required this.syncNotificationService,
     required this.personIds,
+    required this.ownerMembersByPersonId,
     required this.canAddContracts,
   });
 
   final ContractsRepository contractsRepository;
   final SyncNotificationService syncNotificationService;
   final List<String> personIds;
+  final Map<String, ContractsHouseholdMember> ownerMembersByPersonId;
   final bool canAddContracts;
 
   @override
@@ -1929,11 +1968,13 @@ class _LoanTab extends StatefulWidget {
     super.key,
     required this.contractsRepository,
     required this.personIds,
+    required this.ownerMembersByPersonId,
     required this.canAddContracts,
   });
 
   final ContractsRepository contractsRepository;
   final List<String> personIds;
+  final Map<String, ContractsHouseholdMember> ownerMembersByPersonId;
   final bool canAddContracts;
 
   @override
@@ -2172,6 +2213,8 @@ class _LoanTabState extends State<_LoanTab> {
                           child: _InsureContractCard(
                             contract: contractsData.contracts[index],
                             currentPersonId: contractsData.currentPersonId,
+                            ownerMembersByPersonId:
+                                widget.ownerMembersByPersonId,
                             formatCurrency: _formatCurrency,
                             formatDate: _formatDate,
                             formatType: _formatType,
@@ -2713,6 +2756,8 @@ class _InvestmentTabState extends State<_InvestmentTab> {
                           child: _InvestmentContractCard(
                             contract: contractsData.contracts[index],
                             currentPersonId: contractsData.currentPersonId,
+                            ownerMembersByPersonId:
+                                widget.ownerMembersByPersonId,
                             formatCurrency: _formatCurrency,
                             formatDate: _formatDate,
                             formatInvestmentType: _formatInvestmentType,
@@ -3114,6 +3159,7 @@ class _InvestmentContractCard extends StatelessWidget {
   const _InvestmentContractCard({
     required this.contract,
     required this.currentPersonId,
+    required this.ownerMembersByPersonId,
     required this.formatCurrency,
     required this.formatDate,
     required this.formatInvestmentType,
@@ -3124,6 +3170,7 @@ class _InvestmentContractCard extends StatelessWidget {
 
   final InvestmentContract contract;
   final String currentPersonId;
+  final Map<String, ContractsHouseholdMember> ownerMembersByPersonId;
   final String Function(double value) formatCurrency;
   final String Function(DateTime? value) formatDate;
   final String Function(String? value) formatInvestmentType;
@@ -3211,13 +3258,7 @@ class _InvestmentContractCard extends StatelessWidget {
                           ),
                           const Padding(
                             padding: EdgeInsets.symmetric(horizontal: 8),
-                            child: Text(
-                              'â€¢',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Color(0xFFB6B6B6),
-                              ),
-                            ),
+                            child: _ContractTypeDot(),
                           ),
                           Text(
                             formatDate(contract.displayDate),
@@ -3256,7 +3297,10 @@ class _InvestmentContractCard extends StatelessWidget {
             ),
             child: Row(
               children: [
-                _PartnerAvatar(label: contract.partnerName),
+                _ContractOwnerAvatars(
+                  ownerPersonIds: _resolveOwnerPersonIds(),
+                  ownerMembersByPersonId: ownerMembersByPersonId,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -3286,6 +3330,14 @@ class _InvestmentContractCard extends StatelessWidget {
     ));
   }
 
+  List<String> _resolveOwnerPersonIds() {
+    final personId = contract.personId?.trim();
+    if (personId == null || personId.isEmpty) {
+      return const <String>[];
+    }
+    return <String>[personId];
+  }
+
   String _displayPartnerName(String? partnerName) {
     if (partnerName == null ||
         partnerName.trim().isEmpty ||
@@ -3300,6 +3352,7 @@ class _InsureContractCard extends StatelessWidget {
   const _InsureContractCard({
     required this.contract,
     required this.currentPersonId,
+    required this.ownerMembersByPersonId,
     required this.formatCurrency,
     required this.formatDate,
     required this.formatType,
@@ -3311,6 +3364,7 @@ class _InsureContractCard extends StatelessWidget {
 
   final InsureContract contract;
   final String currentPersonId;
+  final Map<String, ContractsHouseholdMember> ownerMembersByPersonId;
   final String Function(double value) formatCurrency;
   final String Function(DateTime? value) formatDate;
   final String Function(String? value) formatType;
@@ -3395,13 +3449,7 @@ class _InsureContractCard extends StatelessWidget {
                           ),
                           const Padding(
                             padding: EdgeInsets.symmetric(horizontal: 8),
-                            child: Text(
-                              'â€¢',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Color(0xFFB6B6B6),
-                              ),
-                            ),
+                            child: _ContractTypeDot(),
                           ),
                           Text(
                             endDatePrefix == null
@@ -3442,7 +3490,10 @@ class _InsureContractCard extends StatelessWidget {
             ),
             child: Row(
               children: [
-                _PartnerAvatar(label: contract.partnerName),
+                _ContractOwnerAvatars(
+                  ownerPersonIds: _resolveOwnerPersonIds(),
+                  ownerMembersByPersonId: ownerMembersByPersonId,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -3472,6 +3523,21 @@ class _InsureContractCard extends StatelessWidget {
         ],
       ),
     ));
+  }
+
+  List<String> _resolveOwnerPersonIds() {
+    final owners = contract.insuredPersons
+        .map((personId) => personId.trim())
+        .where((personId) => personId.isNotEmpty)
+        .toList(growable: false);
+    if (owners.isNotEmpty) {
+      return owners;
+    }
+    final personId = contract.personId?.trim();
+    if (personId == null || personId.isEmpty) {
+      return const <String>[];
+    }
+    return <String>[personId];
   }
 
   String _displayPartnerName(String? partnerName) {
@@ -3592,32 +3658,124 @@ class _ContractActionSheetItem extends StatelessWidget {
   }
 }
 
-class _PartnerAvatar extends StatelessWidget {
-  const _PartnerAvatar({required this.label});
-
-  final String? label;
+class _ContractTypeDot extends StatelessWidget {
+  const _ContractTypeDot();
 
   @override
   Widget build(BuildContext context) {
-    final initial = (label == null || label!.trim().isEmpty || label == '-')
-        ? '?'
-        : label!.trim()[0].toUpperCase();
+    return Container(
+      width: 6,
+      height: 6,
+      decoration: const BoxDecoration(
+        color: Color(0xFFB6B6B6),
+        shape: BoxShape.circle,
+      ),
+    );
+  }
+}
+
+class _ContractOwnerAvatars extends StatelessWidget {
+  const _ContractOwnerAvatars({
+    required this.ownerPersonIds,
+    required this.ownerMembersByPersonId,
+  });
+
+  final List<String> ownerPersonIds;
+  final Map<String, ContractsHouseholdMember> ownerMembersByPersonId;
+
+  @override
+  Widget build(BuildContext context) {
+    if (ownerPersonIds.isEmpty) {
+      return const _ContractOwnerAvatar(member: null, fallbackInitial: '?');
+    }
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List<Widget>.generate(ownerPersonIds.length, (index) {
+        final personId = ownerPersonIds[index];
+        final member = ownerMembersByPersonId[personId];
+        final fallbackInitial = member?.fallbackInitial ?? '?';
+        final marginRight = index == ownerPersonIds.length - 1 ? 0.0 : -6.0;
+        return Container(
+          margin: EdgeInsets.only(right: marginRight),
+          child: _ContractOwnerAvatar(
+            member: member,
+            fallbackInitial: fallbackInitial,
+          ),
+        );
+      }),
+    );
+  }
+}
+
+class _ContractOwnerAvatar extends StatelessWidget {
+  const _ContractOwnerAvatar({
+    required this.member,
+    required this.fallbackInitial,
+  });
+
+  final ContractsHouseholdMember? member;
+  final String fallbackInitial;
+
+  @override
+  Widget build(BuildContext context) {
+    final imageUrl = member?.resolvedProfileImageUrl;
+    if (imageUrl != null) {
+      return Container(
+        width: 24,
+        height: 24,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white, width: 1),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Image.network(
+          imageUrl,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return _ContractOwnerAvatarFallback(
+              color: member?.avatarColor ?? const Color(0xFFD82034),
+              fallbackInitial: fallbackInitial,
+            );
+          },
+        ),
+      );
+    }
+
+    return _ContractOwnerAvatarFallback(
+      color: member?.avatarColor ?? const Color(0xFFD82034),
+      fallbackInitial: fallbackInitial,
+    );
+  }
+}
+
+class _ContractOwnerAvatarFallback extends StatelessWidget {
+  const _ContractOwnerAvatarFallback({
+    required this.color,
+    required this.fallbackInitial,
+  });
+
+  final Color color;
+  final String fallbackInitial;
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       width: 24,
       height: 24,
-      decoration: const BoxDecoration(
-        color: Color(0xFF00B67A),
+      decoration: BoxDecoration(
+        color: color,
         shape: BoxShape.circle,
+        border: Border.all(color: Colors.white, width: 1),
       ),
-      child: Center(
-        child: Text(
-          initial,
-          style: const TextStyle(
-            fontSize: 11,
-            fontFamily: 'Calibri',
-            fontWeight: FontWeight.w700,
-            color: Colors.white,
-          ),
+      alignment: Alignment.center,
+      child: Text(
+        fallbackInitial,
+        style: const TextStyle(
+          fontSize: 11,
+          fontFamily: 'Calibri',
+          fontWeight: FontWeight.w700,
+          color: Colors.white,
         ),
       ),
     );

@@ -1,7 +1,15 @@
+import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/features/self_signup/application/self_signup_controller.dart';
 import 'package:filip_at_flutter/features/self_signup/data/country_data.dart';
 import 'package:filip_at_flutter/features/self_signup/presentation/widgets/signup_shared.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+const String _termsUrl =
+    'https://www.swisslife-select.at/home/footer/nutzungsbedingungen_filip.html';
+const String _dataProtectionUrl =
+    'https://www.swisslife-select.at/home/footer/datenschutz.html';
 
 const List<String> kSalutations = ['Mr.', 'Mrs.'];
 const List<String> kGenders = ['Male', 'Female', 'Others'];
@@ -35,13 +43,26 @@ class _SignupFullFormStepState extends State<SignupFullFormStep> {
   bool _isPasswordHidden = true;
   bool _isRepeatPasswordHidden = true;
   bool _passwordTouched = false;
+  late final TapGestureRecognizer _termsRecognizer;
+  late final TapGestureRecognizer _dataProtectionRecognizer;
 
   static final _passwordRegex = RegExp(
     r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[-_!*@#$,.;?§%^&+=/]).{6,300}$',
   );
 
   @override
+  void initState() {
+    super.initState();
+    _termsRecognizer = TapGestureRecognizer()
+      ..onTap = () => _openExternalUrl(_termsUrl);
+    _dataProtectionRecognizer = TapGestureRecognizer()
+      ..onTap = () => _openExternalUrl(_dataProtectionUrl);
+  }
+
+  @override
   void dispose() {
+    _termsRecognizer.dispose();
+    _dataProtectionRecognizer.dispose();
     _firstNameCtrl.dispose();
     _lastNameCtrl.dispose();
     _postNominalCtrl.dispose();
@@ -54,11 +75,16 @@ class _SignupFullFormStepState extends State<SignupFullFormStep> {
     super.dispose();
   }
 
+  Future<void> _openExternalUrl(String url) async {
+    await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+  }
+
   bool get _isFormValid {
     if (_salutation == null) return false;
     if (_firstNameCtrl.text.trim().length < 2) return false;
     if (_lastNameCtrl.text.trim().length < 2) return false;
     if (_dateOfBirth == null) return false;
+    if (_postNominalCtrl.text.trim().isEmpty) return false;
     if (_selectedGender == null) return false;
     if (_streetCtrl.text.trim().length < 2) return false;
     if (_cityCtrl.text.trim().length < 2) return false;
@@ -122,6 +148,7 @@ class _SignupFullFormStepState extends State<SignupFullFormStep> {
   @override
   Widget build(BuildContext context) {
     final c = widget.controller;
+    final l10n = context.l10n;
     return Column(
       children: [
         Expanded(
@@ -137,105 +164,127 @@ class _SignupFullFormStepState extends State<SignupFullFormStep> {
                     children: [
                       const SizedBox(height: 20),
                       signupSectionHeader(
-                        'Basic Info',
-                        const Icon(Icons.person_outline,
-                            size: 22, color: Color(0xFFD91F32)),
+                        l10n.tr('tns.basicInfo'),
+                        const Icon(
+                          Icons.person_outline,
+                          size: 22,
+                          color: Color(0xFFD91F32),
+                        ),
                       ),
                       _buildInfoCard(),
                       const SizedBox(height: 16),
                       _buildDropdown(
-                        'Salutation *',
+                        '${l10n.tr('tns.salutation')} *',
                         _salutation,
                         kSalutations,
                         _onSalutationChanged,
                       ),
                       const SizedBox(height: 14),
-                      signupFieldLabel('First Name *'),
+                      signupFieldLabel('${l10n.tr('tns.firstName')} *'),
                       const SizedBox(height: 6),
-                      _textField(_firstNameCtrl, 'First Name'),
+                      _textField(_firstNameCtrl, l10n.tr('tns.firstName')),
                       const SizedBox(height: 14),
-                      signupFieldLabel('Last Name *'),
+                      signupFieldLabel('${l10n.tr('tns.lastName')} *'),
                       const SizedBox(height: 6),
-                      _textField(_lastNameCtrl, 'Last Name'),
+                      _textField(_lastNameCtrl, l10n.tr('tns.lastName')),
                       const SizedBox(height: 14),
-                      signupFieldLabel('Date of Birth *'),
+                      signupFieldLabel('${l10n.tr('tns.dateofBirth')} *'),
                       const SizedBox(height: 6),
                       _buildDateField(),
                       const SizedBox(height: 14),
-                      signupFieldLabel('Post Nominal'),
+                      signupFieldLabel('${l10n.tr('tns.postNominal')} *'),
                       const SizedBox(height: 6),
-                      _textField(_postNominalCtrl, 'Post Nominal'),
+                      _textField(_postNominalCtrl, l10n.tr('tns.postNominal')),
                       const SizedBox(height: 14),
-                      signupFieldLabel('Designation'),
+                      signupFieldLabel(l10n.tr('tns.designation')),
                       const SizedBox(height: 6),
-                      _textField(_designationCtrl, 'Designation'),
+                      _textField(_designationCtrl, l10n.tr('tns.designation')),
                       const SizedBox(height: 14),
-                      signupFieldLabel('Select Gender *'),
+                      signupFieldLabel('${l10n.tr('tns.selectGender')} *'),
                       const SizedBox(height: 8),
                       _buildGenderRow(),
                       signupSectionDivider(),
                       signupSectionHeader(
-                        'Address',
-                        const Icon(Icons.home_outlined,
-                            size: 22, color: Color(0xFFD91F32)),
+                        l10n.tr('tns.address'),
+                        const Icon(
+                          Icons.home_outlined,
+                          size: 22,
+                          color: Color(0xFFD91F32),
+                        ),
                       ),
-                      signupFieldLabel('Street *'),
+                      signupFieldLabel('${l10n.tr('tns.street')} *'),
                       const SizedBox(height: 6),
-                      _textField(_streetCtrl, 'Street'),
+                      _textField(_streetCtrl, l10n.tr('tns.street')),
                       const SizedBox(height: 14),
-                      signupFieldLabel('City/State *'),
+                      signupFieldLabel('${l10n.tr('tns.cityState')} *'),
                       const SizedBox(height: 6),
-                      _textField(_cityCtrl, 'City/State'),
+                      _textField(_cityCtrl, l10n.tr('tns.cityState')),
                       const SizedBox(height: 14),
-                      signupFieldLabel('Postal / Zip Code *'),
+                      signupFieldLabel('${l10n.tr('tns.postalZipCode')} *'),
                       const SizedBox(height: 6),
-                      _textField(_postalCtrl, 'Postal / Zip Code',
-                          inputType: TextInputType.number),
+                      _textField(
+                        _postalCtrl,
+                        l10n.tr('tns.postalZipCode'),
+                        inputType: TextInputType.number,
+                      ),
                       const SizedBox(height: 14),
                       _buildCountryDropdown(
-                        'Country *',
+                        '${l10n.tr('tns.country')} *',
                         _selectedCountryCode,
                         (v) => setState(() => _selectedCountryCode = v),
                       ),
                       const SizedBox(height: 14),
                       _buildCountryDropdown(
-                        'Nationality *',
+                        '${l10n.tr('tns.nationality')} *',
                         _selectedNationalityCode,
                         (v) => setState(() => _selectedNationalityCode = v),
                       ),
                       signupSectionDivider(),
                       signupSectionHeader(
-                        'Password',
-                        const Icon(Icons.lock_outline,
-                            size: 22, color: Color(0xFFD91F32)),
+                        l10n.tr('tns.password'),
+                        const Icon(
+                          Icons.lock_outline,
+                          size: 22,
+                          color: Color(0xFFD91F32),
+                        ),
                       ),
-                      signupFieldLabel('Password *'),
+                      signupFieldLabel('${l10n.tr('tns.password')} *'),
                       const SizedBox(height: 6),
-                      _passwordField(_passwordCtrl, 'Password',
-                          _isPasswordHidden, () {
-                        setState(() => _isPasswordHidden = !_isPasswordHidden);
-                      }),
+                      _passwordField(
+                        _passwordCtrl,
+                        l10n.tr('tns.password'),
+                        _isPasswordHidden,
+                        () {
+                          setState(
+                            () => _isPasswordHidden = !_isPasswordHidden,
+                          );
+                        },
+                      ),
                       if (_passwordTouched &&
                           !_passwordRegex.hasMatch(_passwordCtrl.text))
                         _buildPasswordHint(),
                       const SizedBox(height: 14),
-                      signupFieldLabel('Repeat Password *'),
+                      signupFieldLabel('${l10n.tr('tns.repeatPassword')} *'),
                       const SizedBox(height: 6),
                       _passwordField(
-                          _repeatPasswordCtrl,
-                          'Repeat Password',
-                          _isRepeatPasswordHidden, () {
-                        setState(() =>
-                            _isRepeatPasswordHidden = !_isRepeatPasswordHidden);
-                      }),
+                        _repeatPasswordCtrl,
+                        l10n.tr('tns.repeatPassword'),
+                        _isRepeatPasswordHidden,
+                        () {
+                          setState(
+                            () => _isRepeatPasswordHidden =
+                                !_isRepeatPasswordHidden,
+                          );
+                        },
+                      ),
                       if (_passwordTouched &&
                           _repeatPasswordCtrl.text.isNotEmpty &&
                           _passwordCtrl.text != _repeatPasswordCtrl.text)
-                        const Padding(
-                          padding: EdgeInsets.only(top: 4),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
                           child: Text(
-                            'Passwords do not match.',
-                            style: TextStyle(
+                            l10n.tr('tns.retypePasswordMsg'),
+                            style: const TextStyle(
                               fontFamily: 'Calibri',
                               fontSize: 12,
                               color: Color(0xFFD91F32),
@@ -255,7 +304,7 @@ class _SignupFullFormStepState extends State<SignupFullFormStep> {
           ),
         ),
         signupBottomButton(
-          label: 'COMPLETE PROFILE',
+          label: l10n.tr('tns.completeProfile').toUpperCase(),
           isEnabled: _isFormValid && !c.isLoading,
           isLoading: c.isLoading,
           onTap: _submit,
@@ -265,11 +314,12 @@ class _SignupFullFormStepState extends State<SignupFullFormStep> {
   }
 
   Widget _buildPasswordHint() {
-    return const Padding(
-      padding: EdgeInsets.only(top: 4),
+    final l10n = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
       child: Text(
-        'Password must contain at least 6 characters. Must include one UPPERCASE letter, one lowercase letter, one special character and one digit.',
-        style: TextStyle(
+        l10n.tr('tns.passwordFromatMsg'),
+        style: const TextStyle(
           fontFamily: 'Calibri',
           fontSize: 12,
           color: Color(0xFFD91F32),
@@ -280,6 +330,7 @@ class _SignupFullFormStepState extends State<SignupFullFormStep> {
   }
 
   Widget _buildAlmostFinishedHeader() {
+    final l10n = context.l10n;
     return Container(
       color: Colors.white,
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
@@ -289,10 +340,10 @@ class _SignupFullFormStepState extends State<SignupFullFormStep> {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 Text(
-                  'Almost Finished!',
-                  style: TextStyle(
+                  l10n.tr('tns.almostFinished'),
+                  style: const TextStyle(
                     fontFamily: 'Calibri',
                     fontStyle: FontStyle.italic,
                     fontSize: 22,
@@ -300,10 +351,10 @@ class _SignupFullFormStepState extends State<SignupFullFormStep> {
                     color: Color(0xFF2D2D2D),
                   ),
                 ),
-                SizedBox(height: 6),
+                const SizedBox(height: 6),
                 Text(
-                  'Please provide the information and setup password below. It takes less than 30 sec.',
-                  style: TextStyle(
+                  l10n.tr('tns.formSubtitle'),
+                  style: const TextStyle(
                     fontFamily: 'Calibri',
                     fontSize: 13,
                     color: Color(0xFF7A7A7A),
@@ -328,8 +379,11 @@ class _SignupFullFormStepState extends State<SignupFullFormStep> {
                   border: Border.all(color: const Color(0xFFE0E0E0)),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(Icons.description_outlined,
-                    size: 32, color: Color(0xFFD91F32)),
+                child: const Icon(
+                  Icons.description_outlined,
+                  size: 32,
+                  color: Color(0xFFD91F32),
+                ),
               ),
             ),
           ),
@@ -339,6 +393,7 @@ class _SignupFullFormStepState extends State<SignupFullFormStep> {
   }
 
   Widget _buildInfoCard() {
+    final l10n = context.l10n;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -349,28 +404,40 @@ class _SignupFullFormStepState extends State<SignupFullFormStep> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Email Address',
-            style: TextStyle(
-                fontFamily: 'Calibri', fontSize: 12, color: Color(0xFF8B8B8B)),
+          Text(
+            l10n.tr('tns.emailAddress'),
+            style: const TextStyle(
+              fontFamily: 'Calibri',
+              fontSize: 12,
+              color: Color(0xFF8B8B8B),
+            ),
           ),
           const SizedBox(height: 2),
           Text(
             widget.controller.session.userEmail,
             style: const TextStyle(
-                fontFamily: 'Calibri', fontSize: 15, color: Color(0xFF2D2D2D)),
+              fontFamily: 'Calibri',
+              fontSize: 15,
+              color: Color(0xFF2D2D2D),
+            ),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Phone Number',
-            style: TextStyle(
-                fontFamily: 'Calibri', fontSize: 12, color: Color(0xFF8B8B8B)),
+          Text(
+            l10n.tr('tns.phoneNumber'),
+            style: const TextStyle(
+              fontFamily: 'Calibri',
+              fontSize: 12,
+              color: Color(0xFF8B8B8B),
+            ),
           ),
           const SizedBox(height: 2),
           Text(
             widget.controller.session.userPhoneNumber,
             style: const TextStyle(
-                fontFamily: 'Calibri', fontSize: 15, color: Color(0xFF2D2D2D)),
+              fontFamily: 'Calibri',
+              fontSize: 15,
+              color: Color(0xFF2D2D2D),
+            ),
           ),
         ],
       ),
@@ -417,11 +484,11 @@ class _SignupFullFormStepState extends State<SignupFullFormStep> {
   }
 
   Widget _buildDateField() {
+    final l10n = context.l10n;
     return GestureDetector(
       onTap: _pickDate,
       child: Container(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         decoration: BoxDecoration(
           border: Border.all(color: const Color(0xFFC9C9C9), width: 1.0),
           borderRadius: BorderRadius.circular(6),
@@ -432,7 +499,7 @@ class _SignupFullFormStepState extends State<SignupFullFormStep> {
               child: Text(
                 _dateOfBirth != null
                     ? '${_dateOfBirth!.day.toString().padLeft(2, '0')}/${_dateOfBirth!.month.toString().padLeft(2, '0')}/${_dateOfBirth!.year}'
-                    : 'Date of Birth',
+                    : l10n.tr('tns.dateofBirth'),
                 style: TextStyle(
                   fontFamily: 'Calibri',
                   fontSize: 15,
@@ -442,8 +509,11 @@ class _SignupFullFormStepState extends State<SignupFullFormStep> {
                 ),
               ),
             ),
-            const Icon(Icons.calendar_today_outlined,
-                size: 18, color: Color(0xFF888888)),
+            const Icon(
+              Icons.calendar_today_outlined,
+              size: 18,
+              color: Color(0xFF888888),
+            ),
           ],
         ),
       ),
@@ -451,6 +521,7 @@ class _SignupFullFormStepState extends State<SignupFullFormStep> {
   }
 
   Widget _buildGenderRow() {
+    final l10n = context.l10n;
     return Row(
       children: kGenders
           .map(
@@ -488,7 +559,7 @@ class _SignupFullFormStepState extends State<SignupFullFormStep> {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      g,
+                      _genderLabel(l10n, g),
                       style: const TextStyle(
                         fontFamily: 'Calibri',
                         fontSize: 14,
@@ -504,12 +575,24 @@ class _SignupFullFormStepState extends State<SignupFullFormStep> {
     );
   }
 
+  String _genderLabel(AppLocalizations l10n, String value) {
+    switch (value) {
+      case 'Male':
+        return l10n.tr('tns.male');
+      case 'Female':
+        return l10n.tr('tns.female');
+      default:
+        return l10n.tr('tns.others');
+    }
+  }
+
   Widget _buildDropdown(
     String label,
     String? value,
     List<String> items,
     ValueChanged<String?> onChanged,
   ) {
+    final l10n = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -525,7 +608,7 @@ class _SignupFullFormStepState extends State<SignupFullFormStep> {
               value: value,
               isExpanded: true,
               hint: Text(
-                'Select ${label.replaceAll(' *', '').replaceAll('*', '')}',
+                l10n.tr('tns.selectSalutation'),
                 style: const TextStyle(
                   fontFamily: 'Calibri',
                   fontSize: 15,
@@ -533,17 +616,22 @@ class _SignupFullFormStepState extends State<SignupFullFormStep> {
                 ),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 14),
-              icon: const Icon(Icons.keyboard_arrow_down,
-                  color: Color(0xFF555555)),
+              icon: const Icon(
+                Icons.keyboard_arrow_down,
+                color: Color(0xFF555555),
+              ),
               items: items
                   .map(
                     (e) => DropdownMenuItem(
                       value: e,
-                      child: Text(e,
-                          style: const TextStyle(
-                              fontFamily: 'Calibri',
-                              fontSize: 15,
-                              color: Color(0xFF2D2D2D))),
+                      child: Text(
+                        _salutationLabel(l10n, e),
+                        style: const TextStyle(
+                          fontFamily: 'Calibri',
+                          fontSize: 15,
+                          color: Color(0xFF2D2D2D),
+                        ),
+                      ),
                     ),
                   )
                   .toList(),
@@ -558,12 +646,28 @@ class _SignupFullFormStepState extends State<SignupFullFormStep> {
     );
   }
 
+  String _salutationLabel(AppLocalizations l10n, String value) {
+    switch (value) {
+      case 'Mr.':
+        return l10n.tr('tns.mr');
+      case 'Mrs.':
+        return l10n.tr('tns.mrs');
+      default:
+        return value;
+    }
+  }
+
   // Country/Nationality picker — stores ISO2 code, displays name
   Widget _buildCountryDropdown(
     String label,
     String? selectedCode,
     ValueChanged<String?> onChanged,
   ) {
+    final l10n = context.l10n;
+    final labelText = label.replaceAll(' *', '').replaceAll('*', '');
+    final placeholder = labelText == l10n.tr('tns.country')
+        ? l10n.tr('tns.selectCountry')
+        : l10n.tr('tns.selectNationality');
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -575,8 +679,7 @@ class _SignupFullFormStepState extends State<SignupFullFormStep> {
             onSelect: onChanged,
           ),
           child: Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
             decoration: BoxDecoration(
               border: Border.all(color: const Color(0xFFC9C9C9), width: 1.0),
               borderRadius: BorderRadius.circular(6),
@@ -587,11 +690,11 @@ class _SignupFullFormStepState extends State<SignupFullFormStep> {
                   child: Text(
                     selectedCode != null
                         ? (kAllCountries
-                                .where((c) => c.iso2 == selectedCode)
-                                .firstOrNull
-                                ?.name ??
-                            selectedCode)
-                        : 'Select ${label.replaceAll(' *', '')}',
+                                  .where((c) => c.iso2 == selectedCode)
+                                  .firstOrNull
+                                  ?.name ??
+                              selectedCode)
+                        : placeholder,
                     style: TextStyle(
                       fontFamily: 'Calibri',
                       fontSize: 15,
@@ -601,8 +704,7 @@ class _SignupFullFormStepState extends State<SignupFullFormStep> {
                     ),
                   ),
                 ),
-                const Icon(Icons.keyboard_arrow_down,
-                    color: Color(0xFF555555)),
+                const Icon(Icons.keyboard_arrow_down, color: Color(0xFF555555)),
               ],
             ),
           ),
@@ -633,6 +735,7 @@ class _SignupFullFormStepState extends State<SignupFullFormStep> {
   }
 
   Widget _buildTermsRow() {
+    final l10n = context.l10n;
     return GestureDetector(
       onTap: () => setState(() => _agreedToTerms = !_agreedToTerms),
       child: Row(
@@ -656,10 +759,15 @@ class _SignupFullFormStepState extends State<SignupFullFormStep> {
                 : null,
           ),
           const SizedBox(width: 10),
-          const Text(
-            'I agree to continue.',
-            style: TextStyle(
-                fontFamily: 'Calibri', fontSize: 14, color: Color(0xFF2D2D2D)),
+          Expanded(
+            child: Text(
+              l10n.tr('tns.iagreewiththetermsofuse'),
+              style: const TextStyle(
+                fontFamily: 'Calibri',
+                fontSize: 14,
+                color: Color(0xFF2D2D2D),
+              ),
+            ),
           ),
         ],
       ),
@@ -667,28 +775,29 @@ class _SignupFullFormStepState extends State<SignupFullFormStep> {
   }
 
   Widget _buildTermsText() {
+    final l10n = context.l10n;
     return RichText(
-      text: const TextSpan(
-        style: TextStyle(
+      text: TextSpan(
+        style: const TextStyle(
           fontFamily: 'Calibri',
           fontSize: 12,
           color: Color(0xFF7A7A7A),
           height: 1.5,
         ),
         children: [
-          TextSpan(text: "By clicking on 'Continue/Next' you agree to our "),
+          TextSpan(text: '${l10n.tr('tns.selfSignupAgreeText1')} '),
           TextSpan(
-              text: 'terms of use',
-              style: TextStyle(color: Color(0xFFD91F32))),
+            text: l10n.tr('tns.selfSignupAgreeText2'),
+            style: const TextStyle(color: Color(0xFFD91F32)),
+            recognizer: _termsRecognizer,
+          ),
+          TextSpan(text: ' ${l10n.tr('tns.selfSignupAgreeText3')} '),
           TextSpan(
-              text:
-                  ' and confirm that you have read through the information on '),
-          TextSpan(
-              text: 'data protection',
-              style: TextStyle(color: Color(0xFFD91F32))),
-          TextSpan(
-              text:
-                  '. Please read the terms of use and information on data protection carefully.'),
+            text: l10n.tr('tns.selfSignupAgreeText4'),
+            style: const TextStyle(color: Color(0xFFD91F32)),
+            recognizer: _dataProtectionRecognizer,
+          ),
+          TextSpan(text: '. ${l10n.tr('tns.selfSignupAgreeText5')}'),
         ],
       ),
     );
@@ -723,15 +832,18 @@ class _CountrySelectSheetState extends State<_CountrySelectSheet> {
       _filtered = q.isEmpty
           ? kAllCountries
           : kAllCountries
-              .where((c) =>
-                  c.name.toLowerCase().contains(lower) ||
-                  c.iso2.toLowerCase().contains(lower))
-              .toList();
+                .where(
+                  (c) =>
+                      c.name.toLowerCase().contains(lower) ||
+                      c.iso2.toLowerCase().contains(lower),
+                )
+                .toList();
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return SizedBox(
       height: MediaQuery.of(context).size.height * 0.75,
       child: Column(
@@ -753,13 +865,17 @@ class _CountrySelectSheetState extends State<_CountrySelectSheet> {
               onChanged: _onSearch,
               style: const TextStyle(fontFamily: 'Calibri', fontSize: 14),
               decoration: InputDecoration(
-                hintText: 'Search country...',
+                hintText: l10n.tr('tns.search'),
                 hintStyle: const TextStyle(
-                    fontFamily: 'Calibri',
-                    fontSize: 14,
-                    color: Color(0xFFAAAAAA)),
-                prefixIcon: const Icon(Icons.search,
-                    size: 20, color: Color(0xFFAAAAAA)),
+                  fontFamily: 'Calibri',
+                  fontSize: 14,
+                  color: Color(0xFFAAAAAA),
+                ),
+                prefixIcon: const Icon(
+                  Icons.search,
+                  size: 20,
+                  color: Color(0xFFAAAAAA),
+                ),
                 contentPadding: const EdgeInsets.symmetric(vertical: 10),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -767,8 +883,10 @@ class _CountrySelectSheetState extends State<_CountrySelectSheet> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide:
-                      const BorderSide(color: Color(0xFFD91F32), width: 1.5),
+                  borderSide: const BorderSide(
+                    color: Color(0xFFD91F32),
+                    width: 1.5,
+                  ),
                 ),
               ),
             ),
@@ -787,11 +905,15 @@ class _CountrySelectSheetState extends State<_CountrySelectSheet> {
                   onTap: () => widget.onSelect(country.iso2),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 14),
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
                     child: Row(
                       children: [
-                        Text(country.flagEmoji,
-                            style: const TextStyle(fontSize: 20)),
+                        Text(
+                          country.flagEmoji,
+                          style: const TextStyle(fontSize: 20),
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
@@ -804,8 +926,11 @@ class _CountrySelectSheetState extends State<_CountrySelectSheet> {
                           ),
                         ),
                         if (isSelected)
-                          const Icon(Icons.check,
-                              size: 20, color: Color(0xFFD91F32)),
+                          const Icon(
+                            Icons.check,
+                            size: 20,
+                            color: Color(0xFFD91F32),
+                          ),
                       ],
                     ),
                   ),

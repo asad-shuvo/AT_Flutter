@@ -22,6 +22,7 @@ class DashboardRepository {
       email: session.email,
       phoneNumber: session.phoneNumber,
       avatarColorValue: session.avatarColorValue,
+      profileImageUrl: session.profileImageUrl,
     );
   }
 
@@ -238,10 +239,6 @@ class DashboardRepository {
     final chartData = _readChartData(response);
     final segments = _mapInvestmentSegments(chartData);
 
-    if (segments.isEmpty) {
-      return null;
-    }
-
     final totalValue = segments.fold<double>(
       0,
       (previousValue, segment) => previousValue + segment.value,
@@ -410,7 +407,9 @@ class DashboardRepository {
       displayName: _readString(advisorData['DisplayName']),
       email: _readString(advisorData['Email']),
       phone: _readString(advisorData['Phone']),
-      profileImageUrl: _readString(advisorData['ProfileImageId']),
+      profileImageUrl: _apiClient.resolveProfileImageUrl(
+        _readString(advisorData['ProfileImageId']),
+      ),
       avatarColorValue: _parseColorHex(
         _readString(advisorData['ColorCode']),
         fallback: 0xFF43B883,
