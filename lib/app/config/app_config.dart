@@ -17,6 +17,8 @@ class AppConfig {
     required this.cdnBaseUrl,
     required this.storageServiceUrl,
     required this.dmsServiceUrl,
+    required this.signupServiceUrl,
+    required this.captchaUrl,
     required this.appVersion,
     required this.investmentPushNotificationKey,
   });
@@ -38,6 +40,8 @@ class AppConfig {
       cdnBaseUrl: environment.cdnBaseUrl,
       storageServiceUrl: environment.storageServiceUrl,
       dmsServiceUrl: environment.dmsServiceUrl,
+      signupServiceUrl: environment.signupServiceUrl,
+      captchaUrl: environment.captchaUrl,
       appVersion: environment.appVersion,
       investmentPushNotificationKey: environment.investmentPushNotificationKey,
     );
@@ -56,6 +60,8 @@ class AppConfig {
   final String cdnBaseUrl;
   final String storageServiceUrl;
   final String dmsServiceUrl;
+  final String signupServiceUrl;
+  final String captchaUrl;
   final String appVersion;
   final String investmentPushNotificationKey;
 

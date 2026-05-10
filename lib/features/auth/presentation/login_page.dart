@@ -450,7 +450,8 @@ class _LoginPageState extends State<LoginPage> {
                                     ),
                                   ),
                                   GestureDetector(
-                                    onTap: () {},
+                                    onTap: () => Navigator.of(context)
+                                        .pushNamed(AppRouter.selfSignup),
                                     child: Text(
                                       l10n.tr('login.createNow'),
                                       style: const TextStyle(

@@ -10,6 +10,7 @@ import 'package:filip_at_flutter/features/dashboard/data/dashboard_repository.da
 import 'package:filip_at_flutter/features/notifications/data/notifications_repository.dart';
 import 'package:filip_at_flutter/features/notifications/application/fcm_service.dart';
 import 'package:filip_at_flutter/features/notifications/application/sync_notification_service.dart';
+import 'package:filip_at_flutter/features/self_signup/data/self_signup_repository.dart';
 
 class AppServices {
   const AppServices({
@@ -25,6 +26,7 @@ class AppServices {
     required this.languageController,
     required this.syncNotificationService,
     required this.fcmService,
+    required this.selfSignupRepository,
   });
 
   final ApiClient apiClient;
@@ -39,4 +41,5 @@ class AppServices {
   final AppLanguageController languageController;
   final SyncNotificationService syncNotificationService;
   final FcmService fcmService;
+  final SelfSignupRepository selfSignupRepository;
 }

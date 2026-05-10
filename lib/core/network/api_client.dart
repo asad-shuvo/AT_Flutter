@@ -61,6 +61,50 @@ class ApiClient {
     }
   }
 
+  Future<Map<String, dynamic>> getJson({
+    required String url,
+    Map<String, String> headers = const <String, String>{},
+    bool suppressUnauthorizedHandling = false,
+  }) async {
+    final client = HttpClient();
+    client.connectionTimeout = _requestTimeout;
+
+    try {
+      final request = await client.getUrl(Uri.parse(url));
+      request.headers.set(HttpHeaders.contentTypeHeader, 'application/json');
+
+      for (final entry in headers.entries) {
+        request.headers.set(entry.key, entry.value);
+      }
+
+      final response = await request.close().timeout(_requestTimeout);
+      if (response.statusCode == HttpStatus.unauthorized &&
+          !suppressUnauthorizedHandling) {
+        await _onUnauthorized?.call();
+      }
+      final responseBody = await response
+          .transform(utf8.decoder)
+          .join()
+          .timeout(_requestTimeout);
+      final dynamic decodedBody = responseBody.isEmpty
+          ? <String, dynamic>{}
+          : jsonDecode(responseBody);
+
+      if (decodedBody is! Map<String, dynamic>) {
+        throw const HttpException('Unexpected response format');
+      }
+
+      return <String, dynamic>{
+        'statusCode': response.statusCode,
+        'body': decodedBody,
+      };
+    } catch (_) {
+      rethrow;
+    } finally {
+      client.close(force: true);
+    }
+  }
+
   Future<Map<String, dynamic>> postForm({
     required String url,
     required Map<String, String> body,
@@ -122,13 +166,15 @@ class ApiClient {
 
     try {
       final request = await client.postUrl(Uri.parse(url));
+      final bodyBytes = utf8.encode(jsonEncode(body));
       request.headers.set(HttpHeaders.contentTypeHeader, 'application/json');
+      request.headers.set(HttpHeaders.contentLengthHeader, bodyBytes.length);
 
       for (final entry in headers.entries) {
         request.headers.set(entry.key, entry.value);
       }
 
-      request.write(jsonEncode(body));
+      request.add(bodyBytes);
 
       final response = await request.close().timeout(_requestTimeout);
       if (response.statusCode == HttpStatus.unauthorized &&

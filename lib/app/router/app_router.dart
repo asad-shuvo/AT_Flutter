@@ -5,6 +5,7 @@ import 'package:filip_at_flutter/features/auth/presentation/login_intermediary_p
 import 'package:filip_at_flutter/features/auth/presentation/login_page.dart';
 import 'package:filip_at_flutter/features/dashboard/presentation/dashboard_page.dart';
 import 'package:filip_at_flutter/features/onboarding/presentation/onboarding_page.dart';
+import 'package:filip_at_flutter/features/self_signup/presentation/pages/self_signup_page.dart';
 import 'package:filip_at_flutter/features/splash/presentation/splash_page.dart';
 import 'package:flutter/material.dart';
 
@@ -20,6 +21,7 @@ class AppRouter {
   static const String loginIntermediary = '/login-intermediary';
   static const String forgotPassword = '/login/forgot-password';
   static const String dashboard = '/dashboard';
+  static const String selfSignup = '/self-signup';
 
   final AppConfig config;
   final AppServices services;
@@ -58,6 +60,13 @@ class AppRouter {
       case forgotPassword:
         return MaterialPageRoute<void>(
           builder: (_) => const ForgotPasswordPage(),
+          settings: settings,
+        );
+      case selfSignup:
+        return MaterialPageRoute<void>(
+          builder: (_) => SelfSignupPage(
+            repository: services.selfSignupRepository,
+          ),
           settings: settings,
         );
       case dashboard:

@@ -13,6 +13,8 @@ class AppEnvironment {
     required this.cdnBaseUrl,
     required this.storageServiceUrl,
     required this.dmsServiceUrl,
+    required this.signupServiceUrl,
+    required this.captchaUrl,
     required this.appVersion,
     required this.investmentPushNotificationKey,
   });
@@ -44,6 +46,8 @@ class AppEnvironment {
           cdnBaseUrl: cdnBaseUrl,
           storageServiceUrl: '$devBaseUrl/storageservice/v22/StorageService/',
           dmsServiceUrl: '$devBaseUrl/dms/v40/DmsService/',
+          signupServiceUrl: '$devBaseUrl/signup/SignupService/',
+          captchaUrl: '$devBaseUrl/captcha/v1/Captcha/CaptchaCommand/',
           appVersion: '1.0.4.23.1.2024',
           investmentPushNotificationKey: '033c1c1a-3b1c-4bd2-bf9a-dc8009f2de63',
         );
@@ -62,6 +66,8 @@ class AppEnvironment {
           cdnBaseUrl: cdnBaseUrl,
           storageServiceUrl: '$stgBaseUrl/storageservice/v23/StorageService/',
           dmsServiceUrl: '$stgBaseUrl/dms/v46/DmsService/',
+          signupServiceUrl: '$stgBaseUrl/signup/SignupService/',
+          captchaUrl: '$stgBaseUrl/captcha/v1/Captcha/CaptchaCommand/',
           appVersion: '1.0.4',
           investmentPushNotificationKey: '4594019c-5f57-467d-bfbb-f2b6f08dd94c',
         );
@@ -80,6 +86,8 @@ class AppEnvironment {
           cdnBaseUrl: cdnBaseUrl,
           storageServiceUrl: '$uatBaseUrl/storageservice/v23/StorageService/',
           dmsServiceUrl: '$uatBaseUrl/dms/v46/DmsService/',
+          signupServiceUrl: '$uatBaseUrl/signup/SignupService/',
+          captchaUrl: '$uatBaseUrl/captcha/v1/Captcha/CaptchaCommand/',
           appVersion: '19.04.2026',
           investmentPushNotificationKey: '4594019c-5f57-467d-bfbb-f2b6f08dd94c',
         );
@@ -98,6 +106,8 @@ class AppEnvironment {
           cdnBaseUrl: cdnBaseUrl,
           storageServiceUrl: '$prodBaseUrl/storageservice/v100/StorageService/',
           dmsServiceUrl: '$prodBaseUrl/dms/v100/DmsService/',
+          signupServiceUrl: '$prodBaseUrl/signup/SignupService/',
+          captchaUrl: '$prodBaseUrl/captcha/v100/Captcha/CaptchaCommand/',
           appVersion: '1.0.15',
           investmentPushNotificationKey: '4594019c-5f57-467d-bfbb-f2b6f08dd94c',
         );
@@ -115,6 +125,8 @@ class AppEnvironment {
   final String cdnBaseUrl;
   final String storageServiceUrl;
   final String dmsServiceUrl;
+  final String signupServiceUrl;
+  final String captchaUrl;
   final String appVersion;
   final String investmentPushNotificationKey;
 }

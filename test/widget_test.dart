@@ -14,6 +14,7 @@ import 'package:filip_at_flutter/features/dashboard/data/dashboard_repository.da
 import 'package:filip_at_flutter/features/notifications/data/notifications_repository.dart';
 import 'package:filip_at_flutter/features/notifications/application/sync_notification_service.dart';
 import 'package:filip_at_flutter/features/notifications/application/fcm_service.dart';
+import 'package:filip_at_flutter/features/self_signup/data/self_signup_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
@@ -66,6 +67,8 @@ void main() {
       cdnBaseUrl: 'https://cdn.selise.biz/slnetwork/',
       storageServiceUrl: 'https://msblocks.selisestage.com/api/storage/',
       dmsServiceUrl: 'https://msblocks.selisestage.com/api/dms/',
+      signupServiceUrl: 'https://msblocks.selisestage.com/api/signup/SignupService/',
+      captchaUrl: 'https://msblocks.selisestage.com/api/captcha/v1/Captcha/CaptchaCommand/',
       appVersion: '1.0.4',
       investmentPushNotificationKey: '033c1c1a-3b1c-4bd2-bf9a-dc8009f2de63',
     );
@@ -95,6 +98,13 @@ void main() {
       secureStorage: secureStorageService,
     );
 
+    final selfSignupRepository = SelfSignupRepository(
+      apiClient: apiClient,
+      signupServiceUrl: 'https://msblocks.selisestage.com/api/signup/SignupService/',
+      captchaUrl: 'https://msblocks.selisestage.com/api/captcha/v1/Captcha/CaptchaCommand/',
+      originUrl: 'https://sln-at.selisestage.com',
+      tokenUrl: 'https://msblocks.selisestage.com/api/identity/v25/identity/token',
+    );
     final services = AppServices(
       apiClient: apiClient,
       secureStorageService: secureStorageService,
@@ -108,6 +118,7 @@ void main() {
       languageController: languageController,
       syncNotificationService: syncNotificationService,
       fcmService: fcmService,
+      selfSignupRepository: selfSignupRepository,
     );
 
     await tester.pumpWidget(FilipAtApp(config: config, services: services));
