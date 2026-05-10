@@ -36,9 +36,9 @@ class ContractsHouseholdMember {
   Color get avatarColor => Color(avatarColorValue);
 
   String get fallbackInitial {
-    final source = (lastName?.trim().isNotEmpty ?? false)
-        ? lastName!.trim()
-        : displayName.trim();
+    final source = displayName.trim().isNotEmpty
+        ? displayName.trim()
+        : (lastName?.trim() ?? '');
     if (source.isEmpty) {
       return '?';
     }

@@ -11,7 +11,7 @@ import 'package:filip_at_flutter/features/contracts/data/investment_contract_mod
 import 'package:filip_at_flutter/features/contracts/data/investment_overview_model.dart';
 
 class ContractsRepository {
-  const ContractsRepository({
+  ContractsRepository({
     required ApiClient apiClient,
     required UserSessionCache userSessionCache,
   }) : _apiClient = apiClient,
@@ -19,6 +19,36 @@ class ContractsRepository {
 
   final ApiClient _apiClient;
   final UserSessionCache _sessionCache;
+  final Map<String, List<ContractsLookupOption>> _contractTypesCache =
+      <String, List<ContractsLookupOption>>{};
+  List<ContractsPartnerOption>? _partnersCache;
+
+  List<ContractsLookupOption>? peekContractTypes(String entityName) {
+    return _contractTypesCache[entityName];
+  }
+
+  List<ContractsPartnerOption>? peekPartners() {
+    return _partnersCache;
+  }
+
+  void clearLookupCaches() {
+    _contractTypesCache.clear();
+    _partnersCache = null;
+  }
+
+  Future<void> prewarmAddContractLookups() async {
+    try {
+      await Future.wait<dynamic>(<Future<dynamic>>[
+        fetchContractTypes('Insure'),
+        fetchContractTypes('Retirement'),
+        fetchContractTypes('Loan'),
+        fetchContractTypes('Investment'),
+        fetchPartners(),
+      ]);
+    } catch (_) {
+      // Keep lazy flow if prewarm fails.
+    }
+  }
 
   Future<ContractsHouseholdData?> fetchHouseholdData() async {
     final context = await _getAuthorizedPersonContext();
@@ -1217,6 +1247,11 @@ class ContractsRepository {
   Future<List<ContractsLookupOption>> fetchContractTypes(
     String entityName,
   ) async {
+    final cached = _contractTypesCache[entityName];
+    if (cached != null) {
+      return cached;
+    }
+
     final context = await _getAuthorizedPersonContext();
     if (context == null) return const <ContractsLookupOption>[];
 
@@ -1261,16 +1296,24 @@ class ContractsRepository {
       }
     }
 
+    _contractTypesCache[entityName] = options;
     return options;
   }
 
   Future<List<ContractsPartnerOption>> fetchPartners({
     String? searchText,
   }) async {
+    final trimmedSearch = searchText?.trim();
+    if (trimmedSearch == null || trimmedSearch.isEmpty) {
+      final cached = _partnersCache;
+      if (cached != null) {
+        return cached;
+      }
+    }
+
     final context = await _getAuthorizedPersonContext();
     if (context == null) return const <ContractsPartnerOption>[];
 
-    final trimmedSearch = searchText?.trim();
     final response = await _apiClient.postJson(
       url: '${_apiClient.snQueryUrl}SelectNetworkQuery/GetPartners',
       body: <String, dynamic>{
@@ -1296,7 +1339,7 @@ class ContractsRepository {
     final partners = data is Map<String, dynamic> ? data['Partners'] : null;
     if (partners is! List) return const <ContractsPartnerOption>[];
 
-    return partners
+    final mapped = partners
         .whereType<Map>()
         .map(
           (item) => ContractsPartnerOption(
@@ -1306,6 +1349,11 @@ class ContractsRepository {
         )
         .where((item) => item.itemId.isNotEmpty && item.name.isNotEmpty)
         .toList(growable: false);
+
+    if (trimmedSearch == null || trimmedSearch.isEmpty) {
+      _partnersCache = mapped;
+    }
+    return mapped;
   }
 
   Future<void> createContract({

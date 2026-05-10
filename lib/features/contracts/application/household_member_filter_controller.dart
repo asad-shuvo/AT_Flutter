@@ -2,8 +2,8 @@ import 'package:filip_at_flutter/features/contracts/data/contracts_household_mod
 import 'package:filip_at_flutter/features/contracts/data/contracts_repository.dart';
 import 'package:flutter/foundation.dart';
 
-class ContractsHouseholdController extends ChangeNotifier {
-  ContractsHouseholdController({
+class HouseholdMemberFilterController extends ChangeNotifier {
+  HouseholdMemberFilterController({
     required ContractsRepository contractsRepository,
   }) : _contractsRepository = contractsRepository;
 
@@ -15,6 +15,7 @@ class ContractsHouseholdController extends ChangeNotifier {
       const <ContractsHouseholdMember>[];
   List<ContractsHouseholdMember> _businessMembers =
       const <ContractsHouseholdMember>[];
+  Future<void>? _initialLoadFuture;
 
   bool get isLoading => _isLoading;
   ContractsHouseholdMode get mode => _mode;
@@ -27,6 +28,26 @@ class ContractsHouseholdController extends ChangeNotifier {
   bool get hasBusinessMembers => _businessMembers.isNotEmpty;
   bool get shouldShowFilter =>
       _householdMembers.length > 1 || _businessMembers.isNotEmpty;
+
+  Future<void> ensureLoaded() {
+    if (isInitialized) {
+      return SynchronousFuture<void>(null);
+    }
+
+    final pending = _initialLoadFuture;
+    if (pending != null) {
+      return pending;
+    }
+
+    final future = load();
+    _initialLoadFuture = future;
+    future.whenComplete(() {
+      if (identical(_initialLoadFuture, future)) {
+        _initialLoadFuture = null;
+      }
+    });
+    return future;
+  }
 
   List<ContractsHouseholdMember> get visibleMembers {
     return _mode == ContractsHouseholdMode.household
@@ -59,9 +80,15 @@ class ContractsHouseholdController extends ChangeNotifier {
     );
   }
 
-  Future<void> load() async {
-    _isLoading = true;
-    notifyListeners();
+  Future<void> load({bool silentIfInitialized = true}) async {
+    final hasExistingData =
+        _householdMembers.isNotEmpty || _businessMembers.isNotEmpty;
+    final shouldShowLoading = !(silentIfInitialized && hasExistingData);
+
+    if (shouldShowLoading) {
+      _isLoading = true;
+      notifyListeners();
+    }
 
     // Preserve selection across notification-triggered reloads (NativeScript parity:
     // _selectedHouseholdData BehaviorSubject survives re-fetch and restores IsSelected).
@@ -149,6 +176,19 @@ class ContractsHouseholdController extends ChangeNotifier {
         List<ContractsHouseholdMember>.unmodifiable(householdMembers);
     _businessMembers =
         List<ContractsHouseholdMember>.unmodifiable(businessMembers);
+    notifyListeners();
+  }
+
+  void resetToMeDefault() {
+    if (_householdMembers.isEmpty) {
+      return;
+    }
+
+    _mode = ContractsHouseholdMode.household;
+    _householdMembers = _householdMembers
+        .map((member) => member.copyWith(isSelected: member.isCurrentUser))
+        .toList(growable: false);
+    _businessMembers = _setSelection(_businessMembers, false);
     notifyListeners();
   }
 

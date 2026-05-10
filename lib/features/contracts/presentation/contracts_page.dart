@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:filip_at_flutter/features/auth/application/auth_session_controller.dart';
 import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/features/chat/presentation/chat_page.dart';
-import 'package:filip_at_flutter/features/contracts/application/contracts_household_controller.dart';
+import 'package:filip_at_flutter/features/contracts/application/household_member_filter_controller.dart';
 import 'package:filip_at_flutter/features/contracts/data/contracts_household_model.dart';
 import 'package:filip_at_flutter/features/dashboard/data/dashboard_models.dart';
 import 'package:filip_at_flutter/features/dashboard/data/dashboard_repository.dart';
@@ -23,7 +23,10 @@ import 'package:filip_at_flutter/shared/theme/app_colors.dart';
 import 'package:filip_at_flutter/shared/widgets/app_bottom_nav.dart';
 import 'package:filip_at_flutter/shared/widgets/app_page_header.dart';
 import 'package:filip_at_flutter/shared/widgets/app_top_bar.dart';
+import 'package:filip_at_flutter/shared/widgets/contracts_household_member_filter.dart';
 import 'package:flutter/material.dart';
+
+const double _contractsBottomClearance = 96;
 
 class ContractsPage extends StatefulWidget {
   const ContractsPage({
@@ -43,7 +46,7 @@ class ContractsPage extends StatefulWidget {
   final AuthSessionController authSessionController;
   final String appVersion;
   final SyncNotificationService syncNotificationService;
-  final ContractsHouseholdController householdController;
+  final HouseholdMemberFilterController householdController;
 
   @override
   State<ContractsPage> createState() => _ContractsPageState();
@@ -55,7 +58,7 @@ class _ContractsPageState extends State<ContractsPage> {
   late Future<int> _unreadNotificationsFuture;
   late StreamSubscription<Map<String, dynamic>> _contractSyncSubscription;
 
-  ContractsHouseholdController get _householdController =>
+  HouseholdMemberFilterController get _householdController =>
       widget.householdController;
 
   @override
@@ -67,9 +70,17 @@ class _ContractsPageState extends State<ContractsPage> {
 
     // Bootstrap loads household data on auth + notifications.
     // Only load here if somehow not yet initialized (e.g. deep-link before auth listener fires).
-    if (!_householdController.isInitialized) {
-      _householdController.load();
+    if (_householdController.isInitialized) {
+      _householdController.resetToMeDefault();
+    } else {
+      unawaited(
+        _householdController.ensureLoaded().then((_) {
+          if (!mounted) return;
+          _householdController.resetToMeDefault();
+        }),
+      );
     }
+    unawaited(widget.contractsRepository.prewarmAddContractLookups());
 
     _contractSyncSubscription =
         widget.syncNotificationService.contractSyncCompleted.stream.listen(
@@ -127,20 +138,11 @@ class _ContractsPageState extends State<ContractsPage> {
       return;
     }
 
-    final result = await showModalBottomSheet<_ContractsHouseholdSheetResult>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-      ),
-      builder: (context) {
-        return _ContractsHouseholdSheet(
-          initialMode: _householdController.mode,
-          initialHouseholdMembers: _householdController.copyHouseholdMembers(),
-          initialBusinessMembers: _householdController.copyBusinessMembers(),
-        );
-      },
+    final result = await showContractsHouseholdFilterSheet(
+      context,
+      initialMode: _householdController.mode,
+      initialHouseholdMembers: _householdController.copyHouseholdMembers(),
+      initialBusinessMembers: _householdController.copyBusinessMembers(),
     );
 
     if (result == null) {
@@ -225,7 +227,7 @@ class _ContractsPageState extends State<ContractsPage> {
                   },
                 ),
                 AppPageHeader(title: l10n.tr('tns.myContracts')),
-                _HouseholdMemberBar(
+                ContractsHouseholdMemberFilterBar(
                   controller: _householdController,
                   onMemberTap: _handleMemberTap,
                   onArrowTap: _openHouseholdSheet,
@@ -275,564 +277,6 @@ class _ContractsPageState extends State<ContractsPage> {
         onContractsTap: () {},
         onRealEstateTap: () => _openPage(const RealEstatePage()),
         onMessagesTap: () => _openPage(const ChatPage()),
-      ),
-    );
-  }
-}
-
-// â”€â”€ Household member filter bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
-class _HouseholdMemberBar extends StatelessWidget {
-  const _HouseholdMemberBar({
-    required this.controller,
-    required this.onMemberTap,
-    required this.onArrowTap,
-  });
-
-  final ContractsHouseholdController controller;
-  final ValueChanged<String> onMemberTap;
-  final VoidCallback onArrowTap;
-
-  @override
-  Widget build(BuildContext context) {
-    if (controller.isLoading) {
-      return Container(
-        height: 56,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          border: Border(
-            top: BorderSide(color: Color(0xFFE5E5E5)),
-            bottom: BorderSide(color: Color(0xFFE5E5E5)),
-          ),
-        ),
-        child: const Center(
-          child: SizedBox(
-            width: 18,
-            height: 18,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryRed),
-            ),
-          ),
-        ),
-      );
-    }
-
-    if (!controller.shouldShowFilter) {
-      return const SizedBox.shrink();
-    }
-
-    final members = controller.visibleMembers;
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(
-          top: BorderSide(color: Color(0xFFE5E5E5)),
-          bottom: BorderSide(color: Color(0xFFE5E5E5)),
-        ),
-      ),
-      height: 56,
-      child: Row(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 5),
-              child: Row(
-                children: List.generate(members.length, (i) {
-                  final member = members[i];
-                  final label = member.isCurrentUser
-                      ? context.l10n.tr('tns.me')
-                      : member.displayLastName;
-                  return GestureDetector(
-                    onTap: () => onMemberTap(member.personId),
-                    child: Container(
-                      height: 42,
-                      margin: const EdgeInsets.only(left: 5),
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: member.isSelected
-                            ? const Color(0xFFFFF5F6)
-                            : const Color(0xFFF4F4F4),
-                        border: Border.all(
-                          color: member.isSelected
-                              ? AppColors.primaryRed
-                              : const Color(0xFFD2D2D2),
-                          width: 1,
-                        ),
-                        borderRadius: BorderRadius.circular(21),
-                      ),
-                      child: Row(
-                        children: [
-                          _MemberAvatar(member: member, size: 37),
-                          const SizedBox(width: 4),
-                          ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 56),
-                            child: Text(
-                              label.toUpperCase(),
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontFamily: 'Calibri',
-                                fontWeight: FontWeight.w400,
-                                color: Color(0xFF333333),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }),
-              ),
-            ),
-          ),
-          Container(
-            width: 50,
-            height: double.infinity,
-            decoration: const BoxDecoration(
-              border: Border(left: BorderSide(color: Color(0xFFE0E0E0))),
-            ),
-            child: InkWell(
-              onTap: onArrowTap,
-              child: const Center(
-                child: Icon(
-                  SelectNetworkIcons.arrowDown,
-                  size: 22,
-                  color: Color(0xFF808080),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MemberAvatar extends StatelessWidget {
-  const _MemberAvatar({required this.member, required this.size});
-
-  final ContractsHouseholdMember member;
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    final imageUrl = member.resolvedProfileImageUrl;
-    if (imageUrl != null) {
-      return Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.white, width: 2),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Image.network(
-          imageUrl,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return _MemberAvatarFallback(member: member, size: size);
-          },
-        ),
-      );
-    }
-
-    return _MemberAvatarFallback(member: member, size: size);
-  }
-}
-
-class _MemberAvatarFallback extends StatelessWidget {
-  const _MemberAvatarFallback({required this.member, required this.size});
-
-  final ContractsHouseholdMember member;
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: member.avatarColor,
-        shape: BoxShape.circle,
-        border: Border.all(color: Colors.white, width: 2),
-      ),
-      child: Center(
-        child: Text(
-          member.fallbackInitial,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: size * 0.38,
-            fontFamily: 'Calibri',
-            fontWeight: FontWeight.w400,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// â”€â”€ Contract type tab bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
-class _ContractsHouseholdSheetResult {
-  const _ContractsHouseholdSheetResult({
-    required this.mode,
-    required this.householdMembers,
-    required this.businessMembers,
-  });
-
-  final ContractsHouseholdMode mode;
-  final List<ContractsHouseholdMember> householdMembers;
-  final List<ContractsHouseholdMember> businessMembers;
-}
-
-class _ContractsHouseholdSheet extends StatefulWidget {
-  const _ContractsHouseholdSheet({
-    required this.initialMode,
-    required this.initialHouseholdMembers,
-    required this.initialBusinessMembers,
-  });
-
-  final ContractsHouseholdMode initialMode;
-  final List<ContractsHouseholdMember> initialHouseholdMembers;
-  final List<ContractsHouseholdMember> initialBusinessMembers;
-
-  @override
-  State<_ContractsHouseholdSheet> createState() =>
-      _ContractsHouseholdSheetState();
-}
-
-class _ContractsHouseholdSheetState extends State<_ContractsHouseholdSheet> {
-  late ContractsHouseholdMode _mode;
-  late List<ContractsHouseholdMember> _householdMembers;
-  late List<ContractsHouseholdMember> _businessMembers;
-
-  @override
-  void initState() {
-    super.initState();
-    _mode = widget.initialBusinessMembers.isEmpty
-        ? ContractsHouseholdMode.household
-        : widget.initialMode;
-    _householdMembers = widget.initialHouseholdMembers;
-    _businessMembers = widget.initialBusinessMembers;
-  }
-
-  bool get _isHouseholdMode => _mode == ContractsHouseholdMode.household;
-
-  List<ContractsHouseholdMember> get _visibleMembers {
-    return _isHouseholdMode ? _householdMembers : _businessMembers;
-  }
-
-  bool get _isAllSelected =>
-      ContractsHouseholdController.areAllSelected(_householdMembers);
-
-  bool get _canApply =>
-      ContractsHouseholdController.hasAtLeastOneSelected(_visibleMembers);
-
-  void _switchMode(ContractsHouseholdMode mode) {
-    if (_mode == mode) {
-      return;
-    }
-
-    setState(() {
-      _mode = mode;
-      if (_isHouseholdMode) {
-        _businessMembers = ContractsHouseholdController.setSelectionForAll(
-          _businessMembers,
-          false,
-        );
-        _householdMembers = ContractsHouseholdController.ensureFirstSelected(
-          _householdMembers,
-        );
-      } else {
-        _householdMembers = ContractsHouseholdController.setSelectionForAll(
-          _householdMembers,
-          false,
-        );
-        _businessMembers = ContractsHouseholdController.ensureFirstSelected(
-          _businessMembers,
-        );
-      }
-    });
-  }
-
-  void _toggleSelectAll() {
-    setState(() {
-      _householdMembers = ContractsHouseholdController.setSelectionForAll(
-        _householdMembers,
-        !_isAllSelected,
-      );
-      _businessMembers = ContractsHouseholdController.setSelectionForAll(
-        _businessMembers,
-        false,
-      );
-    });
-  }
-
-  void _toggleMember(String personId) {
-    setState(() {
-      if (_isHouseholdMode) {
-        _businessMembers = ContractsHouseholdController.setSelectionForAll(
-          _businessMembers,
-          false,
-        );
-        _householdMembers = _householdMembers
-            .map(
-              (member) => member.personId == personId
-                  ? member.copyWith(isSelected: !member.isSelected)
-                  : member,
-            )
-            .toList(growable: false);
-      } else {
-        _householdMembers = ContractsHouseholdController.setSelectionForAll(
-          _householdMembers,
-          false,
-        );
-        _businessMembers = _businessMembers
-            .map(
-              (member) => member.personId == personId
-                  ? member.copyWith(isSelected: !member.isSelected)
-                  : member,
-            )
-            .toList(growable: false);
-      }
-    });
-  }
-
-  void _apply() {
-    Navigator.of(context).pop(
-      _ContractsHouseholdSheetResult(
-        mode: _mode,
-        householdMembers: _householdMembers,
-        businessMembers: _businessMembers,
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
-
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: EdgeInsets.only(bottom: bottomInset),
-        child: SizedBox(
-          height: 540,
-          child: Column(
-            children: [
-              const SizedBox(height: 12),
-              Container(
-                width: 42,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF0B8C0),
-                  borderRadius: BorderRadius.circular(99),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF3F3F3),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: _SheetModeTab(
-                          label:
-                              '${l10n.tr('tns.household')} (${_householdMembers.length})',
-                          isActive: _isHouseholdMode,
-                          onTap: () =>
-                              _switchMode(ContractsHouseholdMode.household),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: widget.initialBusinessMembers.isNotEmpty
-                            ? _SheetModeTab(
-                                label:
-                                    '${l10n.tr('tns.business')} (${_businessMembers.length})',
-                                isActive: !_isHouseholdMode,
-                                onTap: () => _switchMode(
-                                  ContractsHouseholdMode.business,
-                                ),
-                              )
-                            : const SizedBox.shrink(),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              if (_isHouseholdMode) ...[
-                const SizedBox(height: 12),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    children: [
-                      Text(
-                        l10n.tr('tns.multipleSelection'),
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontFamily: 'Calibri',
-                          color: Color(0xFF666666),
-                        ),
-                      ),
-                      const Spacer(),
-                      GestureDetector(
-                        onTap: _toggleSelectAll,
-                        child: Row(
-                          children: [
-                            Text(
-                              l10n.tr('tns.selectAll'),
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontFamily: 'Calibri',
-                                color: Color(0xFF666666),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Icon(
-                              _isAllSelected
-                                  ? Icons.check_box
-                                  : Icons.check_box_outline_blank,
-                              size: 22,
-                              color: AppColors.primaryRed,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-              const SizedBox(height: 8),
-              Expanded(
-                child: ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(18, 0, 18, 12),
-                  itemCount: _visibleMembers.length,
-                  separatorBuilder: (context, index) =>
-                      const Divider(height: 1, color: Color(0xFFEAEAEA)),
-                  itemBuilder: (context, index) {
-                    final member = _visibleMembers[index];
-                    return InkWell(
-                      onTap: () => _toggleMember(member.personId),
-                      child: SizedBox(
-                        height: 70,
-                        child: Row(
-                          children: [
-                            _MemberAvatar(member: member, size: 42),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                member.isCurrentUser && _isHouseholdMode
-                                    ? '${member.displayName} (${l10n.tr('tns.me')})'
-                                    : member.displayName,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontFamily: 'Calibri',
-                                  color: Color(0xFF333333),
-                                ),
-                              ),
-                            ),
-                            if (member.isSelected)
-                              const Icon(
-                                Icons.done,
-                                size: 22,
-                                color: AppColors.primaryRed,
-                              ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _canApply ? _apply : null,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryRed,
-                      foregroundColor: Colors.white,
-                      disabledBackgroundColor: const Color(0xFFD8D8D8),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Text(
-                      l10n.tr('tns.showContracts'),
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontFamily: 'Calibri',
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SheetModeTab extends StatelessWidget {
-  const _SheetModeTab({
-    required this.label,
-    required this.isActive,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool isActive;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(12),
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        decoration: BoxDecoration(
-          color: isActive ? Colors.white : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isActive ? Colors.white : Colors.transparent,
-          ),
-          boxShadow: isActive
-              ? const <BoxShadow>[
-                  BoxShadow(
-                    color: Color(0x14000000),
-                    blurRadius: 8,
-                    offset: Offset(0, 2),
-                  ),
-                ]
-              : null,
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 14,
-              fontFamily: 'Calibri',
-              fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
-              color: const Color(0xFF333333),
-            ),
-          ),
-        ),
       ),
     );
   }
@@ -1334,7 +778,7 @@ class _NonLifeInsuranceTabState extends State<_NonLifeInsuranceTab> {
     final l10n = context.l10n;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, _contractsBottomClearance),
       child: Column(
         children: [
           Container(
@@ -1699,7 +1143,7 @@ class _RetirementTabState extends State<_RetirementTab> {
     final l10n = context.l10n;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, _contractsBottomClearance),
       child: Column(
         children: [
           Container(
@@ -2092,7 +1536,7 @@ class _LoanTabState extends State<_LoanTab> {
     final l10n = context.l10n;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, _contractsBottomClearance),
       child: Column(
         children: [
           Container(
@@ -2542,7 +1986,7 @@ class _InvestmentTabState extends State<_InvestmentTab> {
     final l10n = context.l10n;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, _contractsBottomClearance),
       child: Column(
         children: [
           // Personal Performance card
@@ -3689,21 +3133,32 @@ class _ContractOwnerAvatars extends StatelessWidget {
       return const _ContractOwnerAvatar(member: null, fallbackInitial: '?');
     }
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: List<Widget>.generate(ownerPersonIds.length, (index) {
-        final personId = ownerPersonIds[index];
-        final member = ownerMembersByPersonId[personId];
-        final fallbackInitial = member?.fallbackInitial ?? '?';
-        final marginRight = index == ownerPersonIds.length - 1 ? 0.0 : -6.0;
-        return Container(
-          margin: EdgeInsets.only(right: marginRight),
-          child: _ContractOwnerAvatar(
-            member: member,
-            fallbackInitial: fallbackInitial,
-          ),
-        );
-      }),
+    const maxVisibleAvatars = 3;
+    const avatarSize = 24.0;
+    const overlapStep = 18.0;
+    final visibleCount = ownerPersonIds.length > maxVisibleAvatars
+        ? maxVisibleAvatars
+        : ownerPersonIds.length;
+    final stackWidth = avatarSize + ((visibleCount - 1) * overlapStep);
+
+    return SizedBox(
+      width: stackWidth,
+      height: avatarSize,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: List<Widget>.generate(visibleCount, (index) {
+          final personId = ownerPersonIds[index];
+          final member = ownerMembersByPersonId[personId];
+          final fallbackInitial = member?.fallbackInitial ?? '?';
+          return Positioned(
+            left: index * overlapStep,
+            child: _ContractOwnerAvatar(
+              member: member,
+              fallbackInitial: fallbackInitial,
+            ),
+          );
+        }),
+      ),
     );
   }
 }
@@ -3886,7 +3341,7 @@ class _EmptyContractTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, _contractsBottomClearance),
       child: Column(
         children: [
           _ContractsSectionHeader(label: l10n.tr(labelKey)),

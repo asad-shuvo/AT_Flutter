@@ -12,7 +12,7 @@ import 'package:filip_at_flutter/features/auth/application/auth_session_controll
 import 'package:filip_at_flutter/features/auth/application/user_session_cache.dart';
 import 'package:filip_at_flutter/features/auth/data/auth_repository.dart';
 import 'package:filip_at_flutter/features/auth/data/login_sync_repository.dart';
-import 'package:filip_at_flutter/features/contracts/application/contracts_household_controller.dart';
+import 'package:filip_at_flutter/features/contracts/application/household_member_filter_controller.dart';
 import 'package:filip_at_flutter/features/contracts/data/contracts_repository.dart';
 import 'package:filip_at_flutter/features/dashboard/data/dashboard_repository.dart';
 import 'package:filip_at_flutter/features/notifications/data/notifications_repository.dart';
@@ -127,7 +127,7 @@ Future<void> bootstrap(AppFlavor flavor) async {
   fcmService.startListening();
 
   // App-level singleton — NativeScript parity: ContractHouseholdService @Injectable root
-  final householdController = ContractsHouseholdController(
+  final householdController = HouseholdMemberFilterController(
     contractsRepository: contractsRepository,
   );
 
@@ -171,10 +171,14 @@ Future<void> bootstrap(AppFlavor flavor) async {
 
   // Reload household data on contract sync notifications (NativeScript: root-level listener)
   syncNotificationService.contractSyncCompleted.stream.listen((_) {
-    householdController.load();
+    if (householdController.isInitialized) {
+      unawaited(householdController.load());
+    }
   });
   syncNotificationService.synccustomercontract.stream.listen((_) {
-    householdController.load();
+    if (householdController.isInitialized) {
+      unawaited(householdController.load());
+    }
   });
 
   runApp(FilipAtApp(config: config, services: services));
@@ -187,7 +191,7 @@ Future<void> _handleAuthStateChange(
   ContractsRepository contractsRepository,
   SyncNotificationService syncNotificationService,
   UserSessionCache userSessionCache,
-  ContractsHouseholdController householdController,
+  HouseholdMemberFilterController householdController,
 ) async {
   final isAuthenticated = authSessionController.isAuthenticated;
 
@@ -201,10 +205,11 @@ Future<void> _handleAuthStateChange(
     }
     // Initial one-time load (NativeScript: root getUserHouseholdAndBusiness on login)
     if (!householdController.isInitialized) {
-      unawaited(householdController.load());
+      unawaited(householdController.ensureLoaded());
     }
   } else {
     userSessionCache.invalidate();
+    contractsRepository.clearLookupCaches();
     final previousTopic = await secureStorageService.read('firebase_topic');
     if (previousTopic != null && previousTopic.isNotEmpty) {
       await fcmService.unsubscribeFromUserTopic(previousTopic);

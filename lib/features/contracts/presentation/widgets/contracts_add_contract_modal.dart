@@ -1,8 +1,9 @@
-﻿import 'package:filip_at_flutter/app/localization/app_localizations.dart';
+import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/features/contracts/data/contracts_add_models.dart';
 import 'package:filip_at_flutter/features/contracts/data/contracts_repository.dart';
 import 'package:filip_at_flutter/features/contracts/presentation/widgets/contracts_add_form_sheet.dart';
 import 'package:filip_at_flutter/shared/theme/app_colors.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 enum ContractsAddKind { insurance, retirement, loan, investment }
@@ -49,7 +50,23 @@ class _ContractsAddContractModalState
   @override
   void initState() {
     super.initState();
-    _bootstrapFuture = _loadBootstrap();
+    final isEditMode = widget.initialData?.isEdit == true;
+    final cachedTypes = widget.repository.peekContractTypes(
+      _lookupEntityName(widget.kind),
+    );
+    final cachedPartners = widget.repository.peekPartners();
+
+    if (!isEditMode && cachedTypes != null && cachedPartners != null) {
+      _bootstrapFuture = SynchronousFuture<_ContractsAddBootstrapData>(
+        _ContractsAddBootstrapData(
+          types: cachedTypes,
+          partners: cachedPartners,
+          fullContractDetails: null,
+        ),
+      );
+    } else {
+      _bootstrapFuture = _loadBootstrap();
+    }
   }
 
   Future<_ContractsAddBootstrapData> _loadBootstrap() async {

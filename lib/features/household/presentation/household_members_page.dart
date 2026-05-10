@@ -1,6 +1,6 @@
 import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/features/auth/application/auth_session_controller.dart';
-import 'package:filip_at_flutter/features/contracts/application/contracts_household_controller.dart';
+import 'package:filip_at_flutter/features/contracts/application/household_member_filter_controller.dart';
 import 'package:filip_at_flutter/features/contracts/data/contracts_household_model.dart';
 import 'package:filip_at_flutter/features/contracts/data/contracts_repository.dart';
 import 'package:filip_at_flutter/features/contracts/presentation/contracts_page.dart';
@@ -30,7 +30,7 @@ class HouseholdMembersPage extends StatefulWidget {
   final AuthSessionController authSessionController;
   final String appVersion;
   final SyncNotificationService syncNotificationService;
-  final ContractsHouseholdController householdController;
+  final HouseholdMemberFilterController householdController;
   final bool isBusiness;
 
   @override
@@ -44,7 +44,7 @@ class _HouseholdMembersPageState extends State<HouseholdMembersPage> {
   void initState() {
     super.initState();
     if (!widget.householdController.isInitialized) {
-      widget.householdController.load();
+      widget.householdController.ensureLoaded();
     }
   }
 
@@ -210,11 +210,11 @@ class _HouseholdMembersPageState extends State<HouseholdMembersPage> {
         ? ContractsHouseholdMode.business
         : ContractsHouseholdMode.household;
 
-    final householdMembers = ContractsHouseholdController.setSelectionForAll(
+    final householdMembers = HouseholdMemberFilterController.setSelectionForAll(
       widget.householdController.copyHouseholdMembers(),
       false,
     );
-    final businessMembers = ContractsHouseholdController.setSelectionForAll(
+    final businessMembers = HouseholdMemberFilterController.setSelectionForAll(
       widget.householdController.copyBusinessMembers(),
       false,
     );

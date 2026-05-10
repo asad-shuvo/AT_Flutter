@@ -5,7 +5,7 @@ import 'package:filip_at_flutter/features/auth/application/auth_session_controll
 import 'package:filip_at_flutter/features/auth/application/user_session_cache.dart';
 import 'package:filip_at_flutter/features/auth/data/auth_repository.dart';
 import 'package:filip_at_flutter/features/auth/data/login_sync_repository.dart';
-import 'package:filip_at_flutter/features/contracts/application/contracts_household_controller.dart';
+import 'package:filip_at_flutter/features/contracts/application/household_member_filter_controller.dart';
 import 'package:filip_at_flutter/features/contracts/data/contracts_repository.dart';
 import 'package:filip_at_flutter/features/dashboard/data/dashboard_repository.dart';
 import 'package:filip_at_flutter/features/notifications/data/notifications_repository.dart';
@@ -44,5 +44,5 @@ class AppServices {
   final SyncNotificationService syncNotificationService;
   final FcmService fcmService;
   final SelfSignupRepository selfSignupRepository;
-  final ContractsHouseholdController householdController;
+  final HouseholdMemberFilterController householdController;
 }

@@ -1,7 +1,7 @@
 import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/features/auth/application/auth_session_controller.dart';
 import 'package:filip_at_flutter/features/chat/presentation/chat_page.dart';
-import 'package:filip_at_flutter/features/contracts/application/contracts_household_controller.dart';
+import 'package:filip_at_flutter/features/contracts/application/household_member_filter_controller.dart';
 import 'package:filip_at_flutter/features/contracts/data/contracts_repository.dart';
 import 'package:filip_at_flutter/features/contracts/presentation/contracts_page.dart';
 import 'package:filip_at_flutter/features/dashboard/data/dashboard_models.dart';
@@ -38,7 +38,7 @@ class FilipExplorerPage extends StatefulWidget {
   final AuthSessionController authSessionController;
   final String appVersion;
   final SyncNotificationService syncNotificationService;
-  final ContractsHouseholdController householdController;
+  final HouseholdMemberFilterController householdController;
 
   @override
   State<FilipExplorerPage> createState() => _FilipExplorerPageState();

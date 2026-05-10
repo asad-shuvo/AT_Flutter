@@ -2,7 +2,7 @@ import 'package:filip_at_flutter/app/localization/app_language_scope.dart';
 import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/features/about/presentation/about_page.dart';
 import 'package:filip_at_flutter/features/auth/application/auth_session_controller.dart';
-import 'package:filip_at_flutter/features/contracts/application/contracts_household_controller.dart';
+import 'package:filip_at_flutter/features/contracts/application/household_member_filter_controller.dart';
 import 'package:filip_at_flutter/features/contracts/data/contracts_repository.dart';
 import 'package:filip_at_flutter/features/dashboard/data/dashboard_models.dart';
 import 'package:filip_at_flutter/features/dashboard/data/dashboard_repository.dart';
@@ -38,7 +38,7 @@ class AppSideDrawer extends StatelessWidget {
   final AuthSessionController authSessionController;
   final String appVersion;
   final SyncNotificationService syncNotificationService;
-  final ContractsHouseholdController householdController;
+  final HouseholdMemberFilterController householdController;
   static const String _legalUrl =
       'https://www.swisslife-select.at/home/footer/nutzungsbedingungen_filip.html';
   static const String _dataPrivacyUrl =
@@ -53,7 +53,8 @@ class AppSideDrawer extends StatelessWidget {
     return Drawer(
       width: 286,
       backgroundColor: Colors.white,
-      child: Column(
+      child: ListView(
+        padding: EdgeInsets.zero,
         children: [
           FutureBuilder<UserProfile?>(
             future: userProfileFuture,
@@ -227,7 +228,7 @@ class AppSideDrawer extends StatelessWidget {
               );
             },
           ),
-          const Spacer(),
+          const SizedBox(height: 12),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: SizedBox(
