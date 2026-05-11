@@ -19,6 +19,7 @@ import 'package:filip_at_flutter/features/notifications/data/notifications_repos
 import 'package:filip_at_flutter/features/notifications/application/fcm_service.dart';
 import 'package:filip_at_flutter/features/notifications/application/sync_notification_service.dart';
 import 'package:filip_at_flutter/app/router/app_router.dart';
+import 'package:filip_at_flutter/features/drive/data/drive_repository.dart';
 import 'package:filip_at_flutter/features/self_signup/data/self_signup_repository.dart';
 import 'package:flutter/material.dart';
 
@@ -48,6 +49,8 @@ Future<void> bootstrap(AppFlavor flavor) async {
     originUrl: config.originUrl,
     storageServiceUrl: config.storageServiceUrl,
     dmsServiceUrl: config.dmsServiceUrl,
+    aggregatorUrl: config.aggregatorUrl,
+    mailServiceUrl: config.mailServiceUrl,
   );
   final secureStorageService = await SecureStorageService.create();
   final authRepository = AuthRepository(
@@ -115,6 +118,10 @@ Future<void> bootstrap(AppFlavor flavor) async {
     originUrl: config.originUrl,
     tokenUrl: config.tokenUrl,
   );
+  final driveRepository = DriveRepository(
+    apiClient: apiClient,
+    userSessionCache: userSessionCache,
+  );
 
   // Firebase & FCM initialization
   final syncNotificationService = SyncNotificationService();
@@ -149,6 +156,7 @@ Future<void> bootstrap(AppFlavor flavor) async {
     fcmService: fcmService,
     selfSignupRepository: selfSignupRepository,
     householdController: householdController,
+    driveRepository: driveRepository,
   );
 
   // Wire auth state changes for FCM topic subscription and session cache invalidation

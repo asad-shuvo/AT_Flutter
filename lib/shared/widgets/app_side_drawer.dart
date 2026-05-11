@@ -2,10 +2,12 @@ import 'package:filip_at_flutter/app/localization/app_language_scope.dart';
 import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/features/about/presentation/about_page.dart';
 import 'package:filip_at_flutter/features/auth/application/auth_session_controller.dart';
+import 'package:filip_at_flutter/features/auth/application/user_session_cache.dart';
 import 'package:filip_at_flutter/features/contracts/application/household_member_filter_controller.dart';
 import 'package:filip_at_flutter/features/contracts/data/contracts_repository.dart';
 import 'package:filip_at_flutter/features/dashboard/data/dashboard_models.dart';
 import 'package:filip_at_flutter/features/dashboard/data/dashboard_repository.dart';
+import 'package:filip_at_flutter/features/drive/data/drive_repository.dart';
 import 'package:filip_at_flutter/features/household/presentation/household_members_page.dart';
 import 'package:filip_at_flutter/features/notifications/application/sync_notification_service.dart';
 import 'package:filip_at_flutter/features/notifications/data/notifications_repository.dart';
@@ -29,6 +31,8 @@ class AppSideDrawer extends StatelessWidget {
     required this.appVersion,
     required this.syncNotificationService,
     required this.householdController,
+    required this.driveRepository,
+    required this.userSessionCache,
   });
 
   final Future<UserProfile?> userProfileFuture;
@@ -39,6 +43,8 @@ class AppSideDrawer extends StatelessWidget {
   final String appVersion;
   final SyncNotificationService syncNotificationService;
   final HouseholdMemberFilterController householdController;
+  final DriveRepository driveRepository;
+  final UserSessionCache userSessionCache;
   static const String _legalUrl =
       'https://www.swisslife-select.at/home/footer/nutzungsbedingungen_filip.html';
   static const String _dataPrivacyUrl =
@@ -187,6 +193,8 @@ class AppSideDrawer extends StatelessWidget {
                           syncNotificationService: syncNotificationService,
                           householdController: householdController,
                           isBusiness: false,
+                          driveRepository: driveRepository,
+                          userSessionCache: userSessionCache,
                         ),
                       ),
                     ),
@@ -205,6 +213,8 @@ class AppSideDrawer extends StatelessWidget {
                           syncNotificationService: syncNotificationService,
                           householdController: householdController,
                           isBusiness: true,
+                          driveRepository: driveRepository,
+                          userSessionCache: userSessionCache,
                         ),
                       ),
                     ),

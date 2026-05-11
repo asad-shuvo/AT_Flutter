@@ -17,6 +17,8 @@ class ApiClient {
     required this.originUrl,
     required this.storageServiceUrl,
     required this.dmsServiceUrl,
+    required this.aggregatorUrl,
+    required this.mailServiceUrl,
   });
 
   final String baseUrl;
@@ -29,6 +31,8 @@ class ApiClient {
   final String originUrl;
   final String storageServiceUrl;
   final String dmsServiceUrl;
+  final String aggregatorUrl;
+  final String mailServiceUrl;
   Future<void> Function()? _onUnauthorized;
 
   String? resolveProfileImageUrl(String? imagePath) {

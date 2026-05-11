@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:filip_at_flutter/features/auth/application/auth_session_controller.dart';
+import 'package:filip_at_flutter/features/auth/application/user_session_cache.dart';
 import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/features/chat/presentation/chat_page.dart';
 import 'package:filip_at_flutter/features/contracts/application/household_member_filter_controller.dart';
@@ -12,6 +13,7 @@ import 'package:filip_at_flutter/features/contracts/presentation/widgets/contrac
 import 'package:filip_at_flutter/features/contracts/data/insure_contract_model.dart';
 import 'package:filip_at_flutter/features/contracts/data/investment_contract_model.dart';
 import 'package:filip_at_flutter/features/contracts/data/investment_overview_model.dart';
+import 'package:filip_at_flutter/features/drive/data/drive_repository.dart';
 import 'package:filip_at_flutter/features/notifications/data/notifications_repository.dart';
 import 'package:filip_at_flutter/features/notifications/presentation/notifications_page.dart';
 import 'package:filip_at_flutter/features/notifications/application/sync_notification_service.dart';
@@ -38,6 +40,8 @@ class ContractsPage extends StatefulWidget {
     required this.appVersion,
     required this.syncNotificationService,
     required this.householdController,
+    required this.driveRepository,
+    required this.userSessionCache,
   });
 
   final ContractsRepository contractsRepository;
@@ -47,6 +51,8 @@ class ContractsPage extends StatefulWidget {
   final String appVersion;
   final SyncNotificationService syncNotificationService;
   final HouseholdMemberFilterController householdController;
+  final DriveRepository driveRepository;
+  final UserSessionCache userSessionCache;
 
   @override
   State<ContractsPage> createState() => _ContractsPageState();
@@ -122,6 +128,8 @@ class _ContractsPageState extends State<ContractsPage> {
           appVersion: widget.appVersion,
           syncNotificationService: widget.syncNotificationService,
           householdController: widget.householdController,
+          driveRepository: widget.driveRepository,
+          userSessionCache: widget.userSessionCache,
         ),
       ),
     );
@@ -210,6 +218,8 @@ class _ContractsPageState extends State<ContractsPage> {
         appVersion: widget.appVersion,
         syncNotificationService: widget.syncNotificationService,
         householdController: widget.householdController,
+        driveRepository: widget.driveRepository,
+        userSessionCache: widget.userSessionCache,
       ),
       body: SafeArea(
         child: AnimatedBuilder(
@@ -270,6 +280,8 @@ class _ContractsPageState extends State<ContractsPage> {
                 appVersion: widget.appVersion,
                 syncNotificationService: widget.syncNotificationService,
                 householdController: widget.householdController,
+                driveRepository: widget.driveRepository,
+                userSessionCache: widget.userSessionCache,
               ),
             ),
           );

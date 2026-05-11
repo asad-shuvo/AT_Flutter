@@ -127,7 +127,7 @@ class AppBottomNav extends StatelessWidget {
                           height: double.infinity,
                           child: GestureDetector(
                             behavior: HitTestBehavior.translucent,
-                            onTap: onHomeTap,
+                            onTapDown: (_) => onHomeTap(),
                           ),
                         ),
                       ],
@@ -141,7 +141,7 @@ class AppBottomNav extends StatelessWidget {
             top: -(_outerCircleSize / 2) - _centerCircleLift,
             child: GestureDetector(
               behavior: HitTestBehavior.translucent,
-              onTap: onHomeTap,
+              onTapDown: (_) => onHomeTap(),
               child: Container(
                 width: _outerCircleSize,
                 height: _outerCircleSize,

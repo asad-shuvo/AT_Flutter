@@ -94,6 +94,8 @@ class AppRouter {
             authSessionController: services.authSessionController,
             syncNotificationService: services.syncNotificationService,
             householdController: services.householdController,
+            driveRepository: services.driveRepository,
+            userSessionCache: services.userSessionCache,
           ),
           settings: settings,
         );

@@ -4,6 +4,7 @@ import 'package:filip_at_flutter/app/router/app_route_observer.dart';
 import 'package:filip_at_flutter/app/localization/app_language_scope.dart';
 import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/features/auth/application/auth_session_controller.dart';
+import 'package:filip_at_flutter/features/auth/application/user_session_cache.dart';
 import 'package:filip_at_flutter/features/chat/presentation/chat_page.dart';
 import 'package:filip_at_flutter/features/contracts/application/household_member_filter_controller.dart';
 import 'package:filip_at_flutter/features/contracts/data/contracts_repository.dart';
@@ -15,6 +16,7 @@ import 'package:filip_at_flutter/features/dashboard/presentation/widgets/asset_l
 import 'package:filip_at_flutter/features/dashboard/presentation/widgets/dashboard_top_bar.dart';
 import 'package:filip_at_flutter/features/dashboard/presentation/widgets/distribution_chart_slider.dart';
 import 'package:filip_at_flutter/features/dashboard/presentation/widgets/total_fixed_asset_card.dart';
+import 'package:filip_at_flutter/features/drive/data/drive_repository.dart';
 import 'package:filip_at_flutter/features/explorer/presentation/filip_explorer_page.dart';
 import 'package:filip_at_flutter/features/notifications/data/notifications_repository.dart';
 import 'package:filip_at_flutter/features/notifications/presentation/notifications_page.dart';
@@ -41,6 +43,8 @@ class DashboardPage extends StatefulWidget {
     required this.authSessionController,
     required this.syncNotificationService,
     required this.householdController,
+    required this.driveRepository,
+    required this.userSessionCache,
   });
 
   final AppConfig config;
@@ -50,6 +54,8 @@ class DashboardPage extends StatefulWidget {
   final AuthSessionController authSessionController;
   final SyncNotificationService syncNotificationService;
   final HouseholdMemberFilterController householdController;
+  final DriveRepository driveRepository;
+  final UserSessionCache userSessionCache;
 
   @override
   State<DashboardPage> createState() => _DashboardPageState();
@@ -155,6 +161,8 @@ class _DashboardPageState extends State<DashboardPage> with RouteAware {
         appVersion: widget.config.appVersion,
         syncNotificationService: widget.syncNotificationService,
         householdController: widget.householdController,
+        driveRepository: widget.driveRepository,
+        userSessionCache: widget.userSessionCache,
       ),
       body: Builder(
         builder: (innerContext) => SafeArea(
@@ -239,6 +247,8 @@ class _DashboardPageState extends State<DashboardPage> with RouteAware {
             appVersion: widget.config.appVersion,
             syncNotificationService: widget.syncNotificationService,
             householdController: widget.householdController,
+            driveRepository: widget.driveRepository,
+            userSessionCache: widget.userSessionCache,
           ),
         ),
         onContractsTap: () => _openPage(
@@ -251,6 +261,8 @@ class _DashboardPageState extends State<DashboardPage> with RouteAware {
             appVersion: widget.config.appVersion,
             syncNotificationService: widget.syncNotificationService,
             householdController: widget.householdController,
+            driveRepository: widget.driveRepository,
+            userSessionCache: widget.userSessionCache,
           ),
         ),
         onRealEstateTap: () => _openPage(context, const RealEstatePage()),
@@ -270,6 +282,8 @@ class _DashboardPageState extends State<DashboardPage> with RouteAware {
           appVersion: widget.config.appVersion,
           syncNotificationService: widget.syncNotificationService,
           householdController: widget.householdController,
+          driveRepository: widget.driveRepository,
+          userSessionCache: widget.userSessionCache,
         ),
       ),
     );

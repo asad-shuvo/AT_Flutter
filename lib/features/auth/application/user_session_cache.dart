@@ -19,6 +19,7 @@ class UserSessionData {
     required this.phoneNumber,
     required this.avatarColorValue,
     required this.profileImageUrl,
+    this.managerNr,
   });
 
   final String accessToken;
@@ -30,6 +31,7 @@ class UserSessionData {
   final String phoneNumber;
   final int avatarColorValue;
   final String? profileImageUrl;
+  final String? managerNr;
 }
 
 class UserSessionCache {
@@ -49,10 +51,20 @@ class UserSessionCache {
   /// Concurrent callers share a single in-flight request.
   Future<UserSessionData?> resolve() {
     if (_cached != null) return Future.value(_cached);
-    return _pending ??= _fetch().then((data) {
+    if (_pending != null) return _pending!;
+    _pending = _resolveFetch();
+    return _pending!;
+  }
+
+  Future<UserSessionData?> _resolveFetch() async {
+    try {
+      final data = await _fetch();
       _cached = data;
       return data;
-    });
+    } finally {
+      // Allow retry on next call if fetch returned null or threw
+      if (_cached == null) _pending = null;
+    }
   }
 
   /// Clears cached data. Call on logout so the next login fetches fresh data.
@@ -75,7 +87,7 @@ class UserSessionCache {
       body: <String, dynamic>{
         'EntityName': 'Person',
         'Text':
-            'Select <ItemId,CustomerId,DisplayName,Email,PhoneNumber,ColorCode,ProfileImage,ProfileImageId>from<Person>where<ProposedUserId=__eql($userId)>pageNumber=<0>pageSize=<1>',
+            'Select <ItemId,CustomerId,DisplayName,Email,PhoneNumber,ColorCode,ProfileImage,ProfileImageId,ManagerNr>from<Person>where<ProposedUserId=__eql($userId)>pageNumber=<0>pageSize=<1>',
         'ExcludeCount': true,
       },
       headers: <String, String>{
@@ -124,6 +136,7 @@ class UserSessionCache {
       profileImageUrl: _apiClient.resolveProfileImageUrl(
         _readString(data['ProfileImage']) ?? _readString(data['ProfileImageId']),
       ),
+      managerNr: _readString(data['ManagerNr']),
     );
   }
 
