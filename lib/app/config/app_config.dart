@@ -21,6 +21,8 @@ class AppConfig {
     required this.captchaUrl,
     required this.appVersion,
     required this.investmentPushNotificationKey,
+    required this.aggregatorUrl,
+    required this.mailServiceUrl,
   });
 
   factory AppConfig.fromFlavor(AppFlavor flavor) {
@@ -44,6 +46,8 @@ class AppConfig {
       captchaUrl: environment.captchaUrl,
       appVersion: environment.appVersion,
       investmentPushNotificationKey: environment.investmentPushNotificationKey,
+      aggregatorUrl: environment.aggregatorUrl,
+      mailServiceUrl: environment.mailServiceUrl,
     );
   }
 
@@ -64,6 +68,8 @@ class AppConfig {
   final String captchaUrl;
   final String appVersion;
   final String investmentPushNotificationKey;
+  final String aggregatorUrl;
+  final String mailServiceUrl;
 
   bool get isProduction => flavor == AppFlavor.prod;
 }

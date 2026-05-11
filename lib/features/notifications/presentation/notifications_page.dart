@@ -1,5 +1,6 @@
 import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/features/auth/application/auth_session_controller.dart';
+import 'package:filip_at_flutter/features/auth/application/user_session_cache.dart';
 import 'package:filip_at_flutter/features/chat/presentation/chat_page.dart';
 import 'package:filip_at_flutter/features/contracts/application/household_member_filter_controller.dart';
 import 'package:filip_at_flutter/features/contracts/data/contracts_repository.dart';
@@ -9,6 +10,7 @@ import 'package:filip_at_flutter/features/dashboard/data/dashboard_models.dart';
 import 'package:filip_at_flutter/features/dashboard/data/dashboard_repository.dart';
 import 'package:filip_at_flutter/features/notifications/application/sync_notification_service.dart';
 import 'package:filip_at_flutter/features/notifications/data/notification_item_model.dart';
+import 'package:filip_at_flutter/features/drive/data/drive_repository.dart';
 import 'package:filip_at_flutter/features/notifications/data/notifications_repository.dart';
 import 'package:filip_at_flutter/features/notifications/presentation/contract_not_found_page.dart';
 import 'package:filip_at_flutter/features/real_estate/presentation/real_estate_page.dart';
@@ -31,6 +33,8 @@ class NotificationsPage extends StatefulWidget {
     required this.appVersion,
     required this.syncNotificationService,
     required this.householdController,
+    required this.driveRepository,
+    required this.userSessionCache,
   });
 
   final DashboardRepository dashboardRepository;
@@ -40,6 +44,8 @@ class NotificationsPage extends StatefulWidget {
   final String appVersion;
   final SyncNotificationService syncNotificationService;
   final HouseholdMemberFilterController householdController;
+  final DriveRepository driveRepository;
+  final UserSessionCache userSessionCache;
 
   @override
   State<NotificationsPage> createState() => _NotificationsPageState();
@@ -160,6 +166,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
           appVersion: widget.appVersion,
           syncNotificationService: widget.syncNotificationService,
           householdController: widget.householdController,
+          driveRepository: widget.driveRepository,
+          userSessionCache: widget.userSessionCache,
         ),
       ),
     );
@@ -180,6 +188,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
         appVersion: widget.appVersion,
         syncNotificationService: widget.syncNotificationService,
         householdController: widget.householdController,
+        driveRepository: widget.driveRepository,
+        userSessionCache: widget.userSessionCache,
       ),
       body: Builder(
         builder: (innerContext) => SafeArea(
@@ -230,6 +240,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 appVersion: widget.appVersion,
                 syncNotificationService: widget.syncNotificationService,
                 householdController: widget.householdController,
+                driveRepository: widget.driveRepository,
+                userSessionCache: widget.userSessionCache,
               ),
             ),
           );

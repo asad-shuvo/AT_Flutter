@@ -11,6 +11,7 @@ import 'package:filip_at_flutter/features/dashboard/data/dashboard_repository.da
 import 'package:filip_at_flutter/features/notifications/data/notifications_repository.dart';
 import 'package:filip_at_flutter/features/notifications/application/fcm_service.dart';
 import 'package:filip_at_flutter/features/notifications/application/sync_notification_service.dart';
+import 'package:filip_at_flutter/features/drive/data/drive_repository.dart';
 import 'package:filip_at_flutter/features/self_signup/data/self_signup_repository.dart';
 
 class AppServices {
@@ -29,6 +30,7 @@ class AppServices {
     required this.fcmService,
     required this.selfSignupRepository,
     required this.householdController,
+    required this.driveRepository,
   });
 
   final ApiClient apiClient;
@@ -45,4 +47,5 @@ class AppServices {
   final FcmService fcmService;
   final SelfSignupRepository selfSignupRepository;
   final HouseholdMemberFilterController householdController;
+  final DriveRepository driveRepository;
 }

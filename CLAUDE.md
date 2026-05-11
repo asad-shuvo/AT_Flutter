@@ -132,3 +132,5 @@ alwys follow this font style from at nativescript mobile app
 
 # Please language support ensure for both de and en language. please check en.json and de.json for language .
 
+# File size  should not be vry big, break it into multiple files follow nativecsript codebase for file formatting
+

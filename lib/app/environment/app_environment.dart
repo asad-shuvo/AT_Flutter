@@ -17,6 +17,8 @@ class AppEnvironment {
     required this.captchaUrl,
     required this.appVersion,
     required this.investmentPushNotificationKey,
+    required this.aggregatorUrl,
+    required this.mailServiceUrl,
   });
 
   factory AppEnvironment.fromFlavor(AppFlavor flavor) {
@@ -50,6 +52,8 @@ class AppEnvironment {
           captchaUrl: '$devBaseUrl/captcha/v1/Captcha/CaptchaCommand/',
           appVersion: '1.0.4.23.1.2024',
           investmentPushNotificationKey: '033c1c1a-3b1c-4bd2-bf9a-dc8009f2de63',
+          aggregatorUrl: '$devBaseUrl/aggregator/v6/Service-Aggregator/ServiceAggrigation/',
+          mailServiceUrl: '$devBaseUrl/mailservice/v12/MailService',
         );
       case AppFlavor.stg:
         return const AppEnvironment(
@@ -70,6 +74,8 @@ class AppEnvironment {
           captchaUrl: '$stgBaseUrl/captcha/v1/Captcha/CaptchaCommand/',
           appVersion: '1.0.4',
           investmentPushNotificationKey: '4594019c-5f57-467d-bfbb-f2b6f08dd94c',
+          aggregatorUrl: '$stgBaseUrl/aggregator/v4/Service-Aggregator/ServiceAggrigation/',
+          mailServiceUrl: '$stgBaseUrl/mailservice/v15/MailService',
         );
       case AppFlavor.uat:
         return const AppEnvironment(
@@ -90,6 +96,8 @@ class AppEnvironment {
           captchaUrl: '$uatBaseUrl/captcha/v1/Captcha/CaptchaCommand/',
           appVersion: '19.04.2026',
           investmentPushNotificationKey: '4594019c-5f57-467d-bfbb-f2b6f08dd94c',
+          aggregatorUrl: '$uatBaseUrl/aggregator/v4/Service-Aggregator/ServiceAggrigation/',
+          mailServiceUrl: '$uatBaseUrl/mailservice/v15/MailService',
         );
       case AppFlavor.prod:
         return const AppEnvironment(
@@ -110,6 +118,8 @@ class AppEnvironment {
           captchaUrl: '$prodBaseUrl/captcha/v100/Captcha/CaptchaCommand/',
           appVersion: '1.0.15',
           investmentPushNotificationKey: '4594019c-5f57-467d-bfbb-f2b6f08dd94c',
+          aggregatorUrl: '$prodBaseUrl/aggregator/v100/Service-Aggregator/ServiceAggrigation/',
+          mailServiceUrl: '$prodBaseUrl/mailservice/v100/MailService',
         );
     }
   }
@@ -129,4 +139,6 @@ class AppEnvironment {
   final String captchaUrl;
   final String appVersion;
   final String investmentPushNotificationKey;
+  final String aggregatorUrl;
+  final String mailServiceUrl;
 }

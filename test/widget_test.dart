@@ -9,9 +9,10 @@ import 'package:filip_at_flutter/features/auth/application/auth_session_controll
 import 'package:filip_at_flutter/features/auth/application/user_session_cache.dart';
 import 'package:filip_at_flutter/features/auth/data/auth_repository.dart';
 import 'package:filip_at_flutter/features/auth/data/login_sync_repository.dart';
-import 'package:filip_at_flutter/features/contracts/application/contracts_household_controller.dart';
+import 'package:filip_at_flutter/features/contracts/application/household_member_filter_controller.dart';
 import 'package:filip_at_flutter/features/contracts/data/contracts_repository.dart';
 import 'package:filip_at_flutter/features/dashboard/data/dashboard_repository.dart';
+import 'package:filip_at_flutter/features/drive/data/drive_repository.dart';
 import 'package:filip_at_flutter/features/notifications/data/notifications_repository.dart';
 import 'package:filip_at_flutter/features/notifications/application/sync_notification_service.dart';
 import 'package:filip_at_flutter/features/notifications/application/fcm_service.dart';
@@ -38,8 +39,11 @@ void main() {
       notificationUrl: 'https://msblocks.selisestage.com/api/notification/v3',
       originUrl: 'https://sln-at.selisestage.com',
       dfsBaseUrl: 'http://pms-swisslife-frontend-test.additiv.com/',
-      storageServiceUrl: 'https://msblocks.selisestage.com/api/storage/',
-      dmsServiceUrl: 'https://msblocks.selisestage.com/api/dms/',
+      storageServiceUrl:
+          'https://msblocks.selisestage.com/api/storageservice/v23/StorageService/',
+      dmsServiceUrl: 'https://msblocks.selisestage.com/api/dms/v46/DmsService/',
+      aggregatorUrl: 'https://msblocks.selisestage.com/api/aggregator/v4/Service-Aggregator/ServiceAggrigation/',
+      mailServiceUrl: 'https://msblocks.selisestage.com/api/mailservice/v15/MailService',
     );
     final authRepository = AuthRepository(
       apiClient: apiClient,
@@ -72,6 +76,8 @@ void main() {
       captchaUrl: 'https://msblocks.selisestage.com/api/captcha/v1/Captcha/CaptchaCommand/',
       appVersion: '1.0.4',
       investmentPushNotificationKey: '033c1c1a-3b1c-4bd2-bf9a-dc8009f2de63',
+      aggregatorUrl: 'https://msblocks.selisestage.com/api/aggregator/v4/Service-Aggregator/ServiceAggrigation/',
+      mailServiceUrl: 'https://msblocks.selisestage.com/api/mailservice/v15/MailService',
     );
     final userSessionCache = UserSessionCache(
       apiClient: apiClient,
@@ -106,6 +112,10 @@ void main() {
       originUrl: 'https://sln-at.selisestage.com',
       tokenUrl: 'https://msblocks.selisestage.com/api/identity/v25/identity/token',
     );
+    final driveRepository = DriveRepository(
+      apiClient: apiClient,
+      userSessionCache: userSessionCache,
+    );
     final services = AppServices(
       apiClient: apiClient,
       secureStorageService: secureStorageService,
@@ -120,9 +130,10 @@ void main() {
       syncNotificationService: syncNotificationService,
       fcmService: fcmService,
       selfSignupRepository: selfSignupRepository,
-      householdController: ContractsHouseholdController(
+      householdController: HouseholdMemberFilterController(
         contractsRepository: contractsRepository,
       ),
+      driveRepository: driveRepository,
     );
 
     await tester.pumpWidget(FilipAtApp(config: config, services: services));

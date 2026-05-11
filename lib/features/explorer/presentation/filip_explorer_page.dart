@@ -1,5 +1,6 @@
 import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/features/auth/application/auth_session_controller.dart';
+import 'package:filip_at_flutter/features/auth/application/user_session_cache.dart';
 import 'package:filip_at_flutter/features/chat/presentation/chat_page.dart';
 import 'package:filip_at_flutter/features/contracts/application/household_member_filter_controller.dart';
 import 'package:filip_at_flutter/features/contracts/data/contracts_repository.dart';
@@ -7,6 +8,7 @@ import 'package:filip_at_flutter/features/contracts/presentation/contracts_page.
 import 'package:filip_at_flutter/features/dashboard/data/dashboard_models.dart';
 import 'package:filip_at_flutter/features/dashboard/data/dashboard_repository.dart';
 import 'package:filip_at_flutter/features/documents/presentation/documents_page.dart';
+import 'package:filip_at_flutter/features/drive/data/drive_repository.dart';
 import 'package:filip_at_flutter/features/notifications/data/notifications_repository.dart';
 import 'package:filip_at_flutter/features/notifications/presentation/notifications_page.dart';
 import 'package:filip_at_flutter/features/notifications/application/sync_notification_service.dart';
@@ -30,6 +32,8 @@ class FilipExplorerPage extends StatefulWidget {
     required this.appVersion,
     required this.syncNotificationService,
     required this.householdController,
+    required this.driveRepository,
+    required this.userSessionCache,
   });
 
   final DashboardRepository dashboardRepository;
@@ -39,6 +43,8 @@ class FilipExplorerPage extends StatefulWidget {
   final String appVersion;
   final SyncNotificationService syncNotificationService;
   final HouseholdMemberFilterController householdController;
+  final DriveRepository driveRepository;
+  final UserSessionCache userSessionCache;
 
   @override
   State<FilipExplorerPage> createState() => _FilipExplorerPageState();
@@ -76,6 +82,8 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
           appVersion: widget.appVersion,
           syncNotificationService: widget.syncNotificationService,
           householdController: widget.householdController,
+          driveRepository: widget.driveRepository,
+          userSessionCache: widget.userSessionCache,
         ),
       ),
     );
@@ -112,6 +120,8 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
             appVersion: widget.appVersion,
             syncNotificationService: widget.syncNotificationService,
             householdController: widget.householdController,
+            driveRepository: widget.driveRepository,
+            userSessionCache: widget.userSessionCache,
           ),
         ),
       ),
@@ -125,7 +135,17 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
         title: l10n.tr('explorer.slider.drive.title'),
         description: l10n.tr('explorer.slider.drive.description'),
         icon: const IconData(0xE9C9, fontFamily: _filipIconFamily),
-        onTap: () => _openPage(const DocumentsPage()),
+        onTap: () => _openPage(DocumentsPage(
+          driveRepository: widget.driveRepository,
+          householdController: widget.householdController,
+          userSessionCache: widget.userSessionCache,
+          dashboardRepository: widget.dashboardRepository,
+          contractsRepository: widget.contractsRepository,
+          notificationsRepository: widget.notificationsRepository,
+          authSessionController: widget.authSessionController,
+          appVersion: widget.appVersion,
+          syncNotificationService: widget.syncNotificationService,
+        )),
       ),
       _ExplorerSlideData(
         title: l10n.tr('explorer.slider.message.title'),
@@ -146,6 +166,8 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
         appVersion: widget.appVersion,
         syncNotificationService: widget.syncNotificationService,
         householdController: widget.householdController,
+        driveRepository: widget.driveRepository,
+        userSessionCache: widget.userSessionCache,
       ),
       body: Builder(
         builder: (innerContext) => SafeArea(
@@ -180,7 +202,17 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
                           _ExplorerTileGrid(
                             onMyRealEstateTap: () =>
                                 _openPage(const RealEstatePage()),
-                            onDriveTap: () => _openPage(const DocumentsPage()),
+                            onDriveTap: () => _openPage(DocumentsPage(
+                              driveRepository: widget.driveRepository,
+                              householdController: widget.householdController,
+                              userSessionCache: widget.userSessionCache,
+                              dashboardRepository: widget.dashboardRepository,
+                              contractsRepository: widget.contractsRepository,
+                              notificationsRepository: widget.notificationsRepository,
+                              authSessionController: widget.authSessionController,
+                              appVersion: widget.appVersion,
+                              syncNotificationService: widget.syncNotificationService,
+                            )),
                             onContractsTap: () => _openPage(
                               ContractsPage(
                                 contractsRepository: widget.contractsRepository,
@@ -193,6 +225,8 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
                                 syncNotificationService:
                                     widget.syncNotificationService,
                                 householdController: widget.householdController,
+                                driveRepository: widget.driveRepository,
+                                userSessionCache: widget.userSessionCache,
                               ),
                             ),
                             onMessageTap: () => _openPage(const ChatPage()),
@@ -247,6 +281,8 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
             appVersion: widget.appVersion,
             syncNotificationService: widget.syncNotificationService,
             householdController: widget.householdController,
+            driveRepository: widget.driveRepository,
+            userSessionCache: widget.userSessionCache,
           ),
         ),
         onRealEstateTap: () => _openPage(const RealEstatePage()),
