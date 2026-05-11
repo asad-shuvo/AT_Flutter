@@ -13,6 +13,7 @@ enum SelfSignupView {
   fullForm,
   passwordSet,
   success,
+  failed,
 }
 
 enum CaptchaTarget { email, phone }
@@ -276,10 +277,10 @@ class SelfSignupController extends ChangeNotifier {
         designation: designation,
       );
       view = SelfSignupView.success;
-    } on SelfSignupException catch (e) {
-      errorMessage = _mapError(e.code);
+    } on SelfSignupException {
+      view = SelfSignupView.failed;
     } catch (_) {
-      errorMessage = 'tns.selfSignupFailedMsg';
+      view = SelfSignupView.failed;
     } finally {
       isLoading = false;
       notifyListeners();
@@ -301,10 +302,10 @@ class SelfSignupController extends ChangeNotifier {
         dateOfBirth: dateOfBirth,
       );
       view = SelfSignupView.success;
-    } on SelfSignupException catch (e) {
-      errorMessage = _mapError(e.code);
+    } on SelfSignupException {
+      view = SelfSignupView.failed;
     } catch (_) {
-      errorMessage = 'tns.selfSignupFailedMsg';
+      view = SelfSignupView.failed;
     } finally {
       isLoading = false;
       notifyListeners();

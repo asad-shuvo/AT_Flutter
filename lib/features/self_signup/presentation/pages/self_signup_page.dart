@@ -4,6 +4,7 @@ import 'package:filip_at_flutter/features/self_signup/application/self_signup_co
 import 'package:filip_at_flutter/features/self_signup/data/self_signup_repository.dart';
 import 'package:filip_at_flutter/features/self_signup/presentation/widgets/signup_captcha_view.dart';
 import 'package:filip_at_flutter/features/self_signup/presentation/widgets/signup_email_step.dart';
+import 'package:filip_at_flutter/features/self_signup/presentation/widgets/signup_failed_view.dart';
 import 'package:filip_at_flutter/features/self_signup/presentation/widgets/signup_full_form_step.dart';
 import 'package:filip_at_flutter/features/self_signup/presentation/widgets/signup_otp_step.dart';
 import 'package:filip_at_flutter/features/self_signup/presentation/widgets/signup_password_step.dart';
@@ -23,6 +24,7 @@ class SelfSignupPage extends StatefulWidget {
 class _SelfSignupPageState extends State<SelfSignupPage> {
   late final SelfSignupController _controller;
   bool _successSheetShown = false;
+  bool _failedSheetShown = false;
 
   @override
   void initState() {
@@ -55,6 +57,12 @@ class _SelfSignupPageState extends State<SelfSignupPage> {
         if (!mounted) return;
         _showSuccessSheet();
       });
+    } else if (_controller.view == SelfSignupView.failed && !_failedSheetShown) {
+      _failedSheetShown = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _showFailedSheet();
+      });
     } else {
       setState(() {});
     }
@@ -86,6 +94,23 @@ class _SelfSignupPageState extends State<SelfSignupPage> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (_) => SignupSuccessView(
+        onGoToLogin: () => Navigator.of(
+          context,
+        ).pushNamedAndRemoveUntil(AppRouter.login, (_) => false),
+      ),
+    );
+  }
+
+  void _showFailedSheet() {
+    showModalBottomSheet<void>(
+      context: context,
+      isDismissible: false,
+      enableDrag: false,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (_) => SignupFailedView(
         onGoToLogin: () => Navigator.of(
           context,
         ).pushNamedAndRemoveUntil(AppRouter.login, (_) => false),
@@ -171,6 +196,7 @@ class _SelfSignupPageState extends State<SelfSignupPage> {
         return SignupFullFormStep(controller: _controller);
       case SelfSignupView.passwordSet:
       case SelfSignupView.success:
+      case SelfSignupView.failed:
         return SignupPasswordStep(controller: _controller);
     }
   }
