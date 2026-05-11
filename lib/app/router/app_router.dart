@@ -3,6 +3,7 @@ import 'package:filip_at_flutter/app/services/app_services.dart';
 import 'package:filip_at_flutter/features/auth/presentation/forgot_password_page.dart';
 import 'package:filip_at_flutter/features/auth/presentation/login_intermediary_page.dart';
 import 'package:filip_at_flutter/features/auth/presentation/login_page.dart';
+import 'package:filip_at_flutter/features/auth/presentation/two_factor_page.dart';
 import 'package:filip_at_flutter/features/dashboard/presentation/dashboard_page.dart';
 import 'package:filip_at_flutter/features/onboarding/presentation/onboarding_page.dart';
 import 'package:filip_at_flutter/features/self_signup/presentation/pages/self_signup_page.dart';
@@ -22,6 +23,7 @@ class AppRouter {
   static const String forgotPassword = '/login/forgot-password';
   static const String dashboard = '/dashboard';
   static const String selfSignup = '/self-signup';
+  static const String twoFactor = '/login/two-factor';
 
   final AppConfig config;
   final AppServices services;
@@ -60,6 +62,19 @@ class AppRouter {
       case forgotPassword:
         return MaterialPageRoute<void>(
           builder: (_) => const ForgotPasswordPage(),
+          settings: settings,
+        );
+      case twoFactor:
+        final args = settings.arguments as Map<String, String>? ?? {};
+        return MaterialPageRoute<void>(
+          builder: (_) => TwoFactorPage(
+            twoFactorToken: args['twoFactorToken'] ?? '',
+            pseudoNumber: args['pseudoNumber'] ?? '',
+            username: args['username'] ?? '',
+            password: args['password'] ?? '',
+            rememberMe: args['rememberMe'] == 'true',
+            authSessionController: services.authSessionController,
+          ),
           settings: settings,
         );
       case selfSignup:

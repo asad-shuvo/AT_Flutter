@@ -5,6 +5,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project
 
 Filip AT Flutter — a Flutter rewrite of the Filip AT customer mobile app (wealth/asset management platform by SELISE). The NativeScript app at `old/l3-angular-sln-mobileat` is the source of truth for UI, icons, typography, colors, spacing, API behavior, and feature grouping. Do not invent a new visual system when the NativeScript app already defines one.
+check D:\Mobile Repo\old\l3-angular-sln-mobileat\graphify-out\graph.html for at nativecsript flow
+
 
 ## Commands
 
@@ -127,3 +129,6 @@ alwys follow this font style from at nativescript mobile app
 # Follow Icon of At Nativescript app
 
 # Follow uilm of nativecsript app
+
+# Please language support ensure for both de and en language. please check en.json and de.json for language .
+

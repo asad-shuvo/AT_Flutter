@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:filip_at_flutter/app/config/app_config.dart';
 import 'package:filip_at_flutter/app/localization/app_language_scope.dart';
 import 'package:filip_at_flutter/app/localization/app_localizations.dart';
@@ -95,9 +97,33 @@ class _LoginPageState extends State<LoginPage> {
 
       Navigator.of(context).pushReplacementNamed(AppRouter.loginIntermediary);
     } on AuthException catch (error) {
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text(error.message)));
+      if (error.code == 'two_factor_code_require') {
+        try {
+          final parsed = jsonDecode(error.description ?? '{}') as Map<String, dynamic>;
+          final twoFactorToken = parsed['TwoFactorToken'] as String? ?? '';
+          final pseudoNumber = parsed['PsudoNumber'] as String? ?? '';
+          if (mounted) {
+            Navigator.of(context).pushNamed(
+              AppRouter.twoFactor,
+              arguments: <String, String>{
+                'twoFactorToken': twoFactorToken,
+                'pseudoNumber': pseudoNumber,
+                'username': _usernameController.text.trim(),
+                'password': _passwordController.text,
+                'rememberMe': _rememberMe.toString(),
+              },
+            );
+          }
+          return;
+        } catch (_) {
+          // fall through to generic snackbar
+        }
+      }
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(content: Text(error.message)));
+      }
     } catch (_) {
       final l10n = context.l10n;
       ScaffoldMessenger.of(context)

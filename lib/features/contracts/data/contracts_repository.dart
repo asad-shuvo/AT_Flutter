@@ -940,6 +940,35 @@ class ContractsRepository {
         .toList(growable: false);
   }
 
+  Future<bool> archiveContractDocument({
+    required String documentItemId,
+  }) async {
+    if (documentItemId.isEmpty) return false;
+    final context = await _getAuthorizedPersonContext();
+    if (context == null) return false;
+
+    final response = await _apiClient.postJson(
+      url: '${_apiClient.dmsServiceUrl}DmsCommand/ArchiveObjectArtifact',
+      body: <String, dynamic>{
+        'ArchivedFor': ' ',
+        'ObjectArtifactId': documentItemId,
+        'ArchivedStatus': true,
+        'IsArchived': true,
+      },
+      headers: _authorizedHeaders(context.accessToken),
+    );
+
+    final statusCode = response['statusCode'] as int? ?? 0;
+    if (statusCode < 200 || statusCode >= 300) return false;
+    final body = response['body'] as Map<String, dynamic>? ?? <String, dynamic>{};
+    final errors = body['Errors'];
+    if (errors is Map) {
+      final isValid = errors['IsValid'];
+      return isValid == true;
+    }
+    return statusCode >= 200 && statusCode < 300;
+  }
+
   Future<void> createExternalLinkDocument({
     required String contractItemId,
     required String resourceTitle,
@@ -1783,6 +1812,180 @@ class ContractsRepository {
         .where((item) => item.isNotEmpty)
         .toList(growable: false);
   }
+
+  Future<ContractByIdResult?> fetchContractById({
+    required String entityName,
+    required String itemId,
+  }) async {
+    if (itemId.isEmpty) return null;
+    final ctx = await _getAuthorizedPersonContext();
+    if (ctx == null) return null;
+
+    final normalized = _normalizeEntityName(entityName);
+    // Retirement uses ContractEntityName 'Insure' in the API (same as NativeScript)
+    final apiEntityName = normalized == 'Retirement' ? 'Insure' : normalized;
+
+    final response = await _apiClient.postJson(
+      url: '${_apiClient.snQueryUrl}ContractsQuery/GetContracts',
+      body: <String, dynamic>{
+        'PersonIds': <String>[ctx.personId],
+        'ContractEntityName': apiEntityName,
+        'ExcludeCount': true,
+        'ItemIds': <String>[itemId],
+      },
+      headers: _authorizedHeaders(ctx.accessToken),
+    );
+
+    final statusCode = response['statusCode'] as int? ?? 0;
+    if (statusCode < 200 || statusCode >= 300) return null;
+
+    final body = response['body'] as Map<String, dynamic>? ?? <String, dynamic>{};
+    final data = body['Data'];
+    if (data is! Map<String, dynamic>) return null;
+
+    if (normalized == 'Investment') {
+      final list = data['Investments'];
+      if (list is! List || list.isEmpty) return null;
+      final raw = (list.first as Map?)?.cast<String, dynamic>() ?? <String, dynamic>{};
+      final contract = InvestmentContract(
+        itemId: _readString(raw['ItemId']) ?? itemId,
+        title: _readString(raw['Title']),
+        iconCodePoint: _investmentTypeIconCodePoint(_readString(raw['InvestmentType'])),
+        source: _readString(raw['Source']),
+        personId: _readString(raw['PersonId']),
+        partnerName: _readString(raw['PartnerName']),
+        investmentType: _readString(raw['InvestmentType']),
+        bookValueDate: _readDateTime(raw['BookValueDate']),
+        investmentStartDate: _readDateTime(raw['InvestmentStartDate']),
+        investmentBookValue: _readDouble(raw['InvestmentBookValue']),
+        investmentCurrentValue: _readDouble(raw['InvestmentCurrentValue']),
+        lumpSumInvestment: _readDouble(raw['LumpSumInvestment']),
+        accountNumber: _readString(raw['AccountNumber']),
+        contractNumber: _readString(raw['ContractNumber']),
+        notes: _readString(raw['Notes']),
+        lastUpdateDate: _readDateTime(raw['LastUpdateDate']),
+        investmentEndDate: _readDateTime(raw['InvestmentEndDate']),
+        paymentFrequency: _readString(raw['PaymentFrequency']),
+        isTargetSumSavingsPlan: raw['IsTargetSumSavingsPlan'] is bool ? raw['IsTargetSumSavingsPlan'] as bool : null,
+        risk: _readDouble(raw['Risk']),
+        isin: _readString(raw['ISIN']),
+        numberOfShares: _readDouble(raw['NumberofShares']),
+        currentShareValue: _readDouble(raw['CurrentShareValue']),
+        interestRate: _readDouble(raw['InterestRate']),
+        couponRate: _readDouble(raw['CouponRate']),
+        couponType: _readString(raw['CouponType']),
+        iban: _readString(raw['IBAN']),
+        bic: _readString(raw['BIC']),
+        currency: _readString(raw['Currency']),
+        issuer: _readString(raw['Issuer']),
+        isPremiumBenefit: raw['IsPremiumBenefit'] is bool ? raw['IsPremiumBenefit'] as bool : null,
+        bondPrice: _readDouble(raw['BondPrice']),
+        bondPriceDate: _readDateTime(raw['BondPriceDate']),
+        currentValueDate: _readDateTime(raw['CurrentValueDate']),
+        syncDisabledProperties: _readStringList(raw['SyncDisabledProperties']),
+      );
+      return ContractByIdResult(
+        investment: contract,
+        insure: null,
+        entityName: normalized,
+        personId: _readString(raw['PersonId']) ?? ctx.personId,
+      );
+    } else if (normalized == 'Loan') {
+      final list = data['Loans'];
+      if (list is! List || list.isEmpty) return null;
+      final raw = (list.first as Map?)?.cast<String, dynamic>() ?? <String, dynamic>{};
+      final contract = InsureContract(
+        itemId: _readString(raw['ItemId']) ?? itemId,
+        title: _readString(raw['Title']),
+        type: _readString(raw['Type']),
+        iconCodePoint: _loanTypeIconCodePoint(_readString(raw['Type'])),
+        endDate: _readDateTime(raw['DateOfReaminingDept']) ?? _readDateTime(raw['StartDate']),
+        grossPremium: _readDouble(raw['RemainingAmount']) ?? _readDouble(raw['Amount']),
+        source: _readString(raw['Source']),
+        personId: _readString(raw['PersonId']),
+        partnerName: _readString(raw['PartnerName']),
+        insuredPersons: _readStringList(raw['InsuredPersons']),
+        contractNumber: _readString(raw['ContractNumber']),
+        notes: _readString(raw['Notes']),
+        lastUpdateDate: _readDateTime(raw['LastUpdateDate']),
+        syncDisabledProperties: _readStringList(raw['SyncDisabledProperties']),
+      );
+      return ContractByIdResult(
+        insure: contract,
+        investment: null,
+        entityName: normalized,
+        personId: _readString(raw['PersonId']) ?? ctx.personId,
+      );
+    } else {
+      // Insure (non-life) and Retirement — both use 'Insure' entity in the API
+      final list = data['Insures'];
+      if (list is! List || list.isEmpty) return null;
+      final raw = (list.first as Map?)?.cast<String, dynamic>() ?? <String, dynamic>{};
+      final iconFn = normalized == 'Retirement'
+          ? _retirementTypeIconCodePoint
+          : _insureTypeIconCodePoint;
+      final contract = InsureContract(
+        itemId: _readString(raw['ItemId']) ?? itemId,
+        title: _readString(raw['Title']),
+        type: _readString(raw['Type']),
+        iconCodePoint: iconFn(_readString(raw['Type'])),
+        endDate: _readDateTime(raw['EndDate']),
+        grossPremium: _readDouble(raw['GrossPremium']),
+        source: _readString(raw['Source']),
+        personId: _readString(raw['PersonId']),
+        partnerName: _readString(raw['PartnerName']),
+        insuredPersons: _readStringList(raw['InsuredPersons']),
+        contractNumber: _readString(raw['ContractNumber']),
+        startDate: _readDateTime(raw['StartDate']),
+        premiumFrequency: _readString(raw['PremiumFrequency']),
+        maturityBenefits: _readDouble(raw['MaturityBenefits']),
+        isLifeTime: raw['IsLifeTime'] is bool ? raw['IsLifeTime'] as bool : null,
+        status: _readString(raw['Status']),
+        adviserVisibility: raw['AdviserVisibility'] is bool ? raw['AdviserVisibility'] as bool : null,
+        partnerId: _readString(raw['PartnerId']),
+        partnerItemId: _readString(raw['PartnerItemId']),
+        productPartnerDescription: _readString(raw['ProductPartnerDescription']),
+        notes: _readString(raw['Notes']),
+        lastUpdateDate: _readDateTime(raw['LastUpdateDate']),
+        vunr: _readString(raw['Vunr']),
+        syncDisabledProperties: _readStringList(raw['SyncDisabledProperties']),
+        dueDate: _readDateTime(raw['DueDate']),
+      );
+      return ContractByIdResult(
+        insure: contract,
+        investment: null,
+        entityName: normalized,
+        personId: _readString(raw['PersonId']) ?? ctx.personId,
+      );
+    }
+  }
+
+  static String _normalizeEntityName(String entityName) {
+    switch (entityName.toLowerCase()) {
+      case 'investment':
+        return 'Investment';
+      case 'retirement':
+        return 'Retirement';
+      case 'loan':
+        return 'Loan';
+      default:
+        return 'Insure';
+    }
+  }
+}
+
+class ContractByIdResult {
+  const ContractByIdResult({
+    required this.insure,
+    required this.investment,
+    required this.entityName,
+    required this.personId,
+  });
+
+  final InsureContract? insure;
+  final InvestmentContract? investment;
+  final String entityName;
+  final String personId;
 }
 
 class _ContractsPersonContext {

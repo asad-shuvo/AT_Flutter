@@ -21,6 +21,54 @@ class AuthRepository {
     return token != null && token.isNotEmpty;
   }
 
+  Future<void> verify2faCode({
+    required String code,
+    required String token,
+  }) async {
+    final response = await _apiClient.postForm(
+      url: _apiClient.tokenUrl,
+      body: <String, String>{
+        'grant_type': 'authenticate_two_factor_code',
+        'two_factor_code': code,
+        'two_factor_token': token,
+      },
+      headers: <String, String>{'Origin': _apiClient.originUrl},
+    );
+
+    final statusCode = response['statusCode'] as int? ?? 0;
+    final responseBody = response['body'] as Map<String, dynamic>;
+
+    if (statusCode < 200 || statusCode >= 300) {
+      throw _mapAuthException(responseBody);
+    }
+
+    final accessToken = responseBody['access_token'] as String?;
+    final refreshToken = responseBody['refresh_token'] as String?;
+
+    if (accessToken == null || accessToken.isEmpty) {
+      throw const AuthException(
+        message: '2FA succeeded but no access token was returned.',
+      );
+    }
+
+    await _secureStorageService.write(
+      key: AppStorageKeys.accessToken,
+      value: accessToken,
+    );
+    if (refreshToken != null && refreshToken.isNotEmpty) {
+      await _secureStorageService.write(
+        key: AppStorageKeys.refreshToken,
+        value: refreshToken,
+      );
+    }
+
+    final loginCount = await getLoginCount();
+    await _secureStorageService.write(
+      key: AppStorageKeys.loginCount,
+      value: '${loginCount + 1}',
+    );
+  }
+
   Future<void> signIn({
     required String username,
     required String password,
@@ -325,6 +373,16 @@ class AuthRepository {
         return const AuthException(
           code: 'incorrect_user_name_or_password',
           message: 'Incorrect email or password.',
+        );
+      case 'invalid_two_factor_code':
+        return const AuthException(
+          code: 'invalid_two_factor_code',
+          message: 'Invalid Two Factor Code!!',
+        );
+      case 'invalid_two_factor_token':
+        return const AuthException(
+          code: 'invalid_two_factor_token',
+          message: 'Invalid Two Factor Token!!',
         );
       case 'two_factor_code_require':
         return AuthException(

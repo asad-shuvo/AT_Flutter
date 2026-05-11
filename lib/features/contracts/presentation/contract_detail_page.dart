@@ -1207,13 +1207,17 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
       ),
       builder: (_) => const _ArchiveConfirmSheet(),
     );
-    if (confirmed == true && mounted) {
-      // TODO: call archive API when DocumentManagerService URL is configured
-      setState(() {
-        _documents =
-            _documents?.where((d) => d.itemId != doc.itemId).toList();
-      });
-    }
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _docsLoading = true);
+    try {
+      await widget.contractsRepository.archiveContractDocument(
+        documentItemId: doc.itemId,
+      );
+    } catch (_) {}
+
+    if (!mounted) return;
+    await _fetchDocuments();
   }
 
   void _toggleInsuranceModule(int index) {
@@ -2182,45 +2186,49 @@ class _ArchiveConfirmSheet extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                border: Border.all(color: AppColors.primaryRed, width: 2),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 36,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryRed,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 52,
+                  height: 14,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: AppColors.primaryRed, width: 2),
+                    borderRadius: BorderRadius.circular(3),
                   ),
-                  const SizedBox(height: 4),
-                  Container(
-                    width: 28,
-                    height: 24,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.primaryRed, width: 2),
-                      borderRadius: const BorderRadius.only(
-                        bottomLeft: Radius.circular(2),
-                        bottomRight: Radius.circular(2),
-                      ),
-                    ),
-                    child: Center(
-                      child: Container(
-                        width: 14,
-                        height: 2,
+                  child: Center(
+                    child: Container(
+                      width: 20,
+                      height: 2,
+                      decoration: BoxDecoration(
                         color: AppColors.primaryRed,
+                        borderRadius: BorderRadius.circular(1),
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+                Container(
+                  width: 44,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: AppColors.primaryRed, width: 2),
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(3),
+                      bottomRight: Radius.circular(3),
+                    ),
+                  ),
+                  child: Center(
+                    child: Container(
+                      width: 18,
+                      height: 2,
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryRed,
+                        borderRadius: BorderRadius.circular(1),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 24),
             const Text(

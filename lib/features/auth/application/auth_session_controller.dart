@@ -47,6 +47,22 @@ class AuthSessionController extends ChangeNotifier {
     }
   }
 
+  Future<void> verify2faCode({
+    required String code,
+    required String token,
+  }) async {
+    try {
+      await _authRepository.verify2faCode(code: code, token: token);
+      _hasCompletedFirstLogin = true;
+      _state = AuthSessionState.authenticated();
+      notifyListeners();
+    } catch (_) {
+      _state = AuthSessionState.unauthenticated();
+      notifyListeners();
+      rethrow;
+    }
+  }
+
   Future<void> signOut() async {
     await _authRepository.clearSession();
     _state = AuthSessionState.unauthenticated();

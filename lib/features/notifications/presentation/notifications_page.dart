@@ -3,19 +3,23 @@ import 'package:filip_at_flutter/features/auth/application/auth_session_controll
 import 'package:filip_at_flutter/features/chat/presentation/chat_page.dart';
 import 'package:filip_at_flutter/features/contracts/application/household_member_filter_controller.dart';
 import 'package:filip_at_flutter/features/contracts/data/contracts_repository.dart';
+import 'package:filip_at_flutter/features/contracts/presentation/contract_detail_page.dart';
 import 'package:filip_at_flutter/features/contracts/presentation/contracts_page.dart';
 import 'package:filip_at_flutter/features/dashboard/data/dashboard_models.dart';
 import 'package:filip_at_flutter/features/dashboard/data/dashboard_repository.dart';
 import 'package:filip_at_flutter/features/notifications/application/sync_notification_service.dart';
 import 'package:filip_at_flutter/features/notifications/data/notification_item_model.dart';
 import 'package:filip_at_flutter/features/notifications/data/notifications_repository.dart';
+import 'package:filip_at_flutter/features/notifications/presentation/contract_not_found_page.dart';
 import 'package:filip_at_flutter/features/real_estate/presentation/real_estate_page.dart';
 import 'package:filip_at_flutter/features/explorer/presentation/filip_explorer_page.dart';
 import 'package:filip_at_flutter/shared/theme/app_colors.dart';
 import 'package:filip_at_flutter/shared/widgets/app_bottom_nav.dart';
+import 'package:filip_at_flutter/shared/widgets/app_loading_view.dart';
 import 'package:filip_at_flutter/shared/widgets/app_side_drawer.dart';
 import 'package:filip_at_flutter/shared/widgets/app_top_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({
@@ -53,6 +57,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
   bool _isInitialLoading = true;
   bool _isLoadingMore = false;
   bool _hasMore = true;
+  bool _isLoadingContract = false;
   Object? _loadError;
 
   @override
@@ -178,21 +183,32 @@ class _NotificationsPageState extends State<NotificationsPage> {
       ),
       body: Builder(
         builder: (innerContext) => SafeArea(
-          child: Column(
+          child: Stack(
             children: [
-              FutureBuilder<int>(
-                future: _unreadNotificationsFuture,
-                builder: (context, snapshot) {
-                  return AppTopBar(
-                    onMenuTap: () => Scaffold.of(innerContext).openDrawer(),
-                    onNotificationTap: () {},
-                    showBadge: (snapshot.data ?? 0) > 0,
-                    notificationIconColor: AppColors.primaryRed,
-                  );
-                },
+              Column(
+                children: [
+                  FutureBuilder<int>(
+                    future: _unreadNotificationsFuture,
+                    builder: (context, snapshot) {
+                      return AppTopBar(
+                        onMenuTap: () => Scaffold.of(innerContext).openDrawer(),
+                        onNotificationTap: () {},
+                        showBadge: (snapshot.data ?? 0) > 0,
+                        notificationIconColor: AppColors.primaryRed,
+                      );
+                    },
+                  ),
+                  _NotificationHeader(title: context.l10n.tr('tns.notification')),
+                  Expanded(child: _buildBody(context)),
+                ],
               ),
-              _NotificationHeader(title: context.l10n.tr('tns.notification')),
-              Expanded(child: _buildBody(context)),
+              if (_isLoadingContract)
+                const ColoredBox(
+                  color: Color(0x66000000),
+                  child: SizedBox.expand(
+                    child: AppLoadingView(),
+                  ),
+                ),
             ],
           ),
         ),
@@ -258,7 +274,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
         controller: _scrollController,
         padding: const EdgeInsets.fromLTRB(10, 10, 10, 120),
         itemCount: _items.length + (_isLoadingMore ? 1 : 0),
-        separatorBuilder: (_, __) => const SizedBox(height: 8),
+        separatorBuilder: (context, i) => const SizedBox(height: 8),
         itemBuilder: (context, index) {
           if (index >= _items.length) {
             return const Padding(
@@ -277,7 +293,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
               ),
             );
           }
-          return _NotificationCard(item: _items[index]);
+          return _NotificationCard(
+            item: _items[index],
+            onTap: () => _handleNotificationTap(_items[index]),
+          );
         },
       ),
     );
@@ -285,6 +304,83 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   void _openPage(Widget page) {
     Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page));
+  }
+
+  void _handleNotificationTap(NotificationItem item) {
+    final raw = item.payload['message'];
+    final message = raw is Map
+        ? Map<String, dynamic>.from(raw)
+        : const <String, dynamic>{};
+
+    switch (item.responseKey) {
+      case 'contractadded':
+      case 'SchedulingNotification':
+        final entityName = message['EntityName'] as String? ?? '';
+        final itemId = message['ItemId'] as String? ?? '';
+        if (entityName.isNotEmpty && itemId.isNotEmpty) {
+          _navigateToContractDetail(entityName: entityName, itemId: itemId);
+        } else {
+          _openContracts();
+        }
+        break;
+      case 'newsignaturedocumentuploaded':
+        _openContracts();
+        break;
+      case 'Mobile_App_Push_Notification':
+        final urlStr = message['Url'] as String?;
+        if (urlStr != null && urlStr.isNotEmpty) {
+          final uri = Uri.tryParse(urlStr);
+          if (uri != null) {
+            launchUrl(uri, mode: LaunchMode.externalApplication);
+          }
+        }
+        break;
+    }
+  }
+
+  Future<void> _navigateToContractDetail({
+    required String entityName,
+    required String itemId,
+  }) async {
+    setState(() => _isLoadingContract = true);
+
+    ContractByIdResult? result;
+    try {
+      result = await widget.contractsRepository.fetchContractById(
+        entityName: entityName,
+        itemId: itemId,
+      );
+    } finally {
+      if (mounted) setState(() => _isLoadingContract = false);
+    }
+
+    if (!mounted) return;
+
+    if (result == null) {
+      await Navigator.of(context).push<void>(
+        MaterialPageRoute<void>(builder: (_) => const ContractNotFoundPage()),
+      );
+      return;
+    }
+
+    final page = result.investment != null
+        ? ContractDetailPage.fromInvestment(
+            contract: result.investment!,
+            contractsRepository: widget.contractsRepository,
+            currentPersonId: result.personId,
+          )
+        : ContractDetailPage.fromInsure(
+            contract: result.insure!,
+            entityName: result.entityName,
+            contractsRepository: widget.contractsRepository,
+            currentPersonId: result.personId,
+          );
+
+    await Navigator.of(context).push<bool>(
+      MaterialPageRoute<bool>(builder: (_) => page),
+    );
+
+    if (mounted) _loadInitial();
   }
 }
 
@@ -320,20 +416,22 @@ class _NotificationHeader extends StatelessWidget {
 }
 
 class _NotificationCard extends StatelessWidget {
-  const _NotificationCard({required this.item});
+  const _NotificationCard({required this.item, required this.onTap});
 
   final NotificationItem item;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(4),
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(4),
-      ),
-      child: Row(
+        child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
@@ -429,6 +527,7 @@ class _NotificationCard extends StatelessWidget {
             ),
           ),
         ],
+        ),
       ),
     );
   }

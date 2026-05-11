@@ -201,15 +201,31 @@ class NotificationsRepository {
   }
 
   Map<String, dynamic> _parseDenormalizedPayload(dynamic source) {
-    if (source is Map<String, dynamic>) return source;
-    if (source is! String || source.isEmpty) return <String, dynamic>{};
-    try {
-      final decoded = jsonDecode(source);
-      if (decoded is Map<String, dynamic>) return decoded;
-      return <String, dynamic>{};
-    } catch (_) {
-      return <String, dynamic>{};
+    Map<String, dynamic>? decoded;
+    if (source is Map<String, dynamic>) {
+      decoded = source;
+    } else if (source is String && source.isNotEmpty) {
+      try {
+        final parsed = jsonDecode(source);
+        if (parsed is Map<String, dynamic>) decoded = parsed;
+      } catch (_) {}
     }
+    if (decoded == null) return <String, dynamic>{};
+    return _resolveNestedMessageString(decoded);
+  }
+
+  // NativeScript parses message as JSON if it's a string:
+  // `typeof result.message == 'string' ? JSON.parse(result.message) : result.message`
+  Map<String, dynamic> _resolveNestedMessageString(Map<String, dynamic> map) {
+    final message = map['message'];
+    if (message is! String || message.isEmpty) return map;
+    try {
+      final parsed = jsonDecode(message);
+      if (parsed is Map<String, dynamic>) {
+        return <String, dynamic>{...map, 'message': parsed};
+      }
+    } catch (_) {}
+    return map;
   }
 
   Future<_NotificationsPersonContext?> _getAuthorizedPersonContext() async {
