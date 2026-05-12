@@ -108,6 +108,14 @@ class _DrivePageState extends State<DrivePage> {
     });
   }
 
+  void _clearSearchBeforeFolderChange() {
+    _searchDebounce?.cancel();
+    if (_searchController.text.isNotEmpty) {
+      _searchController.clear();
+    }
+    _controller.clearSearch();
+  }
+
   Future<void> _openNotifications() async {
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
@@ -288,7 +296,10 @@ class _DrivePageState extends State<DrivePage> {
         if (_controller.breadcrumbs.length > 1)
           _BreadcrumbBar(
             breadcrumbs: _controller.breadcrumbs,
-            onTap: (itemId) => _controller.navigateBreadcrumb(itemId),
+            onTap: (itemId) {
+              _clearSearchBeforeFolderChange();
+              _controller.navigateBreadcrumb(itemId);
+            },
           ),
         // Section header
         Padding(
@@ -359,7 +370,10 @@ class _DrivePageState extends State<DrivePage> {
       items.add(_FolderListTile(
         folder: folder,
         showMoreVert: _controller.canShowMoreVert(folder.ownerId),
-        onTap: () => _controller.openFolder(folder.itemId, folder.name),
+        onTap: () {
+          _clearSearchBeforeFolderChange();
+          _controller.openFolder(folder.itemId, folder.name);
+        },
         onMoreVert: folder.isDefault
             ? null
             : () => _showFolderMoreVert(context, folder),
@@ -398,7 +412,10 @@ class _DrivePageState extends State<DrivePage> {
         _FolderGridCard(
           folder: folder,
           showMoreVert: _controller.canShowMoreVert(folder.ownerId),
-          onTap: () => _controller.openFolder(folder.itemId, folder.name),
+          onTap: () {
+            _clearSearchBeforeFolderChange();
+            _controller.openFolder(folder.itemId, folder.name);
+          },
           onMoreVert: folder.isDefault
               ? null
               : () => _showFolderMoreVert(context, folder),
