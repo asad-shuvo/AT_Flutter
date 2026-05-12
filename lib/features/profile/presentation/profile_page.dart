@@ -147,37 +147,7 @@ class ProfilePage extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
-                    child: SizedBox(
-                      height: 48,
-                      child: ElevatedButton.icon(
-                        onPressed: () => _handleLogout(context),
-                        icon: const Icon(
-                          Icons.logout,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                        label: Text(
-                          l10n.tr('dashboard.drawerLogout'),
-                          style: const TextStyle(
-                            fontFamily: 'Calibri',
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 1.4,
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryRed,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+
 
                 ],
               ),
