@@ -183,7 +183,8 @@ class AppSideDrawer extends StatelessWidget {
                           authSessionController: authSessionController,
                           syncNotificationService: syncNotificationService,
                           profileRepository: repository,
-                          showHouseholdConsent: hasHouseholdMembers,
+                          showHouseholdConsent:
+                              householdController.householdMembers.length > 1,
                         ),
                       );
                     },

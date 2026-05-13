@@ -96,4 +96,8 @@ class AuthSessionController extends ChangeNotifier {
   Future<void> clearRememberMeInfo() {
     return _authRepository.clearRememberMeInfo();
   }
+
+  Future<int> getLoginCount() {
+    return _authRepository.getLoginCount();
+  }
 }

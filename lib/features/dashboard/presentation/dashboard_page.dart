@@ -21,6 +21,7 @@ import 'package:filip_at_flutter/features/explorer/presentation/filip_explorer_p
 import 'package:filip_at_flutter/features/notifications/data/notifications_repository.dart';
 import 'package:filip_at_flutter/features/notifications/presentation/notifications_page.dart';
 import 'package:filip_at_flutter/features/notifications/application/sync_notification_service.dart';
+import 'package:filip_at_flutter/features/profile/gdpr_consent_flow.dart';
 import 'package:filip_at_flutter/features/profile/profile_repository.dart';
 import 'package:filip_at_flutter/shared/widgets/app_side_drawer.dart';
 import 'package:filip_at_flutter/features/profile/presentation/profile_page.dart';
@@ -78,11 +79,14 @@ class _DashboardPageState extends State<DashboardPage> with RouteAware {
   late final PageController _distributionCardsController;
   late StreamSubscription<Map<String, dynamic>> _assetSyncSubscription;
   late StreamSubscription<Map<String, dynamic>> _syncCustomerContractSubscription;
+  StreamSubscription<Map<String, dynamic>>? _gdprSyncSubscription;
 
   int _activeSummaryCardIndex = 0;
   int _activeDistributionCardIndex = 0;
   bool _isOpeningInvestmentPortal = false;
   bool _isSyncPending = true;
+  bool _shouldAutoShowDashboardGdpr = false;
+  bool _hasShownDashboardGdpr = false;
 
   @override
   void initState() {
@@ -107,6 +111,11 @@ class _DashboardPageState extends State<DashboardPage> with RouteAware {
         SnackBar(content: Text(context.l10n.tr('CONTRACT_SYNC_COMPLETED'))),
       );
     });
+
+    _gdprSyncSubscription = widget.syncNotificationService.gdprConsentSync.stream.listen((_) {
+      _tryOpenDashboardGdpr();
+    });
+    unawaited(_prepareDashboardGdprFlow());
   }
 
   @override
@@ -148,7 +157,31 @@ class _DashboardPageState extends State<DashboardPage> with RouteAware {
     _distributionCardsController.dispose();
     _assetSyncSubscription.cancel();
     _syncCustomerContractSubscription.cancel();
+    _gdprSyncSubscription?.cancel();
     super.dispose();
+  }
+
+  Future<void> _prepareDashboardGdprFlow() async {
+    final loginCount = await widget.authSessionController.getLoginCount();
+    if (!mounted) return;
+    _shouldAutoShowDashboardGdpr = loginCount <= 1;
+  }
+
+  Future<void> _tryOpenDashboardGdpr() async {
+    if (!mounted || !_shouldAutoShowDashboardGdpr || _hasShownDashboardGdpr) {
+      return;
+    }
+    _hasShownDashboardGdpr = true;
+    await widget.householdController.ensureLoaded();
+    if (!mounted) return;
+    final showHouseholdOption =
+        widget.householdController.householdMembers.length > 1;
+    await GdprConsentFlow.open(
+      context: context,
+      repository: widget.profileRepository,
+      showHouseholdOption: showHouseholdOption,
+      syncNotificationService: widget.syncNotificationService,
+    );
   }
 
   @override
