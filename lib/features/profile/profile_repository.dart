@@ -363,6 +363,103 @@ class ProfileRepository {
     );
   }
 
+  Future<GdprConsentState> fetchGdprConsent() async {
+    final user = await _requireUser();
+    final headers = await _authorizedHeaders();
+    final queryNoQuote =
+        'Select <ItemId,UserId,UserPnr,IsMarktforschung,IsKundenveranstaltung,IsNewsletter,IsPost,LastUpdateDate,IsAgreedToContinue,IsLatest,IsConsentGivenFromDashBoard,IsElectronicDelivery,IsHousehold>from<GdprUser>where<UserId=__eql(${user.userId}) & IsLatest=__eql(true)>Orderby<LastUpdateDate __desc>pageNumber=<0>pageSize= <1>';
+    final queryQuoted =
+        "Select <ItemId,UserId,UserPnr,IsMarktforschung,IsKundenveranstaltung,IsNewsletter,IsPost,LastUpdateDate,IsAgreedToContinue,IsLatest,IsConsentGivenFromDashBoard,IsElectronicDelivery,IsHousehold>from<GdprUser>where<UserId=__eql('${user.userId}') & IsLatest=__eql(true)>Orderby<LastUpdateDate __desc>pageNumber=<0>pageSize= <1>";
+
+    final rawItem = await _fetchGdprRow(
+      headers: headers,
+      queryText: queryNoQuote,
+    ) ??
+        await _fetchGdprRow(headers: headers, queryText: queryQuoted);
+    if (rawItem == null) return const GdprConsentState.empty();
+
+    final item = _extractResultMap(rawItem);
+    return GdprConsentState(
+      isMarktforschung: _readBool(
+        _readValueByKeys(item, const <String>['IsMarktforschung', 'isMarktforschung']),
+      ),
+      isKundenveranstaltung: _readBool(
+        _readValueByKeys(
+          item,
+          const <String>['IsKundenveranstaltung', 'isKundenveranstaltung'],
+        ),
+      ),
+      isPost: _readBool(_readValueByKeys(item, const <String>['IsPost', 'isPost'])),
+      isNewsletter: _readBool(
+        _readValueByKeys(item, const <String>['IsNewsletter', 'isNewsletter']),
+      ),
+      isHousehold: _readBool(
+        _readValueByKeys(item, const <String>['IsHousehold', 'isHousehold']),
+      ),
+    );
+  }
+
+  Future<Map<String, dynamic>?> _fetchGdprRow({
+    required Map<String, String> headers,
+    required String queryText,
+  }) async {
+    final response = await _apiClient.postJson(
+      url: '${_apiClient.dataCoreUrl}DataManipulationQuery/GetBySQLFilter',
+      body: <String, dynamic>{
+        'EntityName': 'GdprUser',
+        'Text': queryText,
+        'ExcludeCount': true,
+      },
+      headers: headers,
+    );
+
+    final statusCode = response['statusCode'] as int? ?? 0;
+    if (statusCode < 200 || statusCode >= 300) return null;
+
+    final body = response['body'] as Map<String, dynamic>;
+    final results = body['Results'];
+    if (results is! List || results.isEmpty || results.first is! Map) {
+      return null;
+    }
+    return Map<String, dynamic>.from(results.first as Map);
+  }
+
+  Future<OperationResult> updateGdprConsent(GdprConsentState consent) async {
+    final user = await _requireUser();
+    final headers = await _authorizedHeaders();
+    final response = await _apiClient.postJson(
+      url: '${_apiClient.slsnBusinessUrl}SlSnCommand/SyncGdprConsentStatus',
+      body: <String, dynamic>{
+        'Pnr': user.customerId,
+        'CustomerId': user.userId,
+        'IsMarktforschung': consent.isMarktforschung,
+        'IsKundenveranstaltung': consent.isKundenveranstaltung,
+        'IsPost': consent.isPost,
+        'IsNewsletter': consent.isNewsletter,
+        'IsHousehold': consent.isHousehold,
+        'IsElectronicDelivery': true,
+        'LastUpdateDate': DateTime.now().toIso8601String(),
+      },
+      headers: headers,
+    );
+
+    final statusCode = response['statusCode'] as int? ?? 0;
+    if (statusCode < 200 || statusCode >= 300) {
+      return const OperationResult(
+        isSuccess: false,
+        errorCode: 'SOMETHING_WENT_WRONG',
+      );
+    }
+
+    final body = response['body'] as Map<String, dynamic>;
+    final errors = body['Errors'] as Map<String, dynamic>?;
+    final isValid = errors?['IsValid'] == true;
+    return OperationResult(
+      isSuccess: isValid,
+      errorCode: isValid ? null : 'SOMETHING_WENT_WRONG',
+    );
+  }
+
   Future<Map<String, String>> _authorizedHeaders() async {
     final user = await _requireUser();
     return <String, String>{
@@ -398,5 +495,29 @@ class ProfileRepository {
         List<String>.generate(length, (_) => chars[random.nextInt(chars.length)])
             .join();
     return '${chunk(8)}-${chunk(4)}-${chunk(4)}-${chunk(4)}-${chunk(12)}';
+  }
+
+  bool _readBool(dynamic value) {
+    if (value is bool) return value;
+    if (value is num) return value != 0;
+    final text = value?.toString().trim().toLowerCase() ?? '';
+    return text == 'true' || text == '1' || text == 'yes' || text == 'y';
+  }
+
+  Map<String, dynamic> _extractResultMap(Map<String, dynamic> item) {
+    final data = item['Data'];
+    if (data is Map) {
+      return Map<String, dynamic>.from(data);
+    }
+    return item;
+  }
+
+  dynamic _readValueByKeys(Map<String, dynamic> item, List<String> keys) {
+    for (final key in keys) {
+      if (item.containsKey(key)) {
+        return item[key];
+      }
+    }
+    return null;
   }
 }

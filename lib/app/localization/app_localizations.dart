@@ -76,6 +76,37 @@ class AppLocalizations {
       'account.consentsTitle': 'My Consents and Preferences',
       'account.consentsDescription':
           'Update your GDPR Consent & Email preferences here',
+      'account.gdprTitle': 'General Data Protection Regulation',
+      'account.gdprDescription':
+          'By registering in FiLiP you have also gained access to your electronic mailbox for electronic delivery.',
+      'account.gdprPreferenceTitle': 'My Preferences',
+      'account.gdprPreferenceSubtitle':
+          'Tell us what kind of emails you want to receive',
+      'account.gdprOption1Title':
+          'Conducting market research and improving the services offered (customer satisfaction surveys, questions about products and services, etc.)',
+      'account.gdprOption1Subtitle':
+          'Your data will be used to ask you questions regarding the quality of advice, services and products with the aim of increasing quality and adapting to current customer needs.',
+      'account.gdprOption2Title':
+          'Invitation and implementation of customer events (such as local events, trade fairs, but also webinars and the like)',
+      'account.gdprOption2Subtitle':
+          'Your data will be used for the personal registration of your participation in, the planning and organisation of announced information events and for this purpose to be contacted by telephone or e-mail.',
+      'account.gdprOption3Title':
+          'Processing for the postal of advertising information relating to products and services offered by Swiss Life Select',
+      'account.gdprOption3Subtitle':
+          'Your data will be used so that we can send you information about Swiss Life Select and our services and products on paper at your request.',
+      'account.gdprOption4Title': 'Delivery of a customer newsletter',
+      'account.gdprOption4Subtitle':
+          'Your data will be used for a personal registration for the delivery of our customer newsletter.',
+      'account.gdprOption5Title': 'Household',
+      'account.gdprOption5Subtitle':
+          'Other people from my household are allowed to see my personal data, contracts and documents in FiLiP.',
+      'account.gdprUpdateFailed':
+          'Could not update your preferences. Please try again.',
+      'account.gdprSyncInProgress':
+          'Your consent is being synced. You will be notified shortly once it is done.',
+      'account.gdprNotificationMissing':
+          'GDPR sync notification not received yet. Please try again shortly.',
+      'account.gdprUpdatedSuccess': 'Preferences updated successfully.',
       'account.deleteAccount': 'DELETE FILIP ACCOUNT',
       'account.actionPending':
           'This My Account action is not available in Flutter yet.',
@@ -258,6 +289,7 @@ class AppLocalizations {
       'tns.delete': 'Delete',
       'tns.save': 'Save',
       'tns.cancel': 'Cancel',
+      'tns.update': 'Update',
       'tns.ok': 'OK',
       'tns.monthly': 'Monthly',
       'tns.quarterly': 'Quarterly',
@@ -519,7 +551,38 @@ class AppLocalizations {
       'account.preferences': 'Einstellungen',
       'account.consentsTitle': 'Meine Einwilligungen und Präferenzen',
       'account.consentsDescription':
-          'Aktualisieren Sie hier Ihre DSGVO-Einwilligungen und E-Mail-Präferenzen',
+          'Aktualisieren Sie hier Ihre DSGVO-Einwilligungen und E-Mail-PrÃ¤ferenzen',
+      'account.gdprTitle': 'Datenschutz-Grundverordnung',
+      'account.gdprDescription':
+          'Mit Ihrer Registrierung in FiLiP haben Sie auch Zugang zu Ihrem elektronischen Postfach fur die elektronische Zustellung erhalten.',
+      'account.gdprPreferenceTitle': 'Meine Praferenzen',
+      'account.gdprPreferenceSubtitle':
+          'Teilen Sie uns mit, welche Art von E-Mails Sie erhalten mochten',
+      'account.gdprOption1Title':
+          'Durchfuhrung von Marktforschung und Verbesserung der angebotenen Dienstleistungen (Kundenzufriedenheitsumfragen, Fragen zu Produkten und Dienstleistungen usw.)',
+      'account.gdprOption1Subtitle':
+          'Ihre Daten werden verwendet, um Ihnen Fragen zur Qualitat von Beratung, Services und Produkten zu stellen, mit dem Ziel, die Qualitat zu erhohen und an aktuelle Kundenbedurfnisse anzupassen.',
+      'account.gdprOption2Title':
+          'Einladung und Durchfuhrung von Kundenveranstaltungen (wie lokale Events, Messen, aber auch Webinare und Ahnliches)',
+      'account.gdprOption2Subtitle':
+          'Ihre Daten werden fur die personliche Registrierung Ihrer Teilnahme, die Planung und Organisation angekundigter Informationsveranstaltungen verwendet und um Sie telefonisch oder per E-Mail zu kontaktieren.',
+      'account.gdprOption3Title':
+          'Verarbeitung fur den postalischen Versand von Werbeinformationen zu Produkten und Dienstleistungen von Swiss Life Select',
+      'account.gdprOption3Subtitle':
+          'Ihre Daten werden verwendet, damit wir Ihnen auf Wunsch Informationen uber Swiss Life Select sowie unsere Dienstleistungen und Produkte auf Papier zusenden konnen.',
+      'account.gdprOption4Title': 'Zusendung eines Kunden-Newsletters',
+      'account.gdprOption4Subtitle':
+          'Ihre Daten werden fur die personliche Registrierung zur Zustellung unseres Kunden-Newsletters verwendet.',
+      'account.gdprOption5Title': 'Haushalt',
+      'account.gdprOption5Subtitle':
+          'Andere Personen in meinem Haushalt durfen in meine personlichen Daten, Vertrage und Unterlagen in FiLiP Einsicht nehmen.',
+      'account.gdprUpdateFailed':
+          'Praferenzen konnten nicht aktualisiert werden. Bitte versuchen Sie es erneut.',
+      'account.gdprSyncInProgress':
+          'Ihre Zustimmung wird synchronisiert. Sie werden in Kurze benachrichtigt, sobald der Vorgang abgeschlossen ist.',
+      'account.gdprNotificationMissing':
+          'GDPR-Synchronisierungsbenachrichtigung wurde noch nicht empfangen. Bitte versuchen Sie es in Kurze erneut.',
+      'account.gdprUpdatedSuccess': 'Praferenzen erfolgreich aktualisiert.',
       'account.deleteAccount': 'FILIP KONTO LÖSCHEN',
       'account.actionPending':
           'Diese Mein-Konto-Aktion ist in Flutter noch nicht verfügbar.',
@@ -706,6 +769,7 @@ class AppLocalizations {
       'tns.delete': 'Loeschen',
       'tns.save': 'Speichern',
       'tns.cancel': 'Abbrechen',
+      'tns.update': 'Aktualisieren',
       'tns.ok': 'OK',
       'tns.monthly': 'Monatlich',
       'tns.quarterly': 'Vierteljaehrlich',
@@ -1086,3 +1150,4 @@ class _AppLocalizationsDelegate
 extension AppLocalizationContext on BuildContext {
   AppLocalizations get l10n => AppLocalizations.of(this);
 }
+

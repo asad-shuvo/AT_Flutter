@@ -2,7 +2,9 @@ import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/features/auth/application/auth_session_controller.dart';
 import 'package:filip_at_flutter/features/dashboard/data/dashboard_models.dart';
 import 'package:filip_at_flutter/features/dashboard/data/dashboard_repository.dart';
+import 'package:filip_at_flutter/features/notifications/application/sync_notification_service.dart';
 import 'package:filip_at_flutter/features/profile/captcha_bottom_sheet.dart';
+import 'package:filip_at_flutter/features/profile/gdpr_consent_bottom_sheet.dart';
 import 'package:filip_at_flutter/features/profile/profile_repository.dart';
 import 'package:filip_at_flutter/features/profile/update_email_controller.dart';
 import 'package:filip_at_flutter/features/profile/update_email_form.dart';
@@ -21,12 +23,16 @@ class ProfilePage extends StatefulWidget {
     super.key,
     required this.dashboardRepository,
     required this.authSessionController,
+    this.syncNotificationService,
     this.profileRepository,
+    this.showHouseholdConsent = true,
   });
 
   final DashboardRepository dashboardRepository;
   final AuthSessionController authSessionController;
+  final SyncNotificationService? syncNotificationService;
   final ProfileRepository? profileRepository;
+  final bool showHouseholdConsent;
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -162,7 +168,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   _PreferencesSection(
                     title: l10n.tr('account.consentsTitle'),
                     description: l10n.tr('account.consentsDescription'),
-                    onTap: () => _showPendingMessage(context),
+                    onTap: () => _openConsentModal(context),
                   ),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(12, 16, 12, 16),
@@ -205,6 +211,90 @@ class _ProfilePageState extends State<ProfilePage> {
       ..showSnackBar(
         SnackBar(content: Text(context.l10n.tr('account.actionPending'))),
       );
+  }
+
+  Future<void> _openConsentModal(BuildContext context) async {
+    final repository = widget.profileRepository;
+    if (repository == null) {
+      _showPendingMessage(context);
+      return;
+    }
+    final initial = await repository.fetchGdprConsent();
+    if (!mounted) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+      builder: (_) => GdprConsentBottomSheet(
+        initial: initial,
+        showHouseholdOption: widget.showHouseholdConsent,
+        onConfirm: (next) async {
+          final result = await repository.updateGdprConsent(next);
+          if (!mounted) return;
+          if (!result.isSuccess) {
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                SnackBar(
+                  content: Text(context.l10n.tr('account.gdprUpdateFailed')),
+                ),
+              );
+            return;
+          }
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              SnackBar(
+                content: Text(context.l10n.tr('account.gdprSyncInProgress')),
+              ),
+            );
+
+          final syncPayload = await _waitForGdprSyncNotification();
+          if (!mounted) return;
+          final isSuccess = syncPayload != null && _isGdprSyncSuccess(syncPayload);
+          if (isSuccess) {
+            Navigator.of(context).pop();
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                SnackBar(
+                  content: Text(context.l10n.tr('account.gdprUpdatedSuccess')),
+                ),
+              );
+            return;
+          }
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              SnackBar(
+                content: Text(context.l10n.tr('account.gdprNotificationMissing')),
+              ),
+            );
+        },
+      ),
+    );
+  }
+
+  Future<Map<String, dynamic>?> _waitForGdprSyncNotification() async {
+    final syncService = widget.syncNotificationService;
+    if (syncService == null) return null;
+    try {
+      return await syncService.gdprConsentSync.stream.first;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  bool _isGdprSyncSuccess(Map<String, dynamic> payload) {
+    final value = payload['value']?.toString();
+    if (value == '200') return true;
+    final message = payload['message'];
+    if (message is Map) {
+      final text = message['Text']?.toString().toLowerCase() ?? '';
+      if (text.contains('successfully sync')) return true;
+    }
+    return false;
   }
 
   // ── Email flow ────────────────────────────────────────────────────────────
