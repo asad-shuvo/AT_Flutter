@@ -12,6 +12,7 @@ import 'package:filip_at_flutter/features/notifications/application/sync_notific
 import 'package:filip_at_flutter/features/notifications/data/notification_item_model.dart';
 import 'package:filip_at_flutter/features/drive/data/drive_repository.dart';
 import 'package:filip_at_flutter/features/notifications/data/notifications_repository.dart';
+import 'package:filip_at_flutter/features/profile/profile_repository.dart';
 import 'package:filip_at_flutter/features/notifications/presentation/contract_not_found_page.dart';
 import 'package:filip_at_flutter/features/real_estate/presentation/real_estate_page.dart';
 import 'package:filip_at_flutter/features/explorer/presentation/filip_explorer_page.dart';
@@ -35,6 +36,7 @@ class NotificationsPage extends StatefulWidget {
     required this.householdController,
     required this.driveRepository,
     required this.userSessionCache,
+    this.profileRepository,
   });
 
   final DashboardRepository dashboardRepository;
@@ -46,6 +48,7 @@ class NotificationsPage extends StatefulWidget {
   final HouseholdMemberFilterController householdController;
   final DriveRepository driveRepository;
   final UserSessionCache userSessionCache;
+  final ProfileRepository? profileRepository;
 
   @override
   State<NotificationsPage> createState() => _NotificationsPageState();
@@ -168,6 +171,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
           householdController: widget.householdController,
           driveRepository: widget.driveRepository,
           userSessionCache: widget.userSessionCache,
+          profileRepository: widget.profileRepository,
         ),
       ),
     );
@@ -190,6 +194,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
         householdController: widget.householdController,
         driveRepository: widget.driveRepository,
         userSessionCache: widget.userSessionCache,
+        profileRepository: widget.profileRepository,
       ),
       body: Builder(
         builder: (innerContext) => SafeArea(

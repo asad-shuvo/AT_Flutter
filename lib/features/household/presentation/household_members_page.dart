@@ -7,6 +7,7 @@ import 'package:filip_at_flutter/features/contracts/data/contracts_repository.da
 import 'package:filip_at_flutter/features/contracts/presentation/contracts_page.dart';
 import 'package:filip_at_flutter/features/dashboard/data/dashboard_repository.dart';
 import 'package:filip_at_flutter/features/drive/data/drive_repository.dart';
+import 'package:filip_at_flutter/features/profile/profile_repository.dart';
 import 'package:filip_at_flutter/features/notifications/application/sync_notification_service.dart';
 import 'package:filip_at_flutter/features/notifications/data/notifications_repository.dart';
 import 'package:filip_at_flutter/shared/icons/app_icon_packs.dart';
@@ -26,6 +27,7 @@ class HouseholdMembersPage extends StatefulWidget {
     required this.isBusiness,
     required this.driveRepository,
     required this.userSessionCache,
+    this.profileRepository,
   });
 
   final DashboardRepository dashboardRepository;
@@ -38,6 +40,7 @@ class HouseholdMembersPage extends StatefulWidget {
   final bool isBusiness;
   final DriveRepository driveRepository;
   final UserSessionCache userSessionCache;
+  final ProfileRepository? profileRepository;
 
   @override
   State<HouseholdMembersPage> createState() => _HouseholdMembersPageState();
@@ -263,6 +266,7 @@ class _HouseholdMembersPageState extends State<HouseholdMembersPage> {
           householdController: widget.householdController,
           driveRepository: widget.driveRepository,
           userSessionCache: widget.userSessionCache,
+          profileRepository: widget.profileRepository,
         ),
       ),
     );

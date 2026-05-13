@@ -20,6 +20,7 @@ import 'package:filip_at_flutter/features/notifications/application/fcm_service.
 import 'package:filip_at_flutter/features/notifications/application/sync_notification_service.dart';
 import 'package:filip_at_flutter/app/router/app_router.dart';
 import 'package:filip_at_flutter/features/drive/data/drive_repository.dart';
+import 'package:filip_at_flutter/features/profile/profile_repository.dart';
 import 'package:filip_at_flutter/features/self_signup/data/self_signup_repository.dart';
 import 'package:flutter/material.dart';
 
@@ -122,6 +123,11 @@ Future<void> bootstrap(AppFlavor flavor) async {
     apiClient: apiClient,
     userSessionCache: userSessionCache,
   );
+  final profileRepository = ProfileRepository(
+    apiClient: apiClient,
+    userSessionCache: userSessionCache,
+    captchaUrl: config.captchaUrl,
+  );
 
   // Firebase & FCM initialization
   final syncNotificationService = SyncNotificationService();
@@ -157,6 +163,7 @@ Future<void> bootstrap(AppFlavor flavor) async {
     selfSignupRepository: selfSignupRepository,
     householdController: householdController,
     driveRepository: driveRepository,
+    profileRepository: profileRepository,
   );
 
   // Wire auth state changes for FCM topic subscription and session cache invalidation

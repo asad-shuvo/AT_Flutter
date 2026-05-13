@@ -2,25 +2,64 @@ import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/features/auth/application/auth_session_controller.dart';
 import 'package:filip_at_flutter/features/dashboard/data/dashboard_models.dart';
 import 'package:filip_at_flutter/features/dashboard/data/dashboard_repository.dart';
+import 'package:filip_at_flutter/features/profile/captcha_bottom_sheet.dart';
+import 'package:filip_at_flutter/features/profile/profile_repository.dart';
+import 'package:filip_at_flutter/features/profile/update_email_controller.dart';
+import 'package:filip_at_flutter/features/profile/update_email_form.dart';
+import 'package:filip_at_flutter/features/profile/update_password_controller.dart';
+import 'package:filip_at_flutter/features/profile/update_password_form.dart';
+import 'package:filip_at_flutter/features/profile/update_phone_controller.dart';
+import 'package:filip_at_flutter/features/profile/update_phone_form.dart';
+import 'package:filip_at_flutter/features/profile/verification_code_sheet.dart';
 import 'package:filip_at_flutter/shared/icons/app_icon_packs.dart';
 import 'package:filip_at_flutter/shared/theme/app_colors.dart';
 import 'package:filip_at_flutter/shared/utils/logout_utils.dart';
 import 'package:flutter/material.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({
     super.key,
     required this.dashboardRepository,
     required this.authSessionController,
+    this.profileRepository,
   });
 
   final DashboardRepository dashboardRepository;
   final AuthSessionController authSessionController;
+  final ProfileRepository? profileRepository;
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  UpdateEmailController? _emailController;
+  UpdatePhoneController? _phoneController;
+  UpdatePasswordController? _passwordController;
+  String? _phoneNumberOverride;
+
+  @override
+  void initState() {
+    super.initState();
+    final repository = widget.profileRepository;
+    if (repository != null) {
+      _emailController = UpdateEmailController(repository: repository);
+      _phoneController = UpdatePhoneController(repository: repository);
+      _passwordController = UpdatePasswordController(repository: repository);
+    }
+  }
+
+  @override
+  void dispose() {
+    _emailController?.dispose();
+    _phoneController?.dispose();
+    _passwordController?.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-
     return Scaffold(
       backgroundColor: AppColors.screenBackground,
       appBar: AppBar(
@@ -47,16 +86,14 @@ class ProfilePage extends StatelessWidget {
         ),
       ),
       body: FutureBuilder<UserProfile?>(
-        future: dashboardRepository.fetchUserProfile(),
+        future: widget.dashboardRepository.fetchUserProfile(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
               child: CircularProgressIndicator(color: AppColors.primaryRed),
             );
           }
-
           final profile = snapshot.data ?? _emptyProfile;
-
           return SingleChildScrollView(
             padding: const EdgeInsets.all(8),
             child: Container(
@@ -81,18 +118,24 @@ class ProfilePage extends StatelessWidget {
                     label: l10n.tr('account.emailAddress'),
                     value: profile.email,
                     actionLabel: l10n.tr('account.updateEmail'),
-                    onTap: () => _showPendingMessage(context),
+                    onTap: () => _startEmailUpdateFlow(
+                      context: context,
+                      currentEmail: profile.email,
+                    ),
                   ),
                   _AccountActionSection(
                     label: l10n.tr('account.phoneNumber'),
-                    value: profile.phoneNumber,
+                    value: _phoneNumberOverride ?? profile.phoneNumber,
                     actionLabel: l10n.tr('account.updatePhone'),
-                    onTap: () => _showPendingMessage(context),
+                    onTap: () => _startPhoneUpdateFlow(
+                      context: context,
+                      currentPhone: _phoneNumberOverride ?? profile.phoneNumber,
+                    ),
                   ),
                   _PasswordSection(
                     label: l10n.tr('account.password'),
                     actionLabel: l10n.tr('account.changePassword'),
-                    onTap: () => _showPendingMessage(context),
+                    onTap: () => _startPasswordUpdateFlow(context),
                   ),
                   Container(
                     height: 50,
@@ -147,8 +190,6 @@ class ProfilePage extends StatelessWidget {
                       ),
                     ),
                   ),
-
-
                 ],
               ),
             ),
@@ -166,11 +207,324 @@ class ProfilePage extends StatelessWidget {
       );
   }
 
-  Future<void> _handleLogout(BuildContext context) {
-    return performLogout(
-      context,
-      authSessionController: authSessionController,
+  // ── Email flow ────────────────────────────────────────────────────────────
+
+  Future<void> _startEmailUpdateFlow({
+    required BuildContext context,
+    required String currentEmail,
+  }) async {
+    final controller = _emailController;
+    if (controller == null) {
+      _showPendingMessage(context);
+      return;
+    }
+    controller.resetFlow();
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+      builder: (_) => CaptchaBottomSheet(
+        controller: controller,
+        onVerified: (captchaVerificationCode) {
+          _openUpdateEmailSheet(
+            context: context,
+            currentEmail: currentEmail,
+            captchaVerificationCode: captchaVerificationCode,
+          );
+        },
+      ),
     );
+  }
+
+  Future<void> _openUpdateEmailSheet({
+    required BuildContext context,
+    required String currentEmail,
+    required String captchaVerificationCode,
+  }) async {
+    final controller = _emailController;
+    if (controller == null) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => UpdateEmailForm(
+        controller: controller,
+        currentEmail: currentEmail,
+        onConfirm: (newEmail) async {
+          final success = await controller.startEmailFlow(
+            currentEmail: currentEmail,
+            newEmail: newEmail,
+            captchaVerificationCode: captchaVerificationCode,
+            language: Localizations.localeOf(context).languageCode == 'de'
+                ? 'de-DE'
+                : 'en-US',
+          );
+          if (!success || !mounted) {
+            _showErrorCode(context, controller.flowErrorCode);
+            return;
+          }
+          _openEmailVerificationSheet(context);
+        },
+      ),
+    );
+  }
+
+  Future<void> _openEmailVerificationSheet(BuildContext context) async {
+    final controller = _emailController;
+    if (controller == null) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      isDismissible: false,
+      enableDrag: false,
+      isScrollControlled: true,
+      builder: (_) => VerificationCodeSheet(
+        controller: controller,
+        title: 'Update Email Address',
+        icon: SelectNetworkIcons.email,
+        descriptionText:
+            'Please enter the 4 digit security code sent to your email address ${controller.newEmail}',
+        onConfirm: (code) async {
+          final success = await controller.confirmVerificationCode(code);
+          if (!success || !mounted) {
+            _showErrorCode(context, controller.flowErrorCode);
+            return;
+          }
+          if (!mounted) return;
+          Navigator.of(context).pop();
+          final messenger = ScaffoldMessenger.of(context);
+          messenger
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              SnackBar(
+                content: Text(context.l10n.tr('account.emailUpdatedLogout')),
+              ),
+            );
+          await Future<void>.delayed(const Duration(milliseconds: 1000));
+          if (!mounted) return;
+          await widget.authSessionController.clearRememberMeInfo();
+          if (!mounted) return;
+          await performLogout(
+            context,
+            authSessionController: widget.authSessionController,
+          );
+        },
+        onResend: () async {
+          if (!mounted) return;
+          Navigator.of(context).pop();
+          await showModalBottomSheet<void>(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.white,
+            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+            builder: (_) => CaptchaBottomSheet(
+              controller: controller,
+              onVerified: (captchaVerificationCode) async {
+                final ok = await controller.resendVerificationCode(
+                  captchaVerificationCode,
+                );
+                if (!mounted) return;
+                if (!ok) {
+                  _showErrorCode(context, controller.flowErrorCode);
+                  return;
+                }
+                _openEmailVerificationSheet(context);
+              },
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  // ── Phone flow ────────────────────────────────────────────────────────────
+
+  Future<void> _startPhoneUpdateFlow({
+    required BuildContext context,
+    required String currentPhone,
+  }) async {
+    final controller = _phoneController;
+    if (controller == null) {
+      _showPendingMessage(context);
+      return;
+    }
+    controller.resetFlow();
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+      builder: (_) => CaptchaBottomSheet(
+        controller: controller,
+        onVerified: (captchaVerificationCode) {
+          _openUpdatePhoneSheet(
+            context: context,
+            currentPhone: currentPhone,
+            captchaVerificationCode: captchaVerificationCode,
+          );
+        },
+      ),
+    );
+  }
+
+  Future<void> _openUpdatePhoneSheet({
+    required BuildContext context,
+    required String currentPhone,
+    required String captchaVerificationCode,
+  }) async {
+    final controller = _phoneController;
+    if (controller == null) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => UpdatePhoneForm(
+        controller: controller,
+        currentPhone: currentPhone,
+        onConfirm: (newPhone) async {
+          final success = await controller.startPhoneFlow(
+            currentPhone: currentPhone,
+            newPhone: newPhone,
+            captchaVerificationCode: captchaVerificationCode,
+            language: Localizations.localeOf(context).languageCode == 'de'
+                ? 'de-DE'
+                : 'en-US',
+          );
+          if (!success || !mounted) {
+            _showErrorCode(context, controller.flowErrorCode);
+            return;
+          }
+          _openPhoneVerificationSheet(context);
+        },
+      ),
+    );
+  }
+
+  Future<void> _openPhoneVerificationSheet(BuildContext context) async {
+    final controller = _phoneController;
+    if (controller == null) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      isDismissible: false,
+      enableDrag: false,
+      isScrollControlled: true,
+      builder: (_) => VerificationCodeSheet(
+        controller: controller,
+        title: 'Update Phone Number',
+        icon: SelectNetworkIcons.phone,
+        descriptionText:
+            'Please enter the 4 digit security code sent to your mobile no. ${controller.newPhone}',
+        onConfirm: (code) async {
+          final success = await controller.confirmVerificationCode(code);
+          if (!success || !mounted) {
+            _showErrorCode(context, controller.flowErrorCode);
+            return;
+          }
+          if (!mounted) return;
+          setState(() {
+            _phoneNumberOverride = controller.newPhone;
+          });
+          Navigator.of(context).pop();
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              SnackBar(
+                content: Text(context.l10n.tr('account.phoneUpdatedSuccess')),
+              ),
+            );
+        },
+        onResend: () async {
+          if (!mounted) return;
+          Navigator.of(context).pop();
+          await showModalBottomSheet<void>(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.white,
+            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+            builder: (_) => CaptchaBottomSheet(
+              controller: controller,
+              onVerified: (captchaVerificationCode) async {
+                final ok = await controller.resendPhoneCode(captchaVerificationCode);
+                if (!mounted) return;
+                if (!ok) {
+                  _showErrorCode(context, controller.flowErrorCode);
+                  return;
+                }
+                _openPhoneVerificationSheet(context);
+              },
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  // ── Password flow ─────────────────────────────────────────────────────────
+
+  Future<void> _startPasswordUpdateFlow(BuildContext context) async {
+    final controller = _passwordController;
+    if (controller == null) {
+      _showPendingMessage(context);
+      return;
+    }
+    controller.reset();
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+      builder: (_) => UpdatePasswordForm(
+        controller: controller,
+        onConfirm: (oldPassword, newPassword) async {
+          final success = await controller.changePassword(
+            oldPassword: oldPassword,
+            newPassword: newPassword,
+          );
+          if (!mounted) return;
+          if (!success) {
+            _showPasswordError(context, controller.flowErrorCode);
+            return;
+          }
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              SnackBar(
+                content: Text(context.l10n.tr('account.passwordUpdateSuccess')),
+              ),
+            );
+          await Future<void>.delayed(const Duration(milliseconds: 1000));
+          if (!mounted) return;
+          await widget.authSessionController.clearRememberMeInfo();
+          if (!mounted) return;
+          await performLogout(
+            context,
+            authSessionController: widget.authSessionController,
+          );
+        },
+      ),
+    );
+  }
+
+  void _showPasswordError(BuildContext context, String? code) {
+    final l10n = context.l10n;
+    final text = switch (code) {
+      'OLD_PASSWORD_NOT_MATCHED' => l10n.tr('account.oldPasswordNotMatched'),
+      'PREVIOUS_PASSWORD' => l10n.tr('account.previousPasswordError'),
+      _ => l10n.tr('account.passwordUpdateFailed'),
+    };
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(text)));
+  }
+
+  void _showErrorCode(BuildContext context, String? code) {
+    final text = switch (code) {
+      'USER_EXISTS_WITH_NEW_CONTACT' => 'User already exists with this contact.',
+      '2FA_CODE_IS_NOT_VALID' => 'Wrong verification code.',
+      'CAPTCHA_NOT_MATCHED' => 'Captcha value did not match.',
+      _ => 'Something went wrong.',
+    };
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(text)));
   }
 }
 

@@ -96,6 +96,7 @@ class AppRouter {
             householdController: services.householdController,
             driveRepository: services.driveRepository,
             userSessionCache: services.userSessionCache,
+            profileRepository: services.profileRepository,
           ),
           settings: settings,
         );

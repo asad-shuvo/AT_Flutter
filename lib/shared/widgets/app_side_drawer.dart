@@ -13,6 +13,7 @@ import 'package:filip_at_flutter/features/notifications/application/sync_notific
 import 'package:filip_at_flutter/features/notifications/data/notifications_repository.dart';
 import 'package:filip_at_flutter/features/profile/presentation/profile_page.dart';
 import 'package:filip_at_flutter/features/settings/presentation/settings_page.dart';
+import 'package:filip_at_flutter/features/profile/profile_repository.dart';
 import 'package:filip_at_flutter/features/support/presentation/support_page.dart';
 import 'package:filip_at_flutter/shared/icons/app_icon_packs.dart';
 import 'package:filip_at_flutter/shared/theme/app_colors.dart';
@@ -33,6 +34,7 @@ class AppSideDrawer extends StatelessWidget {
     required this.householdController,
     required this.driveRepository,
     required this.userSessionCache,
+    this.profileRepository,
   });
 
   final Future<UserProfile?> userProfileFuture;
@@ -45,6 +47,7 @@ class AppSideDrawer extends StatelessWidget {
   final HouseholdMemberFilterController householdController;
   final DriveRepository driveRepository;
   final UserSessionCache userSessionCache;
+  final ProfileRepository? profileRepository;
   static const String _legalUrl =
       'https://www.swisslife-select.at/home/footer/nutzungsbedingungen_filip.html';
   static const String _dataPrivacyUrl =
@@ -160,13 +163,28 @@ class AppSideDrawer extends StatelessWidget {
                   _DrawerItem(
                     icon: FilipIcons.personOutline,
                     label: l10n.tr('dashboard.drawerAccount'),
-                    onTap: () => _openPage(
-                      context,
-                      ProfilePage(
-                        dashboardRepository: dashboardRepository,
-                        authSessionController: authSessionController,
-                      ),
-                    ),
+                    onTap: () {
+                      final repository = profileRepository;
+                      if (repository == null) {
+                        Navigator.of(context).pop();
+                        ScaffoldMessenger.of(context)
+                          ..hideCurrentSnackBar()
+                          ..showSnackBar(
+                            const SnackBar(
+                              content: Text('Account page is unavailable here.'),
+                            ),
+                          );
+                        return;
+                      }
+                      _openPage(
+                        context,
+                        ProfilePage(
+                          dashboardRepository: dashboardRepository,
+                          authSessionController: authSessionController,
+                          profileRepository: repository,
+                        ),
+                      );
+                    },
                   ),
                   _DrawerItem(
                     icon: FilipIcons.preferences,
@@ -195,6 +213,7 @@ class AppSideDrawer extends StatelessWidget {
                           isBusiness: false,
                           driveRepository: driveRepository,
                           userSessionCache: userSessionCache,
+                          profileRepository: profileRepository,
                         ),
                       ),
                     ),
@@ -215,6 +234,7 @@ class AppSideDrawer extends StatelessWidget {
                           isBusiness: true,
                           driveRepository: driveRepository,
                           userSessionCache: userSessionCache,
+                          profileRepository: profileRepository,
                         ),
                       ),
                     ),

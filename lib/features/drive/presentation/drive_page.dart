@@ -19,6 +19,7 @@ import 'package:filip_at_flutter/features/explorer/presentation/filip_explorer_p
 import 'package:filip_at_flutter/features/notifications/application/sync_notification_service.dart';
 import 'package:filip_at_flutter/features/notifications/data/notifications_repository.dart';
 import 'package:filip_at_flutter/features/notifications/presentation/notifications_page.dart';
+import 'package:filip_at_flutter/features/profile/profile_repository.dart';
 import 'package:filip_at_flutter/features/real_estate/presentation/real_estate_page.dart';
 import 'package:filip_at_flutter/shared/theme/app_colors.dart';
 import 'package:filip_at_flutter/shared/widgets/app_bottom_nav.dart';
@@ -41,6 +42,7 @@ class DrivePage extends StatefulWidget {
     required this.authSessionController,
     required this.appVersion,
     required this.syncNotificationService,
+    this.profileRepository,
   });
 
   final DriveRepository driveRepository;
@@ -52,6 +54,7 @@ class DrivePage extends StatefulWidget {
   final AuthSessionController authSessionController;
   final String appVersion;
   final SyncNotificationService syncNotificationService;
+  final ProfileRepository? profileRepository;
 
   @override
   State<DrivePage> createState() => _DrivePageState();
@@ -158,6 +161,7 @@ class _DrivePageState extends State<DrivePage> {
         householdController: widget.householdController,
         driveRepository: widget.driveRepository,
         userSessionCache: widget.userSessionCache,
+        profileRepository: widget.profileRepository,
       ),
       body: SafeArea(
         child: Column(
@@ -255,6 +259,7 @@ class _DrivePageState extends State<DrivePage> {
                 householdController: widget.householdController,
                 driveRepository: widget.driveRepository,
                 userSessionCache: widget.userSessionCache,
+                profileRepository: widget.profileRepository,
               ),
             ),
           );
@@ -270,6 +275,7 @@ class _DrivePageState extends State<DrivePage> {
             householdController: widget.householdController,
             driveRepository: widget.driveRepository,
             userSessionCache: widget.userSessionCache,
+            profileRepository: widget.profileRepository,
           ),
         ),
         onRealEstateTap: () => _openPage(const RealEstatePage()),

@@ -1,0 +1,207 @@
+import 'dart:async';
+
+import 'package:filip_at_flutter/features/profile/contact_update_controller_base.dart';
+import 'package:filip_at_flutter/features/profile/profile_models.dart';
+import 'package:filip_at_flutter/features/profile/profile_repository.dart';
+
+class UpdatePhoneController extends ContactUpdateControllerBase {
+  UpdatePhoneController({required ProfileRepository repository})
+    : _repository = repository;
+
+  final ProfileRepository _repository;
+
+  CaptchaChallenge? _captcha;
+  String? _captchaError;
+  bool _captchaLoading = false;
+
+  String _newPhone = '';
+  String _currentPhone = '';
+  String _verificationToken = '';
+  String? _flowErrorCode;
+
+  int _secondsLeft = 180;
+  bool _timerRunning = false;
+  Timer? _timer;
+
+  bool _submitting = false;
+
+  @override
+  CaptchaChallenge? get captcha => _captcha;
+  @override
+  String? get captchaError => _captchaError;
+  @override
+  bool get captchaLoading => _captchaLoading;
+  @override
+  bool get submitting => _submitting;
+  @override
+  String? get flowErrorCode => _flowErrorCode;
+  String get newPhone => _newPhone;
+  @override
+  bool get timerRunning => _timerRunning;
+  int get secondsLeft => _secondsLeft;
+  @override
+  String get countdownLabel {
+    final min = _secondsLeft ~/ 60;
+    final sec = _secondsLeft % 60;
+    return '$min:${sec.toString().padLeft(2, '0')}';
+  }
+
+  @override
+  Future<void> prepareCaptcha() async {
+    _captchaLoading = true;
+    _captchaError = null;
+    notifyListeners();
+
+    try {
+      _captcha = await _repository.getCaptcha();
+    } catch (_) {
+      _captchaError = 'CAPTCHA_CREATE_FAILED';
+    } finally {
+      _captchaLoading = false;
+      notifyListeners();
+    }
+  }
+
+  @override
+  Future<String?> verifyCaptcha(String value) async {
+    final challenge = _captcha;
+    if (challenge == null) return null;
+    _captchaError = null;
+    _submitting = true;
+    notifyListeners();
+    try {
+      final result = await _repository.submitCaptcha(
+        captchaId: challenge.id,
+        value: value,
+      );
+      if (!result.isSuccess) {
+        _captchaError = 'CAPTCHA_NOT_MATCHED';
+        return null;
+      }
+      return result.verificationCode;
+    } finally {
+      _submitting = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> startPhoneFlow({
+    required String currentPhone,
+    required String newPhone,
+    required String captchaVerificationCode,
+    required String language,
+  }) async {
+    _flowErrorCode = null;
+    _submitting = true;
+    notifyListeners();
+    try {
+      _currentPhone = currentPhone;
+      _newPhone = newPhone;
+      final result = await _repository.startPhoneVerification(
+        newPhone: newPhone,
+        captchaVerificationCode: captchaVerificationCode,
+        language: language,
+      );
+      if (!result.isSuccess) {
+        _flowErrorCode = result.errorCode ?? 'SOMETHING_WENT_WRONG';
+        return false;
+      }
+
+      _verificationToken = result.token;
+      _startTimer();
+      return true;
+    } finally {
+      _submitting = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> resendPhoneCode(String captchaVerificationCode) async {
+    _flowErrorCode = null;
+    _submitting = true;
+    notifyListeners();
+    try {
+      final result = await _repository.resendPhoneVerificationCode(
+        captchaVerificationCode: captchaVerificationCode,
+        contactVerificationToken: _verificationToken,
+      );
+      if (!result.isSuccess) {
+        _flowErrorCode = result.errorCode ?? 'SOMETHING_WENT_WRONG';
+        return false;
+      }
+
+      _startTimer();
+      return true;
+    } finally {
+      _submitting = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> confirmVerificationCode(String code) async {
+    _flowErrorCode = null;
+    _submitting = true;
+    notifyListeners();
+    try {
+      final result = await _repository.confirmPhoneChange(
+        verificationToken: _verificationToken,
+        verificationCode: code,
+        oldPhone: _currentPhone,
+        newPhone: _newPhone,
+      );
+
+      if (!result.isSuccess) {
+        _flowErrorCode = result.errorCode ?? 'SOMETHING_WENT_WRONG';
+        return false;
+      }
+
+      _stopTimer();
+      return true;
+    } finally {
+      _submitting = false;
+      notifyListeners();
+    }
+  }
+
+  void resetFlow() {
+    _captcha = null;
+    _captchaError = null;
+    _newPhone = '';
+    _currentPhone = '';
+    _verificationToken = '';
+    _flowErrorCode = null;
+    _submitting = false;
+    _stopTimer(resetSeconds: true);
+    notifyListeners();
+  }
+
+  void _startTimer() {
+    _timer?.cancel();
+    _secondsLeft = 180;
+    _timerRunning = true;
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (_secondsLeft <= 1) {
+        _stopTimer();
+      } else {
+        _secondsLeft -= 1;
+        notifyListeners();
+      }
+    });
+    notifyListeners();
+  }
+
+  void _stopTimer({bool resetSeconds = false}) {
+    _timer?.cancel();
+    _timerRunning = false;
+    if (resetSeconds) {
+      _secondsLeft = 180;
+    }
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+}

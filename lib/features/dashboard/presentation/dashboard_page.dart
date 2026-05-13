@@ -21,6 +21,7 @@ import 'package:filip_at_flutter/features/explorer/presentation/filip_explorer_p
 import 'package:filip_at_flutter/features/notifications/data/notifications_repository.dart';
 import 'package:filip_at_flutter/features/notifications/presentation/notifications_page.dart';
 import 'package:filip_at_flutter/features/notifications/application/sync_notification_service.dart';
+import 'package:filip_at_flutter/features/profile/profile_repository.dart';
 import 'package:filip_at_flutter/shared/widgets/app_side_drawer.dart';
 import 'package:filip_at_flutter/features/profile/presentation/profile_page.dart';
 import 'package:filip_at_flutter/features/real_estate/presentation/real_estate_page.dart';
@@ -45,6 +46,7 @@ class DashboardPage extends StatefulWidget {
     required this.householdController,
     required this.driveRepository,
     required this.userSessionCache,
+    required this.profileRepository,
   });
 
   final AppConfig config;
@@ -56,6 +58,7 @@ class DashboardPage extends StatefulWidget {
   final HouseholdMemberFilterController householdController;
   final DriveRepository driveRepository;
   final UserSessionCache userSessionCache;
+  final ProfileRepository profileRepository;
 
   @override
   State<DashboardPage> createState() => _DashboardPageState();
@@ -163,6 +166,7 @@ class _DashboardPageState extends State<DashboardPage> with RouteAware {
         householdController: widget.householdController,
         driveRepository: widget.driveRepository,
         userSessionCache: widget.userSessionCache,
+        profileRepository: widget.profileRepository,
       ),
       body: Builder(
         builder: (innerContext) => SafeArea(
@@ -249,6 +253,7 @@ class _DashboardPageState extends State<DashboardPage> with RouteAware {
             householdController: widget.householdController,
             driveRepository: widget.driveRepository,
             userSessionCache: widget.userSessionCache,
+            profileRepository: widget.profileRepository,
           ),
         ),
         onContractsTap: () => _openPage(
@@ -263,6 +268,7 @@ class _DashboardPageState extends State<DashboardPage> with RouteAware {
             householdController: widget.householdController,
             driveRepository: widget.driveRepository,
             userSessionCache: widget.userSessionCache,
+            profileRepository: widget.profileRepository,
           ),
         ),
         onRealEstateTap: () => _openPage(context, const RealEstatePage()),
@@ -284,6 +290,7 @@ class _DashboardPageState extends State<DashboardPage> with RouteAware {
           householdController: widget.householdController,
           driveRepository: widget.driveRepository,
           userSessionCache: widget.userSessionCache,
+          profileRepository: widget.profileRepository,
         ),
       ),
     );

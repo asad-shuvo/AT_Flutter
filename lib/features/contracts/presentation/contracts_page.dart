@@ -15,6 +15,7 @@ import 'package:filip_at_flutter/features/contracts/data/investment_contract_mod
 import 'package:filip_at_flutter/features/contracts/data/investment_overview_model.dart';
 import 'package:filip_at_flutter/features/drive/data/drive_repository.dart';
 import 'package:filip_at_flutter/features/notifications/data/notifications_repository.dart';
+import 'package:filip_at_flutter/features/profile/profile_repository.dart';
 import 'package:filip_at_flutter/features/notifications/presentation/notifications_page.dart';
 import 'package:filip_at_flutter/features/notifications/application/sync_notification_service.dart';
 import 'package:filip_at_flutter/features/real_estate/presentation/real_estate_page.dart';
@@ -42,6 +43,7 @@ class ContractsPage extends StatefulWidget {
     required this.householdController,
     required this.driveRepository,
     required this.userSessionCache,
+    this.profileRepository,
   });
 
   final ContractsRepository contractsRepository;
@@ -53,6 +55,7 @@ class ContractsPage extends StatefulWidget {
   final HouseholdMemberFilterController householdController;
   final DriveRepository driveRepository;
   final UserSessionCache userSessionCache;
+  final ProfileRepository? profileRepository;
 
   @override
   State<ContractsPage> createState() => _ContractsPageState();
@@ -220,6 +223,7 @@ class _ContractsPageState extends State<ContractsPage> {
         householdController: widget.householdController,
         driveRepository: widget.driveRepository,
         userSessionCache: widget.userSessionCache,
+        profileRepository: widget.profileRepository,
       ),
       body: SafeArea(
         child: AnimatedBuilder(
@@ -227,14 +231,17 @@ class _ContractsPageState extends State<ContractsPage> {
           builder: (context, _) {
             return Column(
               children: [
-                FutureBuilder<int>(
-                  future: _unreadNotificationsFuture,
-                  builder: (context, snapshot) {
-                    return AppTopBar(
-                      onNotificationTap: () => _openNotifications(),
-                      showBadge: (snapshot.data ?? 0) > 0,
-                    );
-                  },
+                Builder(
+                  builder: (innerContext) => FutureBuilder<int>(
+                    future: _unreadNotificationsFuture,
+                    builder: (context, snapshot) {
+                      return AppTopBar(
+                        onMenuTap: () => Scaffold.of(innerContext).openDrawer(),
+                        onNotificationTap: () => _openNotifications(),
+                        showBadge: (snapshot.data ?? 0) > 0,
+                      );
+                    },
+                  ),
                 ),
                 AppPageHeader(title: l10n.tr('tns.myContracts')),
                 ContractsHouseholdMemberFilterBar(

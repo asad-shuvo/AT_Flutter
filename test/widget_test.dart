@@ -16,6 +16,7 @@ import 'package:filip_at_flutter/features/drive/data/drive_repository.dart';
 import 'package:filip_at_flutter/features/notifications/data/notifications_repository.dart';
 import 'package:filip_at_flutter/features/notifications/application/sync_notification_service.dart';
 import 'package:filip_at_flutter/features/notifications/application/fcm_service.dart';
+import 'package:filip_at_flutter/features/profile/profile_repository.dart';
 import 'package:filip_at_flutter/features/self_signup/data/self_signup_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
@@ -116,6 +117,12 @@ void main() {
       apiClient: apiClient,
       userSessionCache: userSessionCache,
     );
+    final profileRepository = ProfileRepository(
+      apiClient: apiClient,
+      userSessionCache: userSessionCache,
+      captchaUrl:
+          'https://msblocks.selisestage.com/api/captcha/v1/Captcha/CaptchaCommand/',
+    );
     final services = AppServices(
       apiClient: apiClient,
       secureStorageService: secureStorageService,
@@ -134,6 +141,7 @@ void main() {
         contractsRepository: contractsRepository,
       ),
       driveRepository: driveRepository,
+      profileRepository: profileRepository,
     );
 
     await tester.pumpWidget(FilipAtApp(config: config, services: services));
