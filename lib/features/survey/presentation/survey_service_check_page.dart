@@ -666,8 +666,9 @@ class _SurveyServiceCheckPageState extends State<SurveyServiceCheckPage> {
                     l10n.tr('DISCLAIMER_TEXT'),
                     style: const TextStyle(
                       fontFamily: 'Calibri',
-                      fontSize: 14,
-                      color: Color(0xFF555555),
+                      fontSize: 10,
+                      fontWeight: FontWeight.w300,
+                      color: SurveyStyles.subtitleColor,
                       height: 1.15,
                     ),
                   ),
@@ -696,9 +697,9 @@ class _SurveyServiceCheckPageState extends State<SurveyServiceCheckPage> {
                   l10n.tr('SUBMIT').toUpperCase(),
                   style: const TextStyle(
                     fontFamily: 'Calibri',
-                    fontSize: 14,
+                    fontSize: 16,
                     fontWeight: FontWeight.w700,
-                    letterSpacing: 1,
+                    letterSpacing: 0.12,
                   ),
                 ),
               ),
@@ -948,7 +949,8 @@ class _ChoiceTile extends StatelessWidget {
                   text,
                   style: TextStyle(
                     fontFamily: 'Calibri',
-                    fontSize: 15,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w300,
                     color: selected
                         ? selectedColor
                         : SurveyStyles.titleColor,
@@ -978,14 +980,15 @@ class _CheckListCard extends StatelessWidget {
     final l10n = context.l10n;
     const textStyle = TextStyle(
       fontFamily: 'Calibri',
-      fontSize: 15,
+      fontSize: 14,
+      fontWeight: FontWeight.w300,
       color: SurveyStyles.subtitleColor,
     );
     const sectionStyle = TextStyle(
       fontFamily: 'Calibri',
-      fontSize: 15,
-      color: SurveyStyles.titleColor,
-      fontWeight: FontWeight.w400,
+      fontSize: 12,
+      fontWeight: FontWeight.w300,
+      color: SurveyStyles.subtitleColor,
     );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1202,6 +1205,7 @@ class _QuestionTwoDetails extends StatelessWidget {
             style: const TextStyle(
               fontFamily: 'Calibri',
               fontSize: 12,
+              fontWeight: FontWeight.w300,
               color: SurveyStyles.subtitleColor,
             ),
           ),
@@ -1232,7 +1236,8 @@ class _QuestionTwoDetails extends StatelessWidget {
                         entry.value,
                         style: const TextStyle(
                           fontFamily: 'Calibri',
-                          fontSize: 15,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w300,
                           color: SurveyStyles.subtitleColor,
                         ),
                       ),

@@ -260,7 +260,7 @@ class _SurveyEditAddressPageState extends State<SurveyEditAddressPage> {
                           fontFamily: 'Calibri',
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
-                          letterSpacing: 0.5,
+                          letterSpacing: 0.12,
                         ),
                       ),
               ),

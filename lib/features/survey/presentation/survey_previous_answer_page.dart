@@ -31,7 +31,8 @@ class SurveyPreviousAnswerPage extends StatelessWidget {
                 style: const TextStyle(
                   fontFamily: 'Calibri',
                   fontSize: 14,
-                  color: SurveyStyles.subtitleColor,
+                  fontWeight: FontWeight.w400,
+                  color: Color(0xFF808080),
                 ),
               ),
             ),
@@ -42,13 +43,13 @@ class SurveyPreviousAnswerPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('${l10n.tr('NAME')}: ${'Asaduzzaman Shuvo'}', style: SurveyStyles.body),
+                  Text('${l10n.tr('NAME')}: ${'Asaduzzaman Shuvo'}', style: SurveyStyles.questionText),
                   const SizedBox(height: 4),
-                  Text('${l10n.tr('EMAIL')}: ${'asaduzzaman.shuvo@selise.ch'}', style: SurveyStyles.body),
+                  Text('${l10n.tr('EMAIL')}: ${'asaduzzaman.shuvo@selise.ch'}', style: SurveyStyles.questionText),
                   const SizedBox(height: 4),
-                  Text('${l10n.tr('PHONE_NUMBER')}: ${'+8801867512994'}', style: SurveyStyles.body),
+                  Text('${l10n.tr('PHONE_NUMBER')}: ${'+8801867512994'}', style: SurveyStyles.questionText),
                   const SizedBox(height: 4),
-                  Text('${l10n.tr('ADDRESS')}: ${'Bakultala, 3622, Fohra, Bangladesh'}', style: SurveyStyles.body),
+                  Text('${l10n.tr('ADDRESS')}: ${'Bakultala, 3622, Fohra, Bangladesh'}', style: SurveyStyles.questionText),
                   const SizedBox(height: 10),
                   Text(
                     l10n.tr('Q1NO'),

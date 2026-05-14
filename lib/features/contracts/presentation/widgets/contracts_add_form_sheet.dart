@@ -1,6 +1,5 @@
 import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/shared/theme/app_colors.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class ContractsAddFormSheet extends StatelessWidget {
@@ -528,103 +527,25 @@ Future<DateTime?> showContractsWheelDatePicker(
   BuildContext context,
   DateTime? initialDate,
 ) {
-  final l10n = context.l10n;
   final now = DateTime.now();
-  DateTime selected = initialDate ?? now;
-
-  return showModalBottomSheet<DateTime>(
+  final first = DateTime(now.year - 50);
+  final last = DateTime(now.year + 80);
+  final initial = initialDate != null &&
+          initialDate.isAfter(first) &&
+          initialDate.isBefore(last)
+      ? initialDate
+      : now;
+  return showDatePicker(
     context: context,
-    backgroundColor: Colors.white,
-    isScrollControlled: false,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(0)),
+    initialDate: initial,
+    firstDate: first,
+    lastDate: last,
+    builder: (ctx, child) => Theme(
+      data: Theme.of(ctx).copyWith(
+        colorScheme: const ColorScheme.light(primary: Color(0xFFD91F32)),
+      ),
+      child: child!,
     ),
-    builder: (sheetContext) {
-      return SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(
-                height: 210,
-                child: Theme(
-                  data: Theme.of(context).copyWith(
-                    cupertinoOverrideTheme: const CupertinoThemeData(
-                      textTheme: CupertinoTextThemeData(
-                        dateTimePickerTextStyle: TextStyle(
-                          fontFamily: 'Calibri',
-                          fontSize: 22,
-                          color: Color(0xFF202020),
-                        ),
-                      ),
-                    ),
-                  ),
-                  child: CupertinoDatePicker(
-                    mode: CupertinoDatePickerMode.date,
-                    initialDateTime: selected,
-                    minimumDate: DateTime(now.year - 50),
-                    maximumDate: DateTime(now.year + 80),
-                    onDateTimeChanged: (value) => selected = value,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 14),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.of(sheetContext).pop(),
-                      style: OutlinedButton.styleFrom(
-                        minimumSize: const Size.fromHeight(56),
-                        side: const BorderSide(color: Color(0xFFD2D2D2)),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Text(
-                        l10n.tr('tns.cancel'),
-                        style: const TextStyle(
-                          fontFamily: 'Calibri',
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.primaryRed,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.of(sheetContext).pop(
-                        DateTime(selected.year, selected.month, selected.day),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryRed,
-                        minimumSize: const Size.fromHeight(56),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Text(
-                        l10n.tr('tns.ok'),
-                        style: const TextStyle(
-                          fontFamily: 'Calibri',
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      );
-    },
   );
 }
 

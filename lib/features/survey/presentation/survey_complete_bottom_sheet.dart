@@ -31,7 +31,7 @@ class SurveyCompleteBottomSheet extends StatelessWidget {
             style: const TextStyle(
               fontFamily: 'Calibri',
               fontSize: 18,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w400,
               color: Color(0xFF333333),
             ),
           ),
@@ -41,8 +41,9 @@ class SurveyCompleteBottomSheet extends StatelessWidget {
             textAlign: TextAlign.center,
             style: const TextStyle(
               fontFamily: 'Calibri',
-              fontSize: 14,
-              color: Color(0xFF666666),
+              fontSize: 16,
+              fontWeight: FontWeight.w300,
+              color: Color(0xFF333333),
               height: 1.4,
             ),
           ),
@@ -63,9 +64,9 @@ class SurveyCompleteBottomSheet extends StatelessWidget {
                 l10n.tr('GO_TO_SURVEY').toUpperCase(),
                 style: const TextStyle(
                   fontFamily: 'Calibri',
-                  fontSize: 14,
+                  fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  letterSpacing: 1,
+                  letterSpacing: 0.12,
                 ),
               ),
             ),

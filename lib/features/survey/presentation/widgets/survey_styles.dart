@@ -34,7 +34,7 @@ class SurveyStyles {
 
   static const TextStyle body = TextStyle(
     fontFamily: 'Calibri',
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: FontWeight.w300,
     color: subtitleColor,
     height: 1.15,

@@ -275,7 +275,7 @@ class _SignupPasswordStepState extends State<SignupPasswordStep> {
             Expanded(
               child: Text(
                 _dateOfBirth != null
-                    ? '${_dateOfBirth!.month}/${_dateOfBirth!.day}/${_dateOfBirth!.year}'
+                    ? '${_dateOfBirth!.day.toString().padLeft(2, '0')}/${_dateOfBirth!.month.toString().padLeft(2, '0')}/${_dateOfBirth!.year}'
                     : l10n.tr('tns.dateofBirth'),
                 style: TextStyle(
                   fontFamily: 'Calibri',

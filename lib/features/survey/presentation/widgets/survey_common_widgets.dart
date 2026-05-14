@@ -78,10 +78,10 @@ class SurveyActionButton extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontFamily: 'Calibri',
-                    fontSize: 14,
+                    fontSize: 16,
                     fontWeight: FontWeight.w700,
                     color: foreground,
-                    letterSpacing: 0.3,
+                    letterSpacing: 0.12,
                   ),
                 ),
               ),
