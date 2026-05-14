@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:filip_at_flutter/shared/theme/form_tokens.dart';
 
 const TextStyle signupInputStyle = TextStyle(
   fontFamily: 'Calibri',
@@ -38,19 +39,19 @@ InputDecoration signupInputDecoration(
     filled: readOnly,
     fillColor: readOnly ? const Color(0xFFF9F9F9) : null,
     enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(6),
+      borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
       borderSide: BorderSide(color: borderColor, width: 1.0),
     ),
     focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(6),
+      borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
       borderSide: const BorderSide(color: Color(0xFFD91F32), width: 1.2),
     ),
     errorBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(6),
+      borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
       borderSide: const BorderSide(color: Color(0xFFD91F32), width: 1.0),
     ),
     focusedErrorBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(6),
+      borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
       borderSide: const BorderSide(color: Color(0xFFD91F32), width: 1.2),
     ),
     suffixIcon: suffixIcon,
@@ -121,3 +122,4 @@ Widget signupSectionDivider() {
     margin: const EdgeInsets.symmetric(vertical: 20),
   );
 }
+

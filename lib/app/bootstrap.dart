@@ -5,6 +5,7 @@ import 'package:filip_at_flutter/app/app.dart';
 import 'package:filip_at_flutter/app/config/app_config.dart';
 import 'package:filip_at_flutter/app/flavor/app_flavor.dart';
 import 'package:filip_at_flutter/app/localization/app_language_controller.dart';
+import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/app/services/app_services.dart';
 import 'package:filip_at_flutter/core/network/api_client.dart';
 import 'package:filip_at_flutter/core/storage/app_storage_keys.dart';
@@ -92,12 +93,11 @@ Future<void> bootstrap(AppFlavor flavor) async {
 
       final context = FilipAtApp.navigatorKey.currentContext;
       if (context != null && context.mounted) {
+        final l10n = AppLocalizations.of(context);
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
           ..showSnackBar(
-            const SnackBar(
-              content: Text('Your session expired. Please log in again.'),
-            ),
+            SnackBar(content: Text(l10n.tr('SOMETHING_WENT_WRONG'))),
           );
       }
       return null;
@@ -210,6 +210,16 @@ Future<void> bootstrap(AppFlavor flavor) async {
     }
   });
   syncNotificationService.synccustomercontract.stream.listen((_) {
+    if (householdController.isInitialized) {
+      unawaited(householdController.load());
+    }
+  });
+  syncNotificationService.personContractSync.stream.listen((_) {
+    if (householdController.isInitialized) {
+      unawaited(householdController.load());
+    }
+  });
+  syncNotificationService.householdExternalSync.stream.listen((_) {
     if (householdController.isInitialized) {
       unawaited(householdController.load());
     }

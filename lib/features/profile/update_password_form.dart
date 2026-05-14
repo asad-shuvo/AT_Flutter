@@ -53,19 +53,19 @@ class _UpdatePasswordFormState extends State<UpdatePasswordForm> {
     String? repeatErr;
 
     if (current.isEmpty) {
-      currentErr = l10n.tr('account.currentPasswordRequired');
+      currentErr = l10n.tr('tns.currentPasswordRequired');
     } else if (!_passwordStrengthRegex.hasMatch(current)) {
-      currentErr = l10n.tr('account.passwordStrengthError');
+      currentErr = l10n.tr('tns.passwordStrengthError');
     }
     if (newPw.isEmpty) {
-      newErr = l10n.tr('account.newPasswordRequired');
+      newErr = l10n.tr('tns.newPasswordRequired');
     } else if (!_passwordStrengthRegex.hasMatch(newPw)) {
-      newErr = l10n.tr('account.passwordStrengthError');
+      newErr = l10n.tr('tns.passwordStrengthError');
     }
     if (repeat.isEmpty) {
-      repeatErr = l10n.tr('account.repeatPasswordRequired');
+      repeatErr = l10n.tr('tns.repeatPasswordRequired');
     } else if (newPw != repeat) {
-      repeatErr = l10n.tr('account.passwordNoMatch');
+      repeatErr = l10n.tr('tns.passwordNoMatch');
     }
 
     setState(() {
@@ -126,7 +126,7 @@ class _UpdatePasswordFormState extends State<UpdatePasswordForm> {
                             ),
                             const SizedBox(width: 10),
                             Text(
-                              l10n.tr('account.changePasswordTitle'),
+                              l10n.tr('tns.changePasswordTitle'),
                               style: const TextStyle(
                                 fontFamily: 'Calibri',
                                 fontSize: 22 / 1.2,
@@ -137,11 +137,11 @@ class _UpdatePasswordFormState extends State<UpdatePasswordForm> {
                           ],
                         ),
                         const SizedBox(height: 20),
-                        signupFieldLabel(l10n.tr('account.currentPassword')),
+                        signupFieldLabel(l10n.tr('tns.currentPassword')),
                         const SizedBox(height: 8),
                         _PasswordField(
                           controller: _currentPasswordController,
-                          hint: l10n.tr('account.enterCurrentPassword'),
+                          hint: l10n.tr('tns.enterCurrentPassword'),
                           showPassword: _showCurrent,
                           onToggle: () =>
                               setState(() => _showCurrent = !_showCurrent),
@@ -151,11 +151,11 @@ class _UpdatePasswordFormState extends State<UpdatePasswordForm> {
                           error: _currentError,
                         ),
                         const SizedBox(height: 16),
-                        signupFieldLabel(l10n.tr('account.newPassword')),
+                        signupFieldLabel(l10n.tr('tns.newPassword')),
                         const SizedBox(height: 8),
                         _PasswordField(
                           controller: _newPasswordController,
-                          hint: l10n.tr('account.enterNewPassword'),
+                          hint: l10n.tr('tns.enterNewPassword'),
                           showPassword: _showNew,
                           onToggle: () =>
                               setState(() => _showNew = !_showNew),
@@ -165,11 +165,11 @@ class _UpdatePasswordFormState extends State<UpdatePasswordForm> {
                           error: _newError,
                         ),
                         const SizedBox(height: 16),
-                        signupFieldLabel(l10n.tr('account.repeatNewPassword')),
+                        signupFieldLabel(l10n.tr('tns.repeatNewPassword')),
                         const SizedBox(height: 8),
                         _PasswordField(
                           controller: _repeatPasswordController,
-                          hint: l10n.tr('account.repeatNewPasswordHint'),
+                          hint: l10n.tr('tns.repeatNewPasswordHint'),
                           showPassword: _showRepeat,
                           onToggle: () =>
                               setState(() => _showRepeat = !_showRepeat),

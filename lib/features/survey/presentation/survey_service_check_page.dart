@@ -14,6 +14,7 @@ import 'package:filip_at_flutter/features/survey/presentation/widgets/survey_com
 import 'package:filip_at_flutter/features/survey/presentation/widgets/survey_styles.dart';
 import 'package:filip_at_flutter/shared/icons/app_icon_packs.dart';
 import 'package:flutter/material.dart';
+import 'package:filip_at_flutter/shared/theme/form_tokens.dart';
 
 class SurveyServiceCheckPage extends StatefulWidget {
   const SurveyServiceCheckPage({
@@ -246,7 +247,7 @@ class _SurveyServiceCheckPageState extends State<SurveyServiceCheckPage> {
       isScrollControlled: true,
       builder: (_) => VerificationCodeSheet(
         controller: controller,
-        title: 'Update Email Address',
+        title: context.l10n.tr('tns.changeEmailAddress'),
         icon: SelectNetworkIcons.email,
         descriptionText:
             'Please enter the 4 digit code sent to ${controller.newEmail}',
@@ -362,7 +363,7 @@ class _SurveyServiceCheckPageState extends State<SurveyServiceCheckPage> {
       isScrollControlled: true,
       builder: (_) => VerificationCodeSheet(
         controller: controller,
-        title: 'Update Phone Number',
+        title: context.l10n.tr('tns.changePhoneNumber'),
         icon: SelectNetworkIcons.phone,
         descriptionText:
             'Please enter the 4 digit code sent to ${controller.newPhone}',
@@ -663,7 +664,7 @@ class _SurveyServiceCheckPageState extends State<SurveyServiceCheckPage> {
                     ),
                   ),
                   Text(
-                    l10n.tr('DISCLAIMER_TEXT'),
+                    l10n.tr('tns.disclaimerText'),
                     style: const TextStyle(
                       fontFamily: 'Calibri',
                       fontSize: 10,
@@ -690,7 +691,7 @@ class _SurveyServiceCheckPageState extends State<SurveyServiceCheckPage> {
                         : SurveyStyles.submitDisabled,
                     foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
                   ),
                 ),
                 child: Text(
@@ -795,7 +796,7 @@ class _FieldTile extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 13),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
         border: Border.all(color: SurveyStyles.borderColor),
       ),
       child: Row(
@@ -822,7 +823,7 @@ class _FieldTile extends StatelessWidget {
     if (onTap != null) {
       return InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
         child: tile,
       );
     }
@@ -843,7 +844,7 @@ class _YesNoRow extends StatelessWidget {
       children: [
         Expanded(
           child: _ChoiceTile(
-            text: l10n.tr('YES'),
+            text: l10n.tr('tns.yes'),
             selected: selectedAnswer == 'yes',
             onTap: () => onSelect('yes'),
           ),
@@ -851,7 +852,7 @@ class _YesNoRow extends StatelessWidget {
         SizedBox(width: 10),
         Expanded(
           child: _ChoiceTile(
-            text: l10n.tr('NO'),
+            text: l10n.tr('tns.no'),
             selected: selectedAnswer == 'no',
             onTap: () => onSelect('no'),
           ),
@@ -906,7 +907,7 @@ class _ChoiceTile extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
         child: Container(
           height: 52,
           padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -916,7 +917,7 @@ class _ChoiceTile extends StatelessWidget {
               color: selected ? selectedColor : Colors.black,
               width: 1.2,
             ),
-            borderRadius: BorderRadius.circular(6),
+            borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
           ),
           child: Row(
             children: [
@@ -993,7 +994,7 @@ class _CheckListCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(l10n.tr('RETIREMENT'), style: sectionStyle),
+        Text(l10n.tr('tns.retirement'), style: sectionStyle),
         const SizedBox(height: 10),
         _CheckTile(
           itemKey: 'q5retirement1',
@@ -1058,7 +1059,7 @@ class _CheckListCard extends StatelessWidget {
           onTap: () => onToggle('q5financing2'),
         ),
         const SizedBox(height: 10),
-        Text(l10n.tr('INVESTMENT'), style: sectionStyle),
+        Text(l10n.tr('tns.investment'), style: sectionStyle),
         const SizedBox(height: 10),
         _CheckTile(
           itemKey: 'q5investment1',
@@ -1125,7 +1126,7 @@ class _CheckTile extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 10),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
         child: Row(
           children: [
             Container(
@@ -1133,7 +1134,7 @@ class _CheckTile extends StatelessWidget {
               height: 24,
               decoration: BoxDecoration(
                 color: selected ? const Color(0xFFFFF5F6) : Colors.white,
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
                 border: Border.all(
                   color: selected ? selectedColor : const Color(0xFFD2D2D2),
                   width: 1,
@@ -1194,7 +1195,7 @@ class _QuestionTwoDetails extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         color: SurveyStyles.softCard,
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
       ),
       padding: const EdgeInsets.all(12),
       child: Column(
@@ -1223,7 +1224,7 @@ class _QuestionTwoDetails extends StatelessWidget {
                       height: 24,
                       decoration: BoxDecoration(
                         color: isSelected ? const Color(0xFFD8495B) : Colors.white,
-                        borderRadius: BorderRadius.circular(6),
+                        borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
                         border: Border.all(color: const Color(0xFFD2D2D2)),
                       ),
                       child: isSelected
@@ -1250,7 +1251,7 @@ class _QuestionTwoDetails extends StatelessWidget {
           if (selected.contains('q2other'))
             _SpecifyField(
               controller: otherController,
-              hintText: l10n.tr('pleaseSpecify'),
+              hintText: l10n.tr('tns.pleaseSpecify'),
             ),
         ],
       ),
@@ -1270,7 +1271,7 @@ class _SpecifyField extends StatelessWidget {
     return TextField(
       controller: controller,
       decoration: InputDecoration(
-        hintText: hintText ?? l10n.tr('pleaseSpecify'),
+        hintText: hintText ?? l10n.tr('tns.pleaseSpecify'),
         hintStyle: const TextStyle(
           fontFamily: 'Calibri',
           fontSize: 15,
@@ -1280,16 +1281,17 @@ class _SpecifyField extends StatelessWidget {
         filled: true,
         fillColor: Colors.white,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
           borderSide: const BorderSide(color: SurveyStyles.borderColor),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
           borderSide: const BorderSide(color: SurveyStyles.borderColor),
         ),
       ),
     );
   }
 }
+
 
 

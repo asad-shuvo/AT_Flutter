@@ -152,6 +152,18 @@ class FcmService {
         navigator.pushNamed('/chat');
         _logEvent('Navigated to chat');
         break;
+      case 'FilipAppUpdate':
+        navigator.pushNamed('/app-update');
+        _logEvent('Navigated to app-update');
+        break;
+      case 'MeetingRecordAdded':
+        navigator.pushNamed('/drive');
+        _logEvent('Navigated to drive');
+        break;
+      case 'AnnouncementBroadCast':
+        navigator.pushNamed('/notifications');
+        _logEvent('Navigated to notifications for announcement');
+        break;
       default:
         _logEvent('Unhandled tap notification: $key');
     }
@@ -160,6 +172,7 @@ class FcmService {
   void _handleDataNotification(String key, Map<String, dynamic> data) {
     switch (key.toLowerCase()) {
       case 'contract_sync_completed':
+      case 'fcczskcontractsync':
         _syncNotificationService.contractSyncCompleted.add(data);
         _logEvent('Emitted to contractSyncCompleted');
         break;
@@ -187,6 +200,10 @@ class FcmService {
         _syncNotificationService.portfolioInvestmentSync.add(data);
         _logEvent('Emitted to portfolioInvestmentSync');
         break;
+      case 'portfolio_findata_sync_completed':
+        _syncNotificationService.portfolioForceSync.add(data);
+        _logEvent('Emitted to portfolioForceSync');
+        break;
       case 'synccustomerdatabyid':
         _syncNotificationService.synccustomerdatabyid.add(data);
         _logEvent('Emitted to synccustomerdatabyid');
@@ -196,6 +213,14 @@ class FcmService {
       case 'gdpr_consent_sync':
         _syncNotificationService.gdprConsentSync.add(data);
         _logEvent('Emitted to gdprConsentSync');
+        break;
+      case 'person_contract_sync_completed':
+        _syncNotificationService.personContractSync.add(data);
+        _logEvent('Emitted to personContractSync');
+        break;
+      case 'household_members_contract_sync_completed':
+        _syncNotificationService.householdExternalSync.add(data);
+        _logEvent('Emitted to householdExternalSync');
         break;
       default:
         _logEvent('Unhandled data notification: $key');

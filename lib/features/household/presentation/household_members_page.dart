@@ -298,11 +298,11 @@ class _HouseholdMembersPageState extends State<HouseholdMembersPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: Text(l10n.tr('common.no')),
+              child: Text(l10n.tr('tns.no')),
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: Text(l10n.tr('common.yes')),
+              child: Text(l10n.tr('tns.yes')),
             ),
           ],
         );
@@ -323,7 +323,7 @@ class _HouseholdMembersPageState extends State<HouseholdMembersPage> {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(l10n.tr('login.genericError'))));
+      ).showSnackBar(SnackBar(content: Text(l10n.tr('tns.genericError'))));
     } finally {
       if (mounted) {
         setState(() {

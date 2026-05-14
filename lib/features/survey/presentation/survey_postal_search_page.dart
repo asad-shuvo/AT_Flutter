@@ -4,6 +4,7 @@ import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/features/survey/data/survey_address_repository.dart';
 import 'package:filip_at_flutter/features/survey/presentation/widgets/survey_styles.dart';
 import 'package:flutter/material.dart';
+import 'package:filip_at_flutter/shared/theme/form_tokens.dart';
 
 const int _kPageSize = 10;
 
@@ -124,7 +125,7 @@ class _SurveyPostalSearchPageState extends State<SurveyPostalSearchPage> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
-          l10n.tr('postalZipCode'),
+          l10n.tr('tns.postalZipCode'),
           style: const TextStyle(
             fontFamily: 'Calibri',
             fontSize: 18,
@@ -147,7 +148,7 @@ class _SurveyPostalSearchPageState extends State<SurveyPostalSearchPage> {
                 color: Color(0xFF333333),
               ),
               decoration: InputDecoration(
-                hintText: l10n.tr('postalZipCode'),
+                hintText: l10n.tr('tns.postalZipCode'),
                 hintStyle: const TextStyle(
                   fontFamily: 'Calibri',
                   fontSize: 16,
@@ -158,14 +159,14 @@ class _SurveyPostalSearchPageState extends State<SurveyPostalSearchPage> {
                 filled: true,
                 fillColor: Colors.white,
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(6),
+                  borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
                   borderSide: const BorderSide(
                     color: Color(0xFFB23A4D),
                     width: 1.2,
                   ),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(6),
+                  borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
                   borderSide: const BorderSide(
                     color: Color(0xFFB23A4D),
                     width: 1.5,
@@ -226,3 +227,4 @@ class _SurveyPostalSearchPageState extends State<SurveyPostalSearchPage> {
     );
   }
 }
+

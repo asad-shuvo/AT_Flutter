@@ -8,7 +8,7 @@ class AppLoadingView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final resolvedLabel = label ?? context.l10n.tr('common.loading');
+    final resolvedLabel = label ?? context.l10n.tr('tns.loading');
 
     return Center(
       child: Column(

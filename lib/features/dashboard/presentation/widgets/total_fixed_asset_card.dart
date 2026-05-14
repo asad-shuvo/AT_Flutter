@@ -39,7 +39,7 @@ class TotalFixedAssetCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    l10n.tr('dashboard.totalFixedAsset'),
+                    l10n.tr('tns.totalFixedAsset'),
                     style: const TextStyle(
                       color: AppColors.textMuted,
                       fontSize: 11,
@@ -57,7 +57,7 @@ class TotalFixedAssetCard extends StatelessWidget {
 
                       return Text(
                         isLoading
-                            ? l10n.tr('common.loading')
+                            ? l10n.tr('tns.loading')
                             : CurrencyFormatter.formatEuro(value),
                         style: const TextStyle(
                           color: AppColors.textPrimary,

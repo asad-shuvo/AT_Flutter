@@ -2,6 +2,7 @@ import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/features/self_signup/application/self_signup_controller.dart';
 import 'package:filip_at_flutter/features/self_signup/presentation/widgets/signup_shared.dart';
 import 'package:flutter/material.dart';
+import 'package:filip_at_flutter/shared/theme/form_tokens.dart';
 import 'package:flutter/services.dart';
 
 class SignupOtpStep extends StatefulWidget {
@@ -104,14 +105,14 @@ class _SignupOtpStepState extends State<SignupOtpStep> {
                       vertical: 16,
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(6),
+                      borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
                       borderSide: const BorderSide(
                         color: Color(0xFFC9C9C9),
                         width: 1.0,
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(6),
+                      borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
                       borderSide: const BorderSide(
                         color: Color(0xFFD91F32),
                         width: 1.5,
@@ -215,3 +216,4 @@ class _SignupOtpStepState extends State<SignupOtpStep> {
     );
   }
 }
+

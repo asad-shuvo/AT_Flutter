@@ -1,6 +1,8 @@
 import 'package:file_picker/file_picker.dart';
+import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/shared/theme/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:filip_at_flutter/shared/theme/form_tokens.dart';
 
 enum DocumentAddMode { externalLink, upload }
 
@@ -95,7 +97,7 @@ class _ContractDocumentAddSheetState extends State<ContractDocumentAddSheet> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to pick file')),
+          SnackBar(content: Text(context.l10n.tr('tns.UPLOAD_FAILED'))),
         );
       }
     } finally {
@@ -215,6 +217,7 @@ class _ContractDocumentAddSheetState extends State<ContractDocumentAddSheet> {
   }
 
   Widget _buildHeader(BuildContext context) {
+    final l10n = context.l10n;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 8, 12),
       child: Row(
@@ -225,9 +228,9 @@ class _ContractDocumentAddSheetState extends State<ContractDocumentAddSheet> {
             color: Color(0xFF333333),
           ),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Text(
-              'Important Documents',
+              l10n.tr('tns.relatedDocument'),
               style: TextStyle(
                 fontFamily: 'Calibri',
                 fontSize: 18,
@@ -246,11 +249,22 @@ class _ContractDocumentAddSheetState extends State<ContractDocumentAddSheet> {
   }
 
   Widget _buildToggleButtons() {
+    final l10n = context.l10n;
     return Row(
       children: [
-        Expanded(child: _buildModeButton(DocumentAddMode.externalLink, 'External Link')),
+        Expanded(
+          child: _buildModeButton(
+            DocumentAddMode.externalLink,
+            l10n.tr('EXTERNAL_LINK'),
+          ),
+        ),
         const SizedBox(width: 12),
-        Expanded(child: _buildModeButton(DocumentAddMode.upload, 'Document Upload')),
+        Expanded(
+          child: _buildModeButton(
+            DocumentAddMode.upload,
+            l10n.tr('DOCUMENT_UPLOAD'),
+          ),
+        ),
       ],
     );
   }
@@ -266,7 +280,7 @@ class _ContractDocumentAddSheetState extends State<ContractDocumentAddSheet> {
             color: selected ? AppColors.primaryRed : const Color(0xFFCCCCCC),
             width: selected ? 1.5 : 1,
           ),
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
           color: selected
               ? AppColors.primaryRed.withValues(alpha: 0.03)
               : Colors.white,
@@ -318,8 +332,8 @@ class _ContractDocumentAddSheetState extends State<ContractDocumentAddSheet> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Resource Title',
+        Text(
+          context.l10n.tr('SOURCE_TITLE'),
           style: TextStyle(
             fontFamily: 'Calibri',
             fontSize: 14,
@@ -333,7 +347,7 @@ class _ContractDocumentAddSheetState extends State<ContractDocumentAddSheet> {
           maxLength: 200,
           onChanged: (_) => setState(() {}),
           decoration: InputDecoration(
-            hintText: 'Resource Title',
+            hintText: context.l10n.tr('SOURCE_TITLE'),
             counterText: '',
             filled: true,
             fillColor: Colors.white,
@@ -342,18 +356,18 @@ class _ContractDocumentAddSheetState extends State<ContractDocumentAddSheet> {
               vertical: 14,
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
               borderSide: const BorderSide(color: Color(0xFFCCCCCC)),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
               borderSide: const BorderSide(
                 color: AppColors.primaryRed,
                 width: 1.2,
               ),
             ),
             disabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
               borderSide: const BorderSide(color: Color(0xFFDDDDDD)),
             ),
             hintStyle: const TextStyle(
@@ -376,8 +390,8 @@ class _ContractDocumentAddSheetState extends State<ContractDocumentAddSheet> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'URL Address',
+        Text(
+          context.l10n.tr('URL_ADDRESS'),
           style: TextStyle(
             fontFamily: 'Calibri',
             fontSize: 14,
@@ -393,7 +407,7 @@ class _ContractDocumentAddSheetState extends State<ContractDocumentAddSheet> {
           textCapitalization: TextCapitalization.none,
           onChanged: (_) => setState(() {}),
           decoration: InputDecoration(
-            hintText: 'URL Address',
+            hintText: context.l10n.tr('URL_ADDRESS'),
             filled: true,
             fillColor: Colors.white,
             contentPadding: const EdgeInsets.symmetric(
@@ -401,18 +415,18 @@ class _ContractDocumentAddSheetState extends State<ContractDocumentAddSheet> {
               vertical: 14,
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
               borderSide: const BorderSide(color: Color(0xFFCCCCCC)),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
               borderSide: const BorderSide(
                 color: AppColors.primaryRed,
                 width: 1.2,
               ),
             ),
             disabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
               borderSide: const BorderSide(color: Color(0xFFDDDDDD)),
             ),
             hintStyle: const TextStyle(
@@ -443,7 +457,7 @@ class _ContractDocumentAddSheetState extends State<ContractDocumentAddSheet> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
             decoration: BoxDecoration(
               border: Border.all(color: const Color(0xFFCCCCCC)),
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
               color: const Color(0xFFF7F7F7),
             ),
             child: Center(
@@ -476,7 +490,7 @@ class _ContractDocumentAddSheetState extends State<ContractDocumentAddSheet> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
               border: Border.all(color: const Color(0xFFEEEEEE)),
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
               color: Colors.white,
             ),
             child: Row(
@@ -529,7 +543,7 @@ class _ContractDocumentAddSheetState extends State<ContractDocumentAddSheet> {
             elevation: 0,
             minimumSize: const Size.fromHeight(56),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
             ),
           ),
           child: _isSubmitting
@@ -575,3 +589,4 @@ Future<bool?> showContractDocumentAddSheet(
     builder: (_) => ContractDocumentAddSheet(onSubmit: onSubmit),
   );
 }
+

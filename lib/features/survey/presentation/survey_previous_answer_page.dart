@@ -43,13 +43,13 @@ class SurveyPreviousAnswerPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('${l10n.tr('NAME')}: ${'Asaduzzaman Shuvo'}', style: SurveyStyles.questionText),
+                  Text('${l10n.tr('tns.Name')}: ${'Asaduzzaman Shuvo'}', style: SurveyStyles.questionText),
                   const SizedBox(height: 4),
-                  Text('${l10n.tr('EMAIL')}: ${'asaduzzaman.shuvo@selise.ch'}', style: SurveyStyles.questionText),
+                  Text('${l10n.tr('tns.email')}: ${'asaduzzaman.shuvo@selise.ch'}', style: SurveyStyles.questionText),
                   const SizedBox(height: 4),
-                  Text('${l10n.tr('PHONE_NUMBER')}: ${'+8801867512994'}', style: SurveyStyles.questionText),
+                  Text('${l10n.tr('tns.phoneNumber')}: ${'+8801867512994'}', style: SurveyStyles.questionText),
                   const SizedBox(height: 4),
-                  Text('${l10n.tr('ADDRESS')}: ${'Bakultala, 3622, Fohra, Bangladesh'}', style: SurveyStyles.questionText),
+                  Text('${l10n.tr('tns.address')}: ${'Bakultala, 3622, Fohra, Bangladesh'}', style: SurveyStyles.questionText),
                   const SizedBox(height: 10),
                   Text(
                     l10n.tr('Q1NO'),
@@ -61,17 +61,17 @@ class SurveyPreviousAnswerPage extends StatelessWidget {
             SurveyQuestionCard(
               serial: l10n.tr('QUES_TWO'),
               question: l10n.tr('QUES_TWO_TITLE'),
-              child: Text(l10n.tr('NO'), style: SurveyStyles.bodyBold),
+              child: Text(l10n.tr('tns.no'), style: SurveyStyles.bodyBold),
             ),
             SurveyQuestionCard(
               serial: l10n.tr('QUES_THREE'),
               question: l10n.tr('QUES_THREE_TITLE'),
-              child: Text(l10n.tr('NO'), style: SurveyStyles.bodyBold),
+              child: Text(l10n.tr('tns.no'), style: SurveyStyles.bodyBold),
             ),
             SurveyQuestionCard(
               serial: l10n.tr('QUES_FOUR'),
               question: l10n.tr('QUES_FOUR_TITLE'),
-              child: Text(l10n.tr('NO'), style: SurveyStyles.bodyBold),
+              child: Text(l10n.tr('tns.no'), style: SurveyStyles.bodyBold),
             ),
           ],
         ),

@@ -1,8 +1,10 @@
 import 'dart:convert';
 
+import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/features/profile/contact_update_controller_base.dart';
 import 'package:filip_at_flutter/shared/theme/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:filip_at_flutter/shared/theme/form_tokens.dart';
 
 class CaptchaBottomSheet extends StatefulWidget {
   const CaptchaBottomSheet({
@@ -119,10 +121,10 @@ class _CaptchaBottomSheetState extends State<CaptchaBottomSheet> {
                                 ],
                               ),
                               const SizedBox(height: 16),
-                              const Padding(
+                              Padding(
                                 padding: EdgeInsets.only(left: 2),
                                 child: Text(
-                                  'Captcha *',
+                                  '${context.l10n.tr('tns.captcha')} *',
                                   style: TextStyle(
                                     color: Color(0xFF808080),
                                     fontFamily: 'Calibri',
@@ -143,7 +145,7 @@ class _CaptchaBottomSheetState extends State<CaptchaBottomSheet> {
                                 ),
                                 decoration: InputDecoration(
                                   counterText: '',
-                                  hintText: 'Captcha',
+                                  hintText: context.l10n.tr('tns.captcha'),
                                   hintStyle: const TextStyle(
                                     fontFamily: 'Calibri',
                                     color: Color(0xFFA6A6A6),
@@ -156,21 +158,21 @@ class _CaptchaBottomSheetState extends State<CaptchaBottomSheet> {
                                     vertical: 14,
                                   ),
                                   border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
+                                    borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
                                     borderSide: const BorderSide(
                                       color: Color(0xFFC9C9C9),
                                       width: 1.0,
                                     ),
                                   ),
                                   enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
+                                    borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
                                     borderSide: const BorderSide(
                                       color: Color(0xFFC9C9C9),
                                       width: 1.0,
                                     ),
                                   ),
                                   focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
+                                    borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
                                     borderSide: const BorderSide(
                                       color: AppColors.primaryRed,
                                       width: 1.2,
@@ -205,7 +207,7 @@ class _CaptchaBottomSheetState extends State<CaptchaBottomSheet> {
                               backgroundColor: AppColors.primaryRed,
                               disabledBackgroundColor: const Color(0xFFD98C99),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(6),
+                                borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
                               ),
                             ),
                             child: const Text(
@@ -232,3 +234,4 @@ class _CaptchaBottomSheetState extends State<CaptchaBottomSheet> {
     );
   }
 }
+

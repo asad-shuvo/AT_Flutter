@@ -21,7 +21,7 @@ class SupportPage extends StatelessWidget {
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
-          l10n.tr('support.title'),
+          l10n.tr('tns.support'),
           style: const TextStyle(
             fontFamily: 'Calibri',
             fontSize: 18,
@@ -40,12 +40,12 @@ class SupportPage extends StatelessWidget {
           children: [
             _SupportCard(
               icon: FilipIcons.clock,
-              text: l10n.tr('support.hours'),
+              text: l10n.tr('tns.supportDay'),
             ),
             const SizedBox(height: 8),
             _SupportCard(
               icon: FilipIcons.advisorMail,
-              text: l10n.tr('support.email'),
+              text: l10n.tr('tns.email'),
             ),
           ],
         ),

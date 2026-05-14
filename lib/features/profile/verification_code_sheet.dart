@@ -1,6 +1,8 @@
 import 'package:filip_at_flutter/features/profile/contact_update_controller_base.dart';
+import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/shared/theme/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:filip_at_flutter/shared/theme/form_tokens.dart';
 
 class VerificationCodeSheet extends StatefulWidget {
   const VerificationCodeSheet({
@@ -118,7 +120,7 @@ class _VerificationCodeSheetState extends State<VerificationCodeSheet> {
                             ),
                             decoration: InputDecoration(
                               counterText: '',
-                              hintText: 'Enter Verification Code',
+                              hintText: context.l10n.tr('tns.verificationCode'),
                               hintStyle: const TextStyle(
                                 fontFamily: 'Calibri',
                                 fontSize: 16,
@@ -131,21 +133,21 @@ class _VerificationCodeSheetState extends State<VerificationCodeSheet> {
                                 vertical: 17,
                               ),
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
                                 borderSide: const BorderSide(
                                   color: Color(0xFF8E2D3A),
                                   width: 1.5,
                                 ),
                               ),
                               enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
                                 borderSide: const BorderSide(
                                   color: Color(0xFF8E2D3A),
                                   width: 1.5,
                                 ),
                               ),
                               focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
                                 borderSide: const BorderSide(
                                   color: Color(0xFF8E2D3A),
                                   width: 1.5,
@@ -243,7 +245,7 @@ class _VerificationCodeSheetState extends State<VerificationCodeSheet> {
                             style: OutlinedButton.styleFrom(
                               side: const BorderSide(color: Color(0xFFC9C9C9)),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(6),
+                                borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
                               ),
                               backgroundColor: Colors.white,
                             ),
@@ -273,7 +275,7 @@ class _VerificationCodeSheetState extends State<VerificationCodeSheet> {
                               backgroundColor: AppColors.primaryRed,
                               disabledBackgroundColor: const Color(0xFFE39CA6),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(6),
+                                borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
                               ),
                             ),
                             child: const Text(
@@ -300,3 +302,4 @@ class _VerificationCodeSheetState extends State<VerificationCodeSheet> {
     );
   }
 }
+

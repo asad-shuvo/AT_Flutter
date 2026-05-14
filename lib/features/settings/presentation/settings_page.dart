@@ -35,7 +35,7 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         titleSpacing: 0,
         title: Text(
-          l10n.tr('preferences.title'),
+          l10n.tr('tns.title'),
           style: const TextStyle(
             fontFamily: 'Calibri',
             fontSize: 18,
@@ -69,7 +69,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           child: Text(
-                            l10n.tr('preferences.biometricTitle'),
+                            l10n.tr('tns.biometricTitle'),
                             style: const TextStyle(
                               fontFamily: 'Calibri',
                               fontSize: 18,
@@ -116,7 +116,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     ],
                   ),
                   Text(
-                    l10n.tr('preferences.biometricDescription'),
+                    l10n.tr('tns.biometricDescription'),
                     style: const TextStyle(
                       fontFamily: 'Calibri',
                       fontSize: 14,
@@ -146,7 +146,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           child: Text(
-                            l10n.tr('preferences.pinTitle'),
+                            l10n.tr('tns.pinTitle'),
                             style: const TextStyle(
                               fontFamily: 'Calibri',
                               fontSize: 18,
@@ -159,7 +159,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     ],
                   ),
                   Text(
-                    l10n.tr('preferences.pinDescription'),
+                    l10n.tr('tns.pinDescription'),
                     style: const TextStyle(
                       fontFamily: 'Calibri',
                       fontSize: 14,
@@ -183,7 +183,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                       ),
                       child: Text(
-                        l10n.tr('preferences.resetPin'),
+                        l10n.tr('tns.resetPin'),
                         style: const TextStyle(
                           fontFamily: 'Calibri',
                           fontSize: 16,
@@ -206,7 +206,7 @@ class _SettingsPageState extends State<SettingsPage> {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
-        SnackBar(content: Text(context.l10n.tr('preferences.actionPending'))),
+        SnackBar(content: Text(context.l10n.tr('tns.actionPending'))),
       );
   }
 

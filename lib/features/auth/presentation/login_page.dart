@@ -8,6 +8,7 @@ import 'package:filip_at_flutter/features/auth/application/auth_session_controll
 import 'package:filip_at_flutter/features/auth/data/auth_exception.dart';
 import 'package:filip_at_flutter/shared/icons/app_icon_packs.dart';
 import 'package:flutter/material.dart';
+import 'package:filip_at_flutter/shared/theme/form_tokens.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({
@@ -128,7 +129,7 @@ class _LoginPageState extends State<LoginPage> {
       final l10n = context.l10n;
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text(l10n.tr('login.genericError'))));
+        ..showSnackBar(SnackBar(content: Text(l10n.tr('tns.retry'))));
     } finally {
       if (mounted) {
         setState(() {
@@ -184,7 +185,7 @@ class _LoginPageState extends State<LoginPage> {
                     child: Column(
                       children: [
                         Text(
-                          l10n.tr('login.welcome'),
+                          l10n.tr('tns.welcomeToFinancialLifePlanner'),
                           textAlign: TextAlign.center,
                           style: theme.textTheme.headlineSmall?.copyWith(
                             fontFamily: 'Calibri',
@@ -201,7 +202,7 @@ class _LoginPageState extends State<LoginPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildFieldLabel(l10n.tr('login.email')),
+                              _buildFieldLabel(l10n.tr('tns.email')),
                               const SizedBox(height: 10),
                               TextFormField(
                                 controller: _usernameController,
@@ -214,7 +215,7 @@ class _LoginPageState extends State<LoginPage> {
                                   color: Color(0xFF2F2F2F),
                                 ),
                                 decoration: InputDecoration(
-                                  hintText: l10n.tr('login.emailHint'),
+                                  hintText: l10n.tr('tns.email'),
                                   hintStyle: const TextStyle(
                                     fontFamily: 'Calibri',
                                     fontSize: 16,
@@ -237,13 +238,13 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                                 validator: (value) {
                                   if (value == null || value.trim().isEmpty) {
-                                    return l10n.tr('login.emailRequired');
+                                    return l10n.tr('tns.emailError');
                                   }
                                   return null;
                                 },
                               ),
                               const SizedBox(height: 16),
-                              _buildFieldLabel(l10n.tr('login.password')),
+                              _buildFieldLabel(l10n.tr('tns.password')),
                               const SizedBox(height: 10),
                               TextFormField(
                                 controller: _passwordController,
@@ -255,7 +256,7 @@ class _LoginPageState extends State<LoginPage> {
                                   color: Color(0xFF2F2F2F),
                                 ),
                                 decoration: InputDecoration(
-                                  hintText: l10n.tr('login.passwordHint'),
+                                  hintText: l10n.tr('tns.password'),
                                   hintStyle: const TextStyle(
                                     fontFamily: 'Calibri',
                                     fontSize: 16,
@@ -292,7 +293,7 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                                 validator: (value) {
                                   if (value == null || value.trim().isEmpty) {
-                                    return l10n.tr('login.passwordRequired');
+                                    return l10n.tr('tns.noPassword');
                                   }
                                   return null;
                                 },
@@ -346,7 +347,7 @@ class _LoginPageState extends State<LoginPage> {
                                           ),
                                           const SizedBox(width: 10),
                                           Text(
-                                            l10n.tr('login.rememberMe'),
+                                            l10n.tr('tns.rememberme'),
                                             style: const TextStyle(
                                               fontFamily: 'Calibri',
                                               fontSize: 13,
@@ -371,7 +372,7 @@ class _LoginPageState extends State<LoginPage> {
                                       foregroundColor: const Color(0xFF6B6B6B),
                                     ),
                                     child: Text(
-                                      l10n.tr('login.forgotPassword'),
+                                      l10n.tr('tns.forgotPassword'),
                                       style: const TextStyle(
                                         fontFamily: 'Calibri',
                                         fontSize: 13,
@@ -415,7 +416,7 @@ class _LoginPageState extends State<LoginPage> {
                                                     ),
                                               )
                                             : Text(
-                                                l10n.tr('login.logIn'),
+                                                l10n.tr('tns.login'),
                                                 style: const TextStyle(
                                                   fontFamily: 'Calibri',
                                                   fontSize: 14,
@@ -468,7 +469,7 @@ class _LoginPageState extends State<LoginPage> {
                                 crossAxisAlignment: WrapCrossAlignment.center,
                                 children: [
                                   Text(
-                                    l10n.tr('login.noAccount'),
+                                    l10n.tr('tns.dontHaveAnAccount'),
                                     style: const TextStyle(
                                       fontFamily: 'Calibri',
                                       fontSize: 12,
@@ -479,7 +480,7 @@ class _LoginPageState extends State<LoginPage> {
                                     onTap: () => Navigator.of(context)
                                         .pushNamed(AppRouter.selfSignup),
                                     child: Text(
-                                      l10n.tr('login.createNow'),
+                                      l10n.tr('tns.createNow'),
                                       style: const TextStyle(
                                         fontFamily: 'Calibri',
                                         fontSize: 12,
@@ -569,7 +570,7 @@ class _LoginPageState extends State<LoginPage> {
 
   OutlineInputBorder _inputBorder({Color color = const Color(0xFFC9C9C9)}) {
     return OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
       borderSide: BorderSide(color: color, width: 1.15),
     );
   }
@@ -609,3 +610,4 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
+

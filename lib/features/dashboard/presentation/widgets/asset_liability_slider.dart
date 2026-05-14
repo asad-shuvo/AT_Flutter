@@ -30,19 +30,19 @@ class AssetLiabilitySlider extends StatelessWidget {
       builder: (context, snapshot) {
         final cards = <_SliderCardData>[
           _SliderCardData(
-            title: l10n.tr('dashboard.slsInvestment'),
+            title: l10n.tr('tns.SLSInvestment'),
             value: snapshot.data?.totalInvestment,
             icon: FilipIcons.investment,
             showChevron: true,
             onTap: onInvestmentTap,
           ),
           _SliderCardData(
-            title: l10n.tr('dashboard.totalMonthlyPremium'),
+            title: l10n.tr('tns.totalMonthlyPremium'),
             value: snapshot.data?.totalMonthlyPremium,
             icon: FilipIcons.premium,
           ),
           _SliderCardData(
-            title: l10n.tr('dashboard.totalLiabilities'),
+            title: l10n.tr('tns.totalLiabilities'),
             value: snapshot.data?.totalLiabilities,
             icon: FilipIcons.liabilities,
           ),
@@ -156,7 +156,7 @@ class _SummarySliderCard extends StatelessWidget {
                 const SizedBox(height: 6),
                 Text(
                   isLoading
-                      ? context.l10n.tr('common.loading')
+                      ? context.l10n.tr('tns.loading')
                       : CurrencyFormatter.formatEuro(value),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

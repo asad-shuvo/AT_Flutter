@@ -586,7 +586,7 @@ class _NotificationCard extends StatelessWidget {
     }
 
     if (diff.inMinutes < 60) {
-      final unit = diff.inMinutes == 1 ? l10n.tr('min') : l10n.tr('mins');
+      final unit = diff.inMinutes == 1 ? l10n.tr('tns.min') : l10n.tr('mins');
       return _agoLabel(l10n, diff.inMinutes, unit).toUpperCase();
     }
 
@@ -596,7 +596,7 @@ class _NotificationCard extends StatelessWidget {
     }
 
     if (diff.inDays < 31) {
-      final unit = diff.inDays == 1 ? l10n.tr('day') : l10n.tr('days');
+      final unit = diff.inDays == 1 ? l10n.tr('tns.day') : l10n.tr('tns.days');
       return _agoLabel(l10n, diff.inDays, unit).toUpperCase();
     }
 

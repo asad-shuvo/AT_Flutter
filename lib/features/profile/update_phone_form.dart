@@ -5,6 +5,7 @@ import 'package:filip_at_flutter/features/self_signup/presentation/widgets/signu
 import 'package:filip_at_flutter/shared/icons/app_icon_packs.dart';
 import 'package:filip_at_flutter/shared/theme/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:filip_at_flutter/shared/theme/form_tokens.dart';
 import 'package:flutter/services.dart';
 
 CountryInfo _defaultPhoneCountry() =>
@@ -52,12 +53,12 @@ class _UpdatePhoneFormState extends State<UpdatePhoneForm> {
     final l10n = context.l10n;
     final digits = _digitsController.text.trim();
     if (digits.length < 9 || digits.length > 14) {
-      setState(() => _localError = l10n.tr('account.phoneInvalid'));
+      setState(() => _localError = l10n.tr('tns.phoneInvalid'));
       return;
     }
     final full = _fullPhone;
     if (full == widget.currentPhone) {
-      setState(() => _localError = l10n.tr('account.phoneUnchanged'));
+      setState(() => _localError = l10n.tr('tns.phoneUnchanged'));
       return;
     }
     setState(() => _localError = null);
@@ -119,7 +120,7 @@ class _UpdatePhoneFormState extends State<UpdatePhoneForm> {
                             ),
                             const SizedBox(width: 10),
                             Text(
-                              l10n.tr('account.changePhoneNumber'),
+                              l10n.tr('tns.changePhoneNumber'),
                               style: TextStyle(
                                 fontFamily: 'Calibri',
                                 fontSize: 18,
@@ -131,7 +132,7 @@ class _UpdatePhoneFormState extends State<UpdatePhoneForm> {
                         ),
                         const SizedBox(height: 20),
                         Text(
-                          l10n.tr('account.updatePhoneSubHeader'),
+                          l10n.tr('tns.updatePhoneSubHeader'),
                           style: TextStyle(
                             fontFamily: 'Calibri',
                             fontSize: 16,
@@ -158,7 +159,7 @@ class _UpdatePhoneFormState extends State<UpdatePhoneForm> {
                                     color: const Color(0xFFC9C9C9),
                                     width: 1.0,
                                   ),
-                                  borderRadius: BorderRadius.circular(6),
+                                  borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
@@ -228,7 +229,7 @@ class _UpdatePhoneFormState extends State<UpdatePhoneForm> {
                         elevation: 0,
                         backgroundColor: AppColors.primaryRed,
                         disabledBackgroundColor: const Color(0xFFE39CA6),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius)),
                       ),
                       child: const Text(
                         'UPDATE',
@@ -340,11 +341,11 @@ class _PhoneCountryPickerSheetState extends State<_PhoneCountryPickerSheet> {
                 ),
                 contentPadding: const EdgeInsets.symmetric(vertical: 10),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
                   borderSide: const BorderSide(color: Color(0xFFDDDDDD)),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
                   borderSide: const BorderSide(
                     color: Color(0xFFD91F32),
                     width: 1.5,
@@ -411,3 +412,4 @@ class _PhoneCountryPickerSheetState extends State<_PhoneCountryPickerSheet> {
     );
   }
 }
+

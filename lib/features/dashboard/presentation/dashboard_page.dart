@@ -360,7 +360,7 @@ class _DashboardPageState extends State<DashboardPage> with RouteAware {
           return;
         }
         _showDashboardMessage(
-          context.l10n.tr('dashboard.investmentPortalUnavailable'),
+          context.l10n.tr('tns.unknownError'),
         );
         _dfsInvestmentUriFuture = widget.dashboardRepository
             .fetchDfsInvestmentUri();
@@ -374,7 +374,7 @@ class _DashboardPageState extends State<DashboardPage> with RouteAware {
 
       if (!launched && mounted) {
         _showDashboardMessage(
-          context.l10n.tr('dashboard.investmentPortalOpenFailed'),
+          context.l10n.tr('tns.unknownError'),
         );
         _dfsInvestmentUriFuture = widget.dashboardRepository
             .fetchDfsInvestmentUri();
@@ -384,7 +384,7 @@ class _DashboardPageState extends State<DashboardPage> with RouteAware {
           .fetchDfsInvestmentUri();
       if (mounted) {
         _showDashboardMessage(
-          context.l10n.tr('dashboard.investmentPortalOpenFailed'),
+          context.l10n.tr('tns.unknownError'),
         );
       }
     } finally {
@@ -525,32 +525,32 @@ class _DashboardDrawer extends StatelessWidget {
           // ── Menu items ──
           _DrawerItem(
             icon: FilipIcons.personOutline,
-            label: l10n.tr('dashboard.drawerAccount'),
+            label: l10n.tr('tns.myAccount'),
             onTap: onProfileTap,
           ),
           _DrawerItem(
             icon: FilipIcons.preferences,
-            label: l10n.tr('dashboard.drawerPreferences'),
+            label: l10n.tr('tns.preferences'),
             onTap: onPreferencesTap,
           ),
           _DrawerItem(
             icon: FilipIcons.household,
-            label: l10n.tr('dashboard.drawerHousehold'),
+            label: l10n.tr('tns.household'),
             onTap: onHouseholdTap,
           ),
           _DrawerItem(
             icon: FilipIcons.survey,
-            label: l10n.tr('dashboard.drawerSurvey'),
+            label: l10n.tr('tns.SURVEY'),
             onTap: onSurveyTap,
           ),
           _DrawerItem(
             icon: FilipIcons.support,
-            label: l10n.tr('dashboard.drawerSupport'),
+            label: l10n.tr('tns.support'),
             onTap: onSupportTap,
           ),
           _DrawerItem(
             icon: FilipIcons.about,
-            label: l10n.tr('dashboard.drawerAbout'),
+            label: l10n.tr('tns.about'),
             onTap: onAboutTap,
           ),
 
@@ -566,7 +566,7 @@ class _DashboardDrawer extends StatelessWidget {
                 onPressed: onLogoutTap,
                 icon: const Icon(Icons.logout, color: Colors.white, size: 20),
                 label: Text(
-                  l10n.tr('dashboard.drawerLogout'),
+                  l10n.tr('tns.logout'),
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 14,
@@ -640,7 +640,7 @@ class _DashboardDrawer extends StatelessWidget {
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                   child: Text(
-                    l10n.tr('dashboard.drawerLegal'),
+                    l10n.tr('tns.legal'),
                     style: const TextStyle(
                       fontSize: 11,
                       color: Color(0xFF8A8A8A),
@@ -663,7 +663,7 @@ class _DashboardDrawer extends StatelessWidget {
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                   child: Text(
-                    l10n.tr('dashboard.drawerDataPrivacy'),
+                    l10n.tr('tns.dataPrivacy'),
                     style: const TextStyle(
                       fontSize: 11,
                       color: Color(0xFF8A8A8A),

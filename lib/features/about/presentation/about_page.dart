@@ -32,7 +32,7 @@ class AboutPage extends StatelessWidget {
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
-          l10n.tr('about.title'),
+          l10n.tr('tns.about'),
           style: const TextStyle(
             fontFamily: 'Calibri',
             fontSize: 18,
@@ -115,7 +115,7 @@ class AboutPage extends StatelessWidget {
 
               // ── Version ──
               Text(
-                '${l10n.tr('about.version')} $appVersion',
+                '${l10n.tr('FILIP_VERSION')} $appVersion',
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontFamily: 'Calibri',
@@ -129,7 +129,7 @@ class AboutPage extends StatelessWidget {
 
               // ── Copyright ──
               Text(
-                '${l10n.tr('about.copyright')} $year. ${l10n.tr('about.allRightsReserved')}',
+                '© Swiss Life Select $year. ${l10n.tr('ALL_RIGHTS_RESERVED')}',
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontFamily: 'Calibri',
@@ -157,11 +157,11 @@ class AboutPage extends StatelessWidget {
                       ),
                       children: [
                         TextSpan(
-                          text: '${l10n.tr('about.technologyDesign')} ',
+                          text: '${l10n.tr('TECHNOLOGY_DESIGN')} ',
                           style: const TextStyle(color: Color(0xFF808080)),
                         ),
                         TextSpan(
-                          text: l10n.tr('about.selise'),
+                          text: 'SELISE',
                           style: const TextStyle(color: Color(0xFFD82034)),
                         ),
                       ],
@@ -177,17 +177,17 @@ class AboutPage extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   _LinkButton(
-                    label: l10n.tr('about.imprint'),
+                    label: l10n.tr('tns.imprint'),
                     onTap: () => _openUrl(_imprintUrl),
                   ),
                   const _Pipe(),
                   _LinkButton(
-                    label: l10n.tr('about.dataPrivacy'),
+                    label: l10n.tr('tns.dataPrivacy'),
                     onTap: () => _openUrl(_dataPrivacyUrl),
                   ),
                   const _Pipe(),
                   _LinkButton(
-                    label: l10n.tr('about.legal'),
+                    label: l10n.tr('tns.legal'),
                     onTap: () => _openUrl(_legalUrl),
                   ),
                 ],
