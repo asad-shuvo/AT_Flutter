@@ -18,6 +18,7 @@ import 'package:filip_at_flutter/features/notifications/application/sync_notific
 import 'package:filip_at_flutter/features/notifications/application/fcm_service.dart';
 import 'package:filip_at_flutter/features/profile/profile_repository.dart';
 import 'package:filip_at_flutter/features/self_signup/data/self_signup_repository.dart';
+import 'package:filip_at_flutter/features/survey/data/survey_address_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
@@ -142,6 +143,10 @@ void main() {
       ),
       driveRepository: driveRepository,
       profileRepository: profileRepository,
+      surveyAddressRepository: SurveyAddressRepository(
+        apiClient: apiClient,
+        userSessionCache: userSessionCache,
+      ),
     );
 
     await tester.pumpWidget(FilipAtApp(config: config, services: services));

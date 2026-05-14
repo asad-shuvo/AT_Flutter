@@ -23,6 +23,7 @@ import 'package:filip_at_flutter/features/notifications/presentation/notificatio
 import 'package:filip_at_flutter/features/notifications/application/sync_notification_service.dart';
 import 'package:filip_at_flutter/features/profile/gdpr_consent_flow.dart';
 import 'package:filip_at_flutter/features/profile/profile_repository.dart';
+import 'package:filip_at_flutter/features/survey/data/survey_address_repository.dart';
 import 'package:filip_at_flutter/shared/widgets/app_side_drawer.dart';
 import 'package:filip_at_flutter/features/profile/presentation/profile_page.dart';
 import 'package:filip_at_flutter/features/real_estate/presentation/real_estate_page.dart';
@@ -48,6 +49,7 @@ class DashboardPage extends StatefulWidget {
     required this.driveRepository,
     required this.userSessionCache,
     required this.profileRepository,
+    this.surveyAddressRepository,
   });
 
   final AppConfig config;
@@ -60,6 +62,7 @@ class DashboardPage extends StatefulWidget {
   final DriveRepository driveRepository;
   final UserSessionCache userSessionCache;
   final ProfileRepository profileRepository;
+  final SurveyAddressRepository? surveyAddressRepository;
 
   @override
   State<DashboardPage> createState() => _DashboardPageState();
@@ -200,6 +203,7 @@ class _DashboardPageState extends State<DashboardPage> with RouteAware {
         driveRepository: widget.driveRepository,
         userSessionCache: widget.userSessionCache,
         profileRepository: widget.profileRepository,
+        surveyAddressRepository: widget.surveyAddressRepository,
       ),
       body: Builder(
         builder: (innerContext) => SafeArea(
@@ -287,6 +291,7 @@ class _DashboardPageState extends State<DashboardPage> with RouteAware {
             driveRepository: widget.driveRepository,
             userSessionCache: widget.userSessionCache,
             profileRepository: widget.profileRepository,
+            surveyAddressRepository: widget.surveyAddressRepository,
           ),
         ),
         onContractsTap: () => _openPage(
@@ -302,6 +307,7 @@ class _DashboardPageState extends State<DashboardPage> with RouteAware {
             driveRepository: widget.driveRepository,
             userSessionCache: widget.userSessionCache,
             profileRepository: widget.profileRepository,
+            surveyAddressRepository: widget.surveyAddressRepository,
           ),
         ),
         onRealEstateTap: () => _openPage(context, const RealEstatePage()),
@@ -324,6 +330,7 @@ class _DashboardPageState extends State<DashboardPage> with RouteAware {
           driveRepository: widget.driveRepository,
           userSessionCache: widget.userSessionCache,
           profileRepository: widget.profileRepository,
+          surveyAddressRepository: widget.surveyAddressRepository,
         ),
       ),
     );

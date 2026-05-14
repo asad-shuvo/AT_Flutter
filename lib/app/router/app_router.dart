@@ -97,6 +97,7 @@ class AppRouter {
             driveRepository: services.driveRepository,
             userSessionCache: services.userSessionCache,
             profileRepository: services.profileRepository,
+            surveyAddressRepository: services.surveyAddressRepository,
           ),
           settings: settings,
         );

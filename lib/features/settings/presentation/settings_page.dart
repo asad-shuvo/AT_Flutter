@@ -2,7 +2,6 @@ import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/features/auth/application/auth_session_controller.dart';
 import 'package:filip_at_flutter/shared/icons/app_icon_packs.dart';
 import 'package:filip_at_flutter/shared/theme/app_colors.dart';
-import 'package:filip_at_flutter/shared/utils/logout_utils.dart';
 import 'package:flutter/material.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -197,32 +196,6 @@ class _SettingsPageState extends State<SettingsPage> {
                 ],
               ),
             ),
-            const SizedBox(height: 8),
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton.icon(
-                onPressed: () => _handleLogout(context),
-                icon: const Icon(Icons.logout, color: Colors.white, size: 20),
-                label: Text(
-                  l10n.tr('dashboard.drawerLogout'),
-                  style: const TextStyle(
-                    fontFamily: 'Calibri',
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.4,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryRed,
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                ),
-              ),
-            ),
           ],
         ),
       ),
@@ -237,12 +210,6 @@ class _SettingsPageState extends State<SettingsPage> {
       );
   }
 
-  Future<void> _handleLogout(BuildContext context) {
-    return performLogout(
-      context,
-      authSessionController: widget.authSessionController,
-    );
-  }
 }
 
 class _PreferenceCard extends StatelessWidget {

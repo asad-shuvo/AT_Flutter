@@ -16,6 +16,7 @@ import 'package:filip_at_flutter/features/contracts/data/investment_overview_mod
 import 'package:filip_at_flutter/features/drive/data/drive_repository.dart';
 import 'package:filip_at_flutter/features/notifications/data/notifications_repository.dart';
 import 'package:filip_at_flutter/features/profile/profile_repository.dart';
+import 'package:filip_at_flutter/features/survey/data/survey_address_repository.dart';
 import 'package:filip_at_flutter/features/notifications/presentation/notifications_page.dart';
 import 'package:filip_at_flutter/features/notifications/application/sync_notification_service.dart';
 import 'package:filip_at_flutter/features/real_estate/presentation/real_estate_page.dart';
@@ -44,6 +45,7 @@ class ContractsPage extends StatefulWidget {
     required this.driveRepository,
     required this.userSessionCache,
     this.profileRepository,
+    this.surveyAddressRepository,
   });
 
   final ContractsRepository contractsRepository;
@@ -56,6 +58,7 @@ class ContractsPage extends StatefulWidget {
   final DriveRepository driveRepository;
   final UserSessionCache userSessionCache;
   final ProfileRepository? profileRepository;
+  final SurveyAddressRepository? surveyAddressRepository;
 
   @override
   State<ContractsPage> createState() => _ContractsPageState();
@@ -224,6 +227,7 @@ class _ContractsPageState extends State<ContractsPage> {
         driveRepository: widget.driveRepository,
         userSessionCache: widget.userSessionCache,
         profileRepository: widget.profileRepository,
+        surveyAddressRepository: widget.surveyAddressRepository,
       ),
       body: SafeArea(
         child: AnimatedBuilder(

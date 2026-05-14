@@ -54,7 +54,7 @@ class _VerificationCodeSheetState extends State<VerificationCodeSheet> {
             top: false,
             child: Container(
               height: 500,
-              color: const Color(0xFFF6F6F6),
+              color: Colors.white,
               padding: const EdgeInsets.fromLTRB(24, 22, 24, 18),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -76,8 +76,8 @@ class _VerificationCodeSheetState extends State<VerificationCodeSheet> {
                                 widget.title,
                                 style: const TextStyle(
                                   fontFamily: 'Calibri',
-                                  fontSize: 22 / 1.2,
-                                  fontWeight: FontWeight.w500,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w400,
                                   color: Color(0xFF333333),
                                 ),
                               ),
@@ -88,7 +88,8 @@ class _VerificationCodeSheetState extends State<VerificationCodeSheet> {
                             widget.descriptionText,
                             style: const TextStyle(
                               fontFamily: 'Calibri',
-                              fontSize: 21 / 1.2,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w300,
                               color: Color(0xFF808080),
                               height: 1.2,
                             ),
@@ -98,7 +99,7 @@ class _VerificationCodeSheetState extends State<VerificationCodeSheet> {
                             'Verification Code',
                             style: TextStyle(
                               fontFamily: 'Calibri',
-                              fontSize: 18 / 1.2,
+                              fontSize: 12,
                               color: Color(0xFF808080),
                             ),
                           ),
@@ -111,19 +112,20 @@ class _VerificationCodeSheetState extends State<VerificationCodeSheet> {
                             onSubmitted: (_) => _onConfirmTap(),
                             style: const TextStyle(
                               fontFamily: 'Calibri',
-                              fontSize: 18 / 1.2,
-                              color: Color(0xFF333333),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w300,
+                              color: Color(0xFF808080),
                             ),
                             decoration: InputDecoration(
                               counterText: '',
                               hintText: 'Enter Verification Code',
                               hintStyle: const TextStyle(
                                 fontFamily: 'Calibri',
-                                fontSize: 22 / 1.2,
+                                fontSize: 16,
                                 color: Color(0xFFABABAB),
                               ),
                               filled: true,
-                              fillColor: const Color(0xFFF6F6F6),
+                              fillColor: Colors.white,
                               contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 16,
                                 vertical: 17,
@@ -178,7 +180,7 @@ class _VerificationCodeSheetState extends State<VerificationCodeSheet> {
                                   color: timerRunning
                                       ? const Color(0xFFD9D9D9)
                                       : AppColors.primaryRed,
-                                  borderRadius: BorderRadius.circular(22),
+                                  borderRadius: BorderRadius.circular(25),
                                 ),
                                 child: TextButton.icon(
                                   onPressed: timerRunning ? null : widget.onResend,
@@ -208,7 +210,7 @@ class _VerificationCodeSheetState extends State<VerificationCodeSheet> {
                                       vertical: 8,
                                     ),
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(22),
+                                      borderRadius: BorderRadius.circular(25),
                                     ),
                                   ),
                                 ),
@@ -235,23 +237,23 @@ class _VerificationCodeSheetState extends State<VerificationCodeSheet> {
                     children: [
                       Expanded(
                         child: SizedBox(
-                          height: 56,
+                          height: 48,
                           child: OutlinedButton(
                             onPressed: () => Navigator.of(context).pop(),
                             style: OutlinedButton.styleFrom(
                               side: const BorderSide(color: Color(0xFFC9C9C9)),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
+                                borderRadius: BorderRadius.circular(6),
                               ),
-                              backgroundColor: const Color(0xFFF6F6F6),
+                              backgroundColor: Colors.white,
                             ),
                             child: const Text(
                               'CANCEL',
                               style: TextStyle(
                                 fontFamily: 'Calibri',
-                                fontSize: 19,
+                                fontSize: 16,
                                 fontWeight: FontWeight.w700,
-                                letterSpacing: 2.2,
+                                letterSpacing: 0.5,
                                 color: AppColors.primaryRed,
                               ),
                             ),
@@ -261,7 +263,7 @@ class _VerificationCodeSheetState extends State<VerificationCodeSheet> {
                       const SizedBox(width: 16),
                       Expanded(
                         child: SizedBox(
-                          height: 56,
+                          height: 48,
                           child: ElevatedButton(
                             onPressed: widget.controller.submitting
                                 ? null
@@ -271,16 +273,16 @@ class _VerificationCodeSheetState extends State<VerificationCodeSheet> {
                               backgroundColor: AppColors.primaryRed,
                               disabledBackgroundColor: const Color(0xFFE39CA6),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
+                                borderRadius: BorderRadius.circular(6),
                               ),
                             ),
                             child: const Text(
                               'CONFIRM',
                               style: TextStyle(
                                 fontFamily: 'Calibri',
-                                fontSize: 19,
+                                fontSize: 16,
                                 fontWeight: FontWeight.w700,
-                                letterSpacing: 2.2,
+                                letterSpacing: 0.5,
                                 color: Colors.white,
                               ),
                             ),

@@ -11,6 +11,7 @@ import 'package:filip_at_flutter/features/documents/presentation/documents_page.
 import 'package:filip_at_flutter/features/drive/data/drive_repository.dart';
 import 'package:filip_at_flutter/features/notifications/data/notifications_repository.dart';
 import 'package:filip_at_flutter/features/profile/profile_repository.dart';
+import 'package:filip_at_flutter/features/survey/data/survey_address_repository.dart';
 import 'package:filip_at_flutter/features/notifications/presentation/notifications_page.dart';
 import 'package:filip_at_flutter/features/notifications/application/sync_notification_service.dart';
 import 'package:filip_at_flutter/features/real_estate/presentation/real_estate_page.dart';
@@ -36,6 +37,7 @@ class FilipExplorerPage extends StatefulWidget {
     required this.driveRepository,
     required this.userSessionCache,
     this.profileRepository,
+    this.surveyAddressRepository,
   });
 
   final DashboardRepository dashboardRepository;
@@ -48,6 +50,7 @@ class FilipExplorerPage extends StatefulWidget {
   final DriveRepository driveRepository;
   final UserSessionCache userSessionCache;
   final ProfileRepository? profileRepository;
+  final SurveyAddressRepository? surveyAddressRepository;
 
   @override
   State<FilipExplorerPage> createState() => _FilipExplorerPageState();
@@ -88,6 +91,7 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
           driveRepository: widget.driveRepository,
           userSessionCache: widget.userSessionCache,
           profileRepository: widget.profileRepository,
+          surveyAddressRepository: widget.surveyAddressRepository,
         ),
       ),
     );
@@ -127,6 +131,7 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
             driveRepository: widget.driveRepository,
             userSessionCache: widget.userSessionCache,
             profileRepository: widget.profileRepository,
+            surveyAddressRepository: widget.surveyAddressRepository,
           ),
         ),
       ),
@@ -175,6 +180,7 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
         driveRepository: widget.driveRepository,
         userSessionCache: widget.userSessionCache,
         profileRepository: widget.profileRepository,
+        surveyAddressRepository: widget.surveyAddressRepository,
       ),
       body: Builder(
         builder: (innerContext) => SafeArea(
@@ -235,6 +241,8 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
                                 householdController: widget.householdController,
                                 driveRepository: widget.driveRepository,
                                 userSessionCache: widget.userSessionCache,
+                                profileRepository: widget.profileRepository,
+                                surveyAddressRepository: widget.surveyAddressRepository,
                               ),
                             ),
                             onMessageTap: () => _openPage(const ChatPage()),
@@ -292,6 +300,7 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
             driveRepository: widget.driveRepository,
             userSessionCache: widget.userSessionCache,
             profileRepository: widget.profileRepository,
+            surveyAddressRepository: widget.surveyAddressRepository,
           ),
         ),
         onRealEstateTap: () => _openPage(const RealEstatePage()),

@@ -26,6 +26,118 @@ class DashboardRepository {
     );
   }
 
+  Future<SurveyCustomerInfo?> fetchSurveyCustomerInfo() async {
+    final context = await _getAuthorizedPersonContext();
+    if (context == null) return null;
+
+    final response = await _apiClient.postJson(
+      url: '${_apiClient.dataCoreUrl}DataManipulationQuery/GetBySQLFilter',
+      body: <String, dynamic>{
+        'EntityName': 'Person',
+        'Text':
+            'Select <ItemId,DisplayName,Email,PhoneNumber,FirstName,LastName,MiddleName,Salutation,DateOfBirth,Sex,MarketName,Currency,Nationality,CustomerId,CompanyName,Designation,Street,PostalCode,State,City,Country,AddressLine1,AddressLine2>from<Person>where<ItemId=__eql(${context.personId})>pageNumber=<0>pageSize=<1>',
+        'ExcludeCount': true,
+      },
+      headers: _authorizedHeaders(context.accessToken),
+    );
+
+    final statusCode = response['statusCode'] as int? ?? 0;
+    if (statusCode < 200 || statusCode >= 300) return null;
+
+    final body = response['body'] as Map<String, dynamic>? ?? <String, dynamic>{};
+    final results = body['Results'];
+    if (results is! List || results.isEmpty || results.first is! Map) return null;
+    final person = Map<String, dynamic>.from(results.first as Map);
+
+    final street = _readString(person['Street']);
+    final postalCode = _readString(person['PostalCode']);
+    final state = _readString(person['State']);
+    final city = _readString(person['City']);
+    final country = _readString(person['Country']);
+    final addressLine1 = _readString(person['AddressLine1']);
+    final itemId = _readString(person['ItemId']);
+
+    final addressParts = <String>[
+      if (street != null && street.isNotEmpty) street,
+      if (postalCode != null && postalCode.isNotEmpty) postalCode,
+      if (state != null && state.isNotEmpty) state,
+      if (city != null && city.isNotEmpty) city,
+      if (country != null && country.isNotEmpty) country,
+    ];
+
+    final rawPersonData = Map<String, dynamic>.fromEntries(
+      person.entries.where((e) => e.value != null),
+    );
+
+    return SurveyCustomerInfo(
+      personId: context.personId,
+      customerId: context.customerId,
+      itemId: itemId ?? '',
+      displayName: _readString(person['DisplayName']) ?? '',
+      email: _readString(person['Email']) ?? '',
+      phoneNumber: _readString(person['PhoneNumber']) ?? '',
+      address: addressParts.join(', '),
+      street: street ?? '',
+      postalCode: postalCode ?? '',
+      cityState: state?.isNotEmpty == true ? state! : (city ?? ''),
+      country: country ?? '',
+      addressLine1: addressLine1 ?? '',
+      rawPersonData: rawPersonData,
+    );
+  }
+
+  Future<SurveyServiceCheckRecord?> fetchServiceCheckRecord() async {
+    final context = await _getAuthorizedPersonContext();
+    if (context == null) return null;
+
+    final response = await _apiClient.postJson(
+      url: '${_apiClient.dataCoreUrl}DataManipulationQuery/GetBySQLFilter',
+      body: <String, dynamic>{
+        'EntityName': 'ServiceCheck',
+        'Text':
+            'Select <*>from<ServiceCheck>where<PersonId=__eql(${context.personId})>pageNumber=<0>pageSize=<20>',
+        'ExcludeCount': true,
+      },
+      headers: _authorizedHeaders(context.accessToken),
+    );
+
+    final statusCode = response['statusCode'] as int? ?? 0;
+    if (statusCode < 200 || statusCode >= 300) return null;
+
+    final body = response['body'] as Map<String, dynamic>? ?? <String, dynamic>{};
+    final results = body['Results'];
+    if (results is! List || results.isEmpty || results.first is! Map) return null;
+
+    final first = Map<String, dynamic>.from(results.first as Map);
+    final itemId = _readString(first['ItemId']);
+    final lastUpdateDate = _readString(first['LastUpdateDate']);
+    return SurveyServiceCheckRecord(
+      itemId: itemId,
+      raw: first,
+      lastUpdateDate: lastUpdateDate == null ? null : DateTime.tryParse(lastUpdateDate),
+    );
+  }
+
+  Future<bool> updateServiceCheck(Map<String, dynamic> payload) async {
+    final context = await _getAuthorizedPersonContext();
+    if (context == null) return false;
+
+    final response = await _apiClient.postJson(
+      url: '${_apiClient.slsnBusinessUrl}SlSnCommand/UpdateServiceCheck',
+      body: <String, dynamic>{
+        ...payload,
+        'MessageCorrelationId': _newGuid(),
+      },
+      headers: _authorizedHeaders(context.accessToken),
+    );
+
+    final statusCode = response['statusCode'] as int? ?? 0;
+    if (statusCode < 200 || statusCode >= 300) return false;
+    final body = response['body'] as Map<String, dynamic>? ?? <String, dynamic>{};
+    final errors = body['Errors'];
+    return errors is Map && errors['IsValid'] == true;
+  }
+
   Future<DashboardOverviewSummary> fetchOverviewSummary() async {
     final context = await _getAuthorizedPersonContext();
     if (context == null) {
@@ -657,6 +769,50 @@ class DashboardRepository {
     }
     return fallback;
   }
+}
+
+class SurveyCustomerInfo {
+  const SurveyCustomerInfo({
+    required this.personId,
+    required this.customerId,
+    required this.itemId,
+    required this.displayName,
+    required this.email,
+    required this.phoneNumber,
+    required this.address,
+    required this.street,
+    required this.postalCode,
+    required this.cityState,
+    required this.country,
+    required this.addressLine1,
+    this.rawPersonData = const <String, dynamic>{},
+  });
+
+  final String personId;
+  final String customerId;
+  final String itemId;
+  final String displayName;
+  final String email;
+  final String phoneNumber;
+  final String address;
+  final String street;
+  final String postalCode;
+  final String cityState;
+  final String country;
+  final String addressLine1;
+  final Map<String, dynamic> rawPersonData;
+}
+
+class SurveyServiceCheckRecord {
+  const SurveyServiceCheckRecord({
+    required this.itemId,
+    required this.raw,
+    required this.lastUpdateDate,
+  });
+
+  final String? itemId;
+  final Map<String, dynamic> raw;
+  final DateTime? lastUpdateDate;
 }
 
 class _AuthorizedPersonContext {

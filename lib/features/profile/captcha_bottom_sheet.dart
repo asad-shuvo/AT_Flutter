@@ -205,16 +205,16 @@ class _CaptchaBottomSheetState extends State<CaptchaBottomSheet> {
                               backgroundColor: AppColors.primaryRed,
                               disabledBackgroundColor: const Color(0xFFD98C99),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
+                                borderRadius: BorderRadius.circular(6),
                               ),
                             ),
                             child: const Text(
                               'SUBMIT',
                               style: TextStyle(
                                 fontFamily: 'Calibri',
-                                fontSize: 20,
+                                fontSize: 16,
                                 fontWeight: FontWeight.w700,
-                                letterSpacing: 2.2,
+                                letterSpacing: 0.5,
                                 color: Colors.white,
                               ),
                             ),

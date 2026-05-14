@@ -20,6 +20,7 @@ import 'package:filip_at_flutter/features/notifications/application/sync_notific
 import 'package:filip_at_flutter/features/notifications/data/notifications_repository.dart';
 import 'package:filip_at_flutter/features/notifications/presentation/notifications_page.dart';
 import 'package:filip_at_flutter/features/profile/profile_repository.dart';
+import 'package:filip_at_flutter/features/survey/data/survey_address_repository.dart';
 import 'package:filip_at_flutter/features/real_estate/presentation/real_estate_page.dart';
 import 'package:filip_at_flutter/shared/theme/app_colors.dart';
 import 'package:filip_at_flutter/shared/widgets/app_bottom_nav.dart';
@@ -43,6 +44,7 @@ class DrivePage extends StatefulWidget {
     required this.appVersion,
     required this.syncNotificationService,
     this.profileRepository,
+    this.surveyAddressRepository,
   });
 
   final DriveRepository driveRepository;
@@ -55,6 +57,7 @@ class DrivePage extends StatefulWidget {
   final String appVersion;
   final SyncNotificationService syncNotificationService;
   final ProfileRepository? profileRepository;
+  final SurveyAddressRepository? surveyAddressRepository;
 
   @override
   State<DrivePage> createState() => _DrivePageState();
@@ -162,6 +165,7 @@ class _DrivePageState extends State<DrivePage> {
         driveRepository: widget.driveRepository,
         userSessionCache: widget.userSessionCache,
         profileRepository: widget.profileRepository,
+        surveyAddressRepository: widget.surveyAddressRepository,
       ),
       body: SafeArea(
         child: Column(

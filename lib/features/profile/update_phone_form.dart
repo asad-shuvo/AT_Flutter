@@ -122,8 +122,8 @@ class _UpdatePhoneFormState extends State<UpdatePhoneForm> {
                               l10n.tr('account.changePhoneNumber'),
                               style: TextStyle(
                                 fontFamily: 'Calibri',
-                                fontSize: 22 / 1.2,
-                                fontWeight: FontWeight.w500,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w400,
                                 color: Color(0xFF333333),
                               ),
                             ),
@@ -134,7 +134,8 @@ class _UpdatePhoneFormState extends State<UpdatePhoneForm> {
                           l10n.tr('account.updatePhoneSubHeader'),
                           style: TextStyle(
                             fontFamily: 'Calibri',
-                            fontSize: 21 / 1.2,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w300,
                             color: Color(0xFF808080),
                             height: 1.2,
                           ),
@@ -220,22 +221,22 @@ class _UpdatePhoneFormState extends State<UpdatePhoneForm> {
                     ),
                   ),
                   SizedBox(
-                    height: 56,
+                    height: 48,
                     child: ElevatedButton(
                       onPressed: isEnabled ? _onConfirmTap : null,
                       style: ElevatedButton.styleFrom(
                         elevation: 0,
                         backgroundColor: AppColors.primaryRed,
                         disabledBackgroundColor: const Color(0xFFE39CA6),
-                        shape: const RoundedRectangleBorder(),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                       ),
                       child: const Text(
                         'UPDATE',
                         style: TextStyle(
                           fontFamily: 'Calibri',
-                          fontSize: 19,
+                          fontSize: 16,
                           fontWeight: FontWeight.w700,
-                          letterSpacing: 2.2,
+                          letterSpacing: 0.5,
                           color: Colors.white,
                         ),
                       ),

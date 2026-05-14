@@ -73,7 +73,7 @@ class _UpdateEmailFormState extends State<UpdateEmailForm> {
             top: false,
             child: Container(
               height: 430,
-              color: const Color(0xFFF6F6F6),
+              color: Colors.white,
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -95,8 +95,8 @@ class _UpdateEmailFormState extends State<UpdateEmailForm> {
                                 l10n.tr('account.changeEmailAddress'),
                                 style: TextStyle(
                                   fontFamily: 'Calibri',
-                                  fontSize: 22 / 1.2,
-                                  fontWeight: FontWeight.w500,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w400,
                                   color: Color(0xFF333333),
                                 ),
                               ),
@@ -107,7 +107,8 @@ class _UpdateEmailFormState extends State<UpdateEmailForm> {
                             l10n.tr('account.updateEmailSubHeader'),
                             style: TextStyle(
                               fontFamily: 'Calibri',
-                              fontSize: 21 / 1.2,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w300,
                               color: Color(0xFF808080),
                               height: 1.2,
                             ),
@@ -117,7 +118,7 @@ class _UpdateEmailFormState extends State<UpdateEmailForm> {
                             l10n.tr('account.newEmailAddress'),
                             style: TextStyle(
                               fontFamily: 'Calibri',
-                              fontSize: 18 / 1.2,
+                              fontSize: 12,
                               color: Color(0xFF808080),
                             ),
                           ),
@@ -128,18 +129,19 @@ class _UpdateEmailFormState extends State<UpdateEmailForm> {
                             onChanged: (_) => setState(() => _localError = null),
                             style: const TextStyle(
                               fontFamily: 'Calibri',
-                              fontSize: 18 / 1.2,
-                              color: Color(0xFF333333),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w300,
+                              color: Color(0xFF808080),
                             ),
                             decoration: InputDecoration(
                               hintText: l10n.tr('account.enterNewEmailAddress'),
                               hintStyle: const TextStyle(
                                 fontFamily: 'Calibri',
-                                fontSize: 22 / 1.2,
+                                fontSize: 16,
                                 color: Color(0xFFABABAB),
                               ),
                               filled: true,
-                              fillColor: const Color(0xFFF6F6F6),
+                              fillColor: Colors.white,
                               contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 16,
                                 vertical: 17,
@@ -184,7 +186,7 @@ class _UpdateEmailFormState extends State<UpdateEmailForm> {
                   ),
                   const SizedBox(height: 12),
                   SizedBox(
-                    height: 56,
+                    height: 48,
                     child: ElevatedButton(
                       onPressed: isUpdateEnabled ? _onConfirmTap : null,
                       style: ElevatedButton.styleFrom(
@@ -192,16 +194,16 @@ class _UpdateEmailFormState extends State<UpdateEmailForm> {
                         backgroundColor: AppColors.primaryRed,
                         disabledBackgroundColor: const Color(0xFFE39CA6),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(6),
                         ),
                       ),
                       child: const Text(
                         'UPDATE',
                         style: TextStyle(
                           fontFamily: 'Calibri',
-                          fontSize: 19,
+                          fontSize: 16,
                           fontWeight: FontWeight.w700,
-                          letterSpacing: 2.2,
+                          letterSpacing: 0.5,
                           color: Colors.white,
                         ),
                       ),

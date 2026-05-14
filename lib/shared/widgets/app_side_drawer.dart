@@ -15,6 +15,8 @@ import 'package:filip_at_flutter/features/profile/presentation/profile_page.dart
 import 'package:filip_at_flutter/features/settings/presentation/settings_page.dart';
 import 'package:filip_at_flutter/features/profile/profile_repository.dart';
 import 'package:filip_at_flutter/features/support/presentation/support_page.dart';
+import 'package:filip_at_flutter/features/survey/data/survey_address_repository.dart';
+import 'package:filip_at_flutter/features/survey/presentation/survey_page.dart';
 import 'package:filip_at_flutter/shared/icons/app_icon_packs.dart';
 import 'package:filip_at_flutter/shared/theme/app_colors.dart';
 import 'package:filip_at_flutter/shared/utils/logout_utils.dart';
@@ -35,6 +37,7 @@ class AppSideDrawer extends StatelessWidget {
     required this.driveRepository,
     required this.userSessionCache,
     this.profileRepository,
+    this.surveyAddressRepository,
   });
 
   final Future<UserProfile?> userProfileFuture;
@@ -48,6 +51,7 @@ class AppSideDrawer extends StatelessWidget {
   final DriveRepository driveRepository;
   final UserSessionCache userSessionCache;
   final ProfileRepository? profileRepository;
+  final SurveyAddressRepository? surveyAddressRepository;
   static const String _legalUrl =
       'https://www.swisslife-select.at/home/footer/nutzungsbedingungen_filip.html';
   static const String _dataPrivacyUrl =
@@ -244,7 +248,16 @@ class AppSideDrawer extends StatelessWidget {
                   _DrawerItem(
                     icon: FilipIcons.survey,
                     label: l10n.tr('dashboard.drawerSurvey'),
-                    onTap: () => Navigator.of(context).pop(),
+                    onTap: () => _openPage(
+                      context,
+                      SurveyPage(
+                        dashboardRepository: dashboardRepository,
+                        authSessionController: authSessionController,
+                        syncNotificationService: syncNotificationService,
+                        profileRepository: profileRepository,
+                        surveyAddressRepository: surveyAddressRepository,
+                      ),
+                    ),
                   ),
                   _DrawerItem(
                     icon: FilipIcons.support,

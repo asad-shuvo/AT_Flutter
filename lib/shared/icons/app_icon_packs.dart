@@ -29,6 +29,7 @@ class SelectNetworkIcons {
     0xEA15,
     fontFamily: _family,
   );
+  static const IconData edit = IconData(0xE969, fontFamily: _family);
 }
 
 class FilipIcons {
@@ -60,6 +61,7 @@ class FilipIcons {
   static const IconData menu = IconData(0xE988, fontFamily: _family);
   static const IconData notifications = IconData(0xEA39, fontFamily: _family);
   static const IconData back = IconData(0xE9F2, fontFamily: _family);
+  static const IconData edit = IconData(0xE969, fontFamily: _family);
   static const IconData pin = IconData(0xE9A5, fontFamily: _family);
   static const IconData loan = IconData(0xE9B4, fontFamily: _family);
 }

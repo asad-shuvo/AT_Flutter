@@ -22,6 +22,7 @@ import 'package:filip_at_flutter/app/router/app_router.dart';
 import 'package:filip_at_flutter/features/drive/data/drive_repository.dart';
 import 'package:filip_at_flutter/features/profile/profile_repository.dart';
 import 'package:filip_at_flutter/features/self_signup/data/self_signup_repository.dart';
+import 'package:filip_at_flutter/features/survey/data/survey_address_repository.dart';
 import 'package:flutter/material.dart';
 
 @pragma('vm:entry-point')
@@ -128,6 +129,10 @@ Future<void> bootstrap(AppFlavor flavor) async {
     userSessionCache: userSessionCache,
     captchaUrl: config.captchaUrl,
   );
+  final surveyAddressRepository = SurveyAddressRepository(
+    apiClient: apiClient,
+    userSessionCache: userSessionCache,
+  );
 
   // Firebase & FCM initialization
   final syncNotificationService = SyncNotificationService();
@@ -164,6 +169,7 @@ Future<void> bootstrap(AppFlavor flavor) async {
     householdController: householdController,
     driveRepository: driveRepository,
     profileRepository: profileRepository,
+    surveyAddressRepository: surveyAddressRepository,
   );
 
   // Wire auth state changes for FCM topic subscription and session cache invalidation
