@@ -168,6 +168,7 @@ class AuthRepository {
         url: _apiClient.tokenUrl,
         body: <String, String>{
           'grant_type': 'refresh_token',
+          'client_id': ApiClient.tenantId,
           'refresh_token': refreshToken,
         },
         headers: <String, String>{'Origin': _apiClient.originUrl},

@@ -7,6 +7,7 @@ import 'package:filip_at_flutter/app/flavor/app_flavor.dart';
 import 'package:filip_at_flutter/app/localization/app_language_controller.dart';
 import 'package:filip_at_flutter/app/services/app_services.dart';
 import 'package:filip_at_flutter/core/network/api_client.dart';
+import 'package:filip_at_flutter/core/storage/app_storage_keys.dart';
 import 'package:filip_at_flutter/core/storage/secure_storage_service.dart';
 import 'package:filip_at_flutter/features/auth/application/auth_session_controller.dart';
 import 'package:filip_at_flutter/features/auth/application/user_session_cache.dart';
@@ -63,16 +64,26 @@ Future<void> bootstrap(AppFlavor flavor) async {
     authRepository: authRepository,
   );
   var isHandlingUnauthorized = false;
+  // Forward reference — assigned immediately after UserSessionCache is created.
+  // Null-safe: the handler is only called at runtime (after full init).
+  UserSessionCache? sessionCacheForRefresh;
+
+  // Returns new access token so ApiClient retries the failed request (NS parity).
+  // Returns null to skip retry; caller receives the 401 response.
   apiClient.setUnauthorizedHandler(() async {
     if (isHandlingUnauthorized || !authSessionController.isAuthenticated) {
-      return;
+      return null;
     }
 
     isHandlingUnauthorized = true;
     try {
-      // Mirror NativeScript: try token refresh before forcing logout.
       final refreshed = await authSessionController.tryRefreshTokens();
-      if (refreshed) return;
+      if (refreshed) {
+        // Invalidate stale session cache so the next repo call re-fetches
+        // with the new token (mirrors NS tokenProvider.setAccessToken flow).
+        sessionCacheForRefresh?.invalidate();
+        return await secureStorageService.read(AppStorageKeys.accessToken);
+      }
 
       await authSessionController.expireSession();
 
@@ -89,6 +100,7 @@ Future<void> bootstrap(AppFlavor flavor) async {
             ),
           );
       }
+      return null;
     } finally {
       isHandlingUnauthorized = false;
     }
@@ -97,6 +109,7 @@ Future<void> bootstrap(AppFlavor flavor) async {
     apiClient: apiClient,
     secureStorageService: secureStorageService,
   );
+  sessionCacheForRefresh = userSessionCache;
   final loginSyncRepository = LoginSyncRepository(apiClient: apiClient);
   final dashboardRepository = DashboardRepository(
     apiClient: apiClient,

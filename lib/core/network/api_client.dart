@@ -4,7 +4,8 @@ import 'dart:io';
 class ApiClient {
   static const Duration _requestTimeout = Duration(seconds: 20);
   static const Duration _uploadTimeout = Duration(seconds: 60);
-  static const String _tenantId = 'EDB4E319-4CCE-49CE-B877-275C8A8E5568';
+
+  static const String tenantId = 'EDB4E319-4CCE-49CE-B877-275C8A8E5568';
 
   ApiClient({
     required this.baseUrl,
@@ -33,7 +34,9 @@ class ApiClient {
   final String dmsServiceUrl;
   final String aggregatorUrl;
   final String mailServiceUrl;
-  Future<void> Function()? _onUnauthorized;
+
+  // Returns the new access token after a successful refresh, or null to skip retry.
+  Future<String?> Function()? _onUnauthorized;
 
   String? resolveProfileImageUrl(String? imagePath) {
     final value = imagePath?.trim();
@@ -46,7 +49,7 @@ class ApiClient {
 
     final parts = value.split('/');
     final bucketBase = _storageBucketBaseUrl;
-    if (bucketBase != null && parts.isNotEmpty && parts.first == _tenantId) {
+    if (bucketBase != null && parts.isNotEmpty && parts.first == tenantId) {
       return bucketBase + value;
     }
 
@@ -70,10 +73,9 @@ class ApiClient {
     return null;
   }
 
-  void setUnauthorizedHandler(Future<void> Function() handler) {
+  void setUnauthorizedHandler(Future<String?> Function() handler) {
     _onUnauthorized = handler;
   }
-
 
   Future<int> putBytes({
     required String url,
@@ -106,43 +108,17 @@ class ApiClient {
     Map<String, String> headers = const <String, String>{},
     bool suppressUnauthorizedHandling = false,
   }) async {
-    final client = HttpClient();
-    client.connectionTimeout = _requestTimeout;
-
-    try {
-      final request = await client.getUrl(Uri.parse(url));
-      request.headers.set(HttpHeaders.contentTypeHeader, 'application/json');
-
-      for (final entry in headers.entries) {
-        request.headers.set(entry.key, entry.value);
+    final result = await _doGetJson(url: url, headers: headers);
+    if (!suppressUnauthorizedHandling &&
+        result['statusCode'] == HttpStatus.unauthorized) {
+      final newToken = await _onUnauthorized?.call();
+      if (newToken != null && newToken.isNotEmpty) {
+        final retryHeaders = Map<String, String>.from(headers);
+        retryHeaders['Authorization'] = 'bearer $newToken';
+        return _doGetJson(url: url, headers: retryHeaders);
       }
-
-      final response = await request.close().timeout(_requestTimeout);
-      if (response.statusCode == HttpStatus.unauthorized &&
-          !suppressUnauthorizedHandling) {
-        await _onUnauthorized?.call();
-      }
-      final responseBody = await response
-          .transform(utf8.decoder)
-          .join()
-          .timeout(_requestTimeout);
-      final dynamic decodedBody = responseBody.isEmpty
-          ? <String, dynamic>{}
-          : jsonDecode(responseBody);
-
-      if (decodedBody is! Map<String, dynamic>) {
-        throw const HttpException('Unexpected response format');
-      }
-
-      return <String, dynamic>{
-        'statusCode': response.statusCode,
-        'body': decodedBody,
-      };
-    } catch (_) {
-      rethrow;
-    } finally {
-      client.close(force: true);
     }
+    return result;
   }
 
   Future<Map<String, dynamic>> postForm({
@@ -151,48 +127,17 @@ class ApiClient {
     Map<String, String> headers = const <String, String>{},
     bool suppressUnauthorizedHandling = false,
   }) async {
-    final client = HttpClient();
-    client.connectionTimeout = _requestTimeout;
-
-    try {
-      final request = await client.postUrl(Uri.parse(url));
-      request.headers.set(
-        HttpHeaders.contentTypeHeader,
-        'application/x-www-form-urlencoded',
-      );
-
-      for (final entry in headers.entries) {
-        request.headers.set(entry.key, entry.value);
+    final result = await _doPostForm(url: url, body: body, headers: headers);
+    if (!suppressUnauthorizedHandling &&
+        result['statusCode'] == HttpStatus.unauthorized) {
+      final newToken = await _onUnauthorized?.call();
+      if (newToken != null && newToken.isNotEmpty) {
+        final retryHeaders = Map<String, String>.from(headers);
+        retryHeaders['Authorization'] = 'bearer $newToken';
+        return _doPostForm(url: url, body: body, headers: retryHeaders);
       }
-
-      request.write(Uri(queryParameters: body).query);
-
-      final response = await request.close().timeout(_requestTimeout);
-      if (response.statusCode == HttpStatus.unauthorized &&
-          !suppressUnauthorizedHandling) {
-        await _onUnauthorized?.call();
-      }
-      final responseBody = await response
-          .transform(utf8.decoder)
-          .join()
-          .timeout(_requestTimeout);
-      final dynamic decodedBody = responseBody.isEmpty
-          ? <String, dynamic>{}
-          : jsonDecode(responseBody);
-
-      if (decodedBody is! Map<String, dynamic>) {
-        throw const HttpException('Unexpected response format');
-      }
-
-      return <String, dynamic>{
-        'statusCode': response.statusCode,
-        'body': decodedBody,
-      };
-    } catch (_) {
-      rethrow;
-    } finally {
-      client.close(force: true);
     }
+    return result;
   }
 
   Future<Map<String, dynamic>> postJson({
@@ -201,42 +146,116 @@ class ApiClient {
     Map<String, String> headers = const <String, String>{},
     bool suppressUnauthorizedHandling = false,
   }) async {
+    final result = await _doPostJson(url: url, body: body, headers: headers);
+    if (!suppressUnauthorizedHandling &&
+        result['statusCode'] == HttpStatus.unauthorized) {
+      final newToken = await _onUnauthorized?.call();
+      if (newToken != null && newToken.isNotEmpty) {
+        final retryHeaders = Map<String, String>.from(headers);
+        retryHeaders['Authorization'] = 'bearer $newToken';
+        return _doPostJson(url: url, body: body, headers: retryHeaders);
+      }
+    }
+    return result;
+  }
+
+  // ── Internal request executors ──────────────────────────────────────────
+
+  Future<Map<String, dynamic>> _doGetJson({
+    required String url,
+    required Map<String, String> headers,
+  }) async {
     final client = HttpClient();
     client.connectionTimeout = _requestTimeout;
+    try {
+      final request = await client.getUrl(Uri.parse(url));
+      request.headers.set(HttpHeaders.contentTypeHeader, 'application/json');
+      for (final entry in headers.entries) {
+        request.headers.set(entry.key, entry.value);
+      }
+      final response = await request.close().timeout(_requestTimeout);
+      final responseBody = await response
+          .transform(utf8.decoder)
+          .join()
+          .timeout(_requestTimeout);
+      final dynamic decoded = responseBody.isEmpty
+          ? <String, dynamic>{}
+          : jsonDecode(responseBody);
+      if (decoded is! Map<String, dynamic>) {
+        throw const HttpException('Unexpected response format');
+      }
+      return <String, dynamic>{'statusCode': response.statusCode, 'body': decoded};
+    } catch (_) {
+      rethrow;
+    } finally {
+      client.close(force: true);
+    }
+  }
 
+  Future<Map<String, dynamic>> _doPostForm({
+    required String url,
+    required Map<String, String> body,
+    required Map<String, String> headers,
+  }) async {
+    final client = HttpClient();
+    client.connectionTimeout = _requestTimeout;
+    try {
+      final request = await client.postUrl(Uri.parse(url));
+      request.headers.set(
+        HttpHeaders.contentTypeHeader,
+        'application/x-www-form-urlencoded',
+      );
+      for (final entry in headers.entries) {
+        request.headers.set(entry.key, entry.value);
+      }
+      request.write(Uri(queryParameters: body).query);
+      final response = await request.close().timeout(_requestTimeout);
+      final responseBody = await response
+          .transform(utf8.decoder)
+          .join()
+          .timeout(_requestTimeout);
+      final dynamic decoded = responseBody.isEmpty
+          ? <String, dynamic>{}
+          : jsonDecode(responseBody);
+      if (decoded is! Map<String, dynamic>) {
+        throw const HttpException('Unexpected response format');
+      }
+      return <String, dynamic>{'statusCode': response.statusCode, 'body': decoded};
+    } catch (_) {
+      rethrow;
+    } finally {
+      client.close(force: true);
+    }
+  }
+
+  Future<Map<String, dynamic>> _doPostJson({
+    required String url,
+    required Map<String, dynamic> body,
+    required Map<String, String> headers,
+  }) async {
+    final client = HttpClient();
+    client.connectionTimeout = _requestTimeout;
     try {
       final request = await client.postUrl(Uri.parse(url));
       final bodyBytes = utf8.encode(jsonEncode(body));
       request.headers.set(HttpHeaders.contentTypeHeader, 'application/json');
       request.headers.set(HttpHeaders.contentLengthHeader, bodyBytes.length);
-
       for (final entry in headers.entries) {
         request.headers.set(entry.key, entry.value);
       }
-
       request.add(bodyBytes);
-
       final response = await request.close().timeout(_requestTimeout);
-      if (response.statusCode == HttpStatus.unauthorized &&
-          !suppressUnauthorizedHandling) {
-        await _onUnauthorized?.call();
-      }
       final responseBody = await response
           .transform(utf8.decoder)
           .join()
           .timeout(_requestTimeout);
-      final dynamic decodedBody = responseBody.isEmpty
+      final dynamic decoded = responseBody.isEmpty
           ? <String, dynamic>{}
           : jsonDecode(responseBody);
-
-      if (decodedBody is! Map<String, dynamic>) {
+      if (decoded is! Map<String, dynamic>) {
         throw const HttpException('Unexpected response format');
       }
-
-      return <String, dynamic>{
-        'statusCode': response.statusCode,
-        'body': decodedBody,
-      };
+      return <String, dynamic>{'statusCode': response.statusCode, 'body': decoded};
     } catch (_) {
       rethrow;
     } finally {
