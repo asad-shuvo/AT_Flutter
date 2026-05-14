@@ -118,7 +118,7 @@ class AppSideDrawer extends StatelessWidget {
           const SizedBox(height: 52),
           _DrawerItem(
             icon: FilipIcons.personOutline,
-            label: l10n.tr('dashboard.drawerAccount'),
+            label: l10n.tr('tns.myAccount'),
             onTap: () => _openPage(
               context,
               ProfilePage(
@@ -129,7 +129,7 @@ class AppSideDrawer extends StatelessWidget {
           ),
           _DrawerItem(
             icon: FilipIcons.preferences,
-            label: l10n.tr('dashboard.drawerPreferences'),
+            label: l10n.tr('tns.preferences'),
             onTap: () => _openPage(
               context,
               SettingsPage(authSessionController: authSessionController),
@@ -137,22 +137,22 @@ class AppSideDrawer extends StatelessWidget {
           ),
           _DrawerItem(
             icon: FilipIcons.household,
-            label: l10n.tr('dashboard.drawerHousehold'),
+            label: l10n.tr('tns.household'),
             onTap: () => Navigator.of(context).pop(),
           ),
           _DrawerItem(
             icon: FilipIcons.survey,
-            label: l10n.tr('dashboard.drawerSurvey'),
+            label: l10n.tr('tns.SURVEY'),
             onTap: () => Navigator.of(context).pop(),
           ),
           _DrawerItem(
             icon: FilipIcons.support,
-            label: l10n.tr('dashboard.drawerSupport'),
+            label: l10n.tr('tns.support'),
             onTap: () => _openPage(context, const SupportPage()),
           ),
           _DrawerItem(
             icon: FilipIcons.about,
-            label: l10n.tr('dashboard.drawerAbout'),
+            label: l10n.tr('tns.about'),
             onTap: () => _openPage(context, AboutPage(appVersion: appVersion)),
           ),
           const Spacer(),
@@ -165,7 +165,7 @@ class AppSideDrawer extends StatelessWidget {
                 onPressed: () => _handleLogout(context),
                 icon: const Icon(Icons.logout, color: Colors.white, size: 20),
                 label: Text(
-                  l10n.tr('dashboard.drawerLogout'),
+                  l10n.tr('tns.logout'),
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 14,
@@ -242,7 +242,7 @@ class AppSideDrawer extends StatelessWidget {
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                   child: Text(
-                    l10n.tr('dashboard.drawerLegal'),
+                    l10n.tr('tns.legal'),
                     style: const TextStyle(
                       fontSize: 11,
                       color: Color(0xFF8A8A8A),
@@ -265,7 +265,7 @@ class AppSideDrawer extends StatelessWidget {
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                   child: Text(
-                    l10n.tr('dashboard.drawerDataPrivacy'),
+                    l10n.tr('tns.dataPrivacy'),
                     style: const TextStyle(
                       fontSize: 11,
                       color: Color(0xFF8A8A8A),

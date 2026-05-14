@@ -5,6 +5,7 @@ import 'package:filip_at_flutter/features/auth/application/auth_session_controll
 import 'package:filip_at_flutter/features/auth/data/auth_exception.dart';
 import 'package:filip_at_flutter/shared/icons/app_icon_packs.dart';
 import 'package:flutter/material.dart';
+import 'package:filip_at_flutter/shared/theme/form_tokens.dart';
 import 'package:flutter/services.dart';
 
 class TwoFactorPage extends StatefulWidget {
@@ -88,7 +89,7 @@ class _TwoFactorPageState extends State<TwoFactorPage> {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(
-          const SnackBar(content: Text('Verification failed. Please try again.')),
+          SnackBar(content: Text(context.l10n.tr('tns.retry'))),
         );
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
@@ -141,7 +142,7 @@ class _TwoFactorPageState extends State<TwoFactorPage> {
                             children: [
                               Center(
                                 child: Text(
-                                  l10n.tr('login.welcome'),
+                                  l10n.tr('tns.welcomeToFinancialLifePlanner'),
                                   textAlign: TextAlign.center,
                                   style: theme.textTheme.headlineSmall?.copyWith(
                                     fontFamily: 'Calibri',
@@ -156,8 +157,8 @@ class _TwoFactorPageState extends State<TwoFactorPage> {
                               const SizedBox(height: 28),
                               Text(
                                 widget.pseudoNumber.isNotEmpty
-                                    ? 'A message has been sent to your phone number ending with ${widget.pseudoNumber}.'
-                                    : 'A message has been sent to your phone number.',
+                                    ? '${l10n.tr('tns.aMessageHasBeenSent')} ${widget.pseudoNumber}.'
+                                    : l10n.tr('tns.aMessageHasBeenSent'),
                                 style: const TextStyle(
                                   fontFamily: 'Calibri',
                                   fontSize: 15,
@@ -180,7 +181,7 @@ class _TwoFactorPageState extends State<TwoFactorPage> {
                                   color: Color(0xFF2F2F2F),
                                 ),
                                 decoration: InputDecoration(
-                                  hintText: 'Enter Verification Code',
+                                  hintText: l10n.tr('tns.verificationCode'),
                                   hintStyle: const TextStyle(
                                     fontFamily: 'Calibri',
                                     fontSize: 16,
@@ -218,7 +219,7 @@ class _TwoFactorPageState extends State<TwoFactorPage> {
                         disabledForegroundColor: Colors.white,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
                         ),
                       ),
                       child: _isSubmitting
@@ -251,7 +252,7 @@ class _TwoFactorPageState extends State<TwoFactorPage> {
                           crossAxisAlignment: WrapCrossAlignment.center,
                           children: [
                             Text(
-                              l10n.tr('login.noAccount'),
+                              l10n.tr('tns.dontHaveAnAccount'),
                               style: const TextStyle(
                                 fontFamily: 'Calibri',
                                 fontSize: 12,
@@ -262,7 +263,7 @@ class _TwoFactorPageState extends State<TwoFactorPage> {
                               onTap: () => Navigator.of(context)
                                   .pushNamed(AppRouter.selfSignup),
                               child: Text(
-                                l10n.tr('login.createNow'),
+                                l10n.tr('tns.createNow'),
                                 style: const TextStyle(
                                   fontFamily: 'Calibri',
                                   fontSize: 12,
@@ -348,7 +349,7 @@ class _TwoFactorPageState extends State<TwoFactorPage> {
 
   OutlineInputBorder _inputBorder({Color color = const Color(0xFFC9C9C9)}) {
     return OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
       borderSide: BorderSide(color: color, width: 1.15),
     );
   }
@@ -377,3 +378,4 @@ class _TwoFactorPageState extends State<TwoFactorPage> {
     );
   }
 }
+

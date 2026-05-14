@@ -27,7 +27,7 @@ class DashboardTopBar extends StatelessWidget {
           onNotificationTap: onNotificationTap,
           showBadge: showNotificationBadge,
         ),
-        AppPageHeader(title: context.l10n.tr('dashboard.summaryTitle')),
+        AppPageHeader(title: context.l10n.tr('tns.myFinancialSummary')),
       ],
     );
   }

@@ -142,3 +142,6 @@ alwys follow this font style from at nativescript mobile app
 # Follow Icon of At Nativescript app
 
 # Follow uilm of nativecsript app
+
+# en/de.json now single source of truth.
+# No mixed hardcoded-vs-JSON mismatch path.

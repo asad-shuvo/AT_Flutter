@@ -88,7 +88,7 @@ class _LoadedAdvisorCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      context.l10n.tr('advisor.title'),
+                      context.l10n.tr('tns.myFinancialAdvisor'),
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w400,
@@ -160,26 +160,26 @@ class _LoadedAdvisorCard extends StatelessWidget {
   Future<void> _launchEmail(BuildContext context) async {
     final email = advisorInfo.email?.trim();
     if (email == null || email.isEmpty) {
-      _showActionMessage(context, context.l10n.tr('advisor.noEmail'));
+      _showActionMessage(context, context.l10n.tr('tns.emailNotFound'));
       return;
     }
 
     final launched = await launchUrl(Uri(scheme: 'mailto', path: email));
     if (!launched && context.mounted) {
-      _showActionMessage(context, context.l10n.tr('advisor.openEmailFailed'));
+      _showActionMessage(context, context.l10n.tr('tns.unknownError'));
     }
   }
 
   Future<void> _launchPhone(BuildContext context) async {
     final phone = advisorInfo.phone?.trim();
     if (phone == null || phone.isEmpty) {
-      _showActionMessage(context, context.l10n.tr('advisor.noPhone'));
+      _showActionMessage(context, context.l10n.tr('tns.invalidPhone'));
       return;
     }
 
     final launched = await launchUrl(Uri(scheme: 'tel', path: phone));
     if (!launched && context.mounted) {
-      _showActionMessage(context, context.l10n.tr('advisor.openPhoneFailed'));
+      _showActionMessage(context, context.l10n.tr('tns.unknownError'));
     }
   }
 
@@ -317,7 +317,7 @@ class _EmptyAdvisorCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      context.l10n.tr('advisor.title'),
+                      context.l10n.tr('tns.myFinancialAdvisor'),
                       style: const TextStyle(
                         fontSize: 12,
                         color: Color(0xFF808080),
@@ -325,7 +325,7 @@ class _EmptyAdvisorCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      context.l10n.tr('advisor.noAdvisorAssigned'),
+                      context.l10n.tr('tns.noAdvisorAssigned'),
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
@@ -356,7 +356,7 @@ class _EmptyAdvisorCard extends StatelessWidget {
         Padding(
           padding: EdgeInsets.fromLTRB(18, 14, 18, 18),
           child: Text(
-            context.l10n.tr('advisor.noAdvisorDescription'),
+            context.l10n.tr('tns.noAdvisorAssignedSubheader'),
             style: const TextStyle(
               fontSize: 14,
               color: Color(0xFFB4B4B4),

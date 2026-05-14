@@ -4,6 +4,7 @@ import 'package:filip_at_flutter/features/self_signup/data/country_data.dart';
 import 'package:filip_at_flutter/features/self_signup/presentation/widgets/signup_shared.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:filip_at_flutter/shared/theme/form_tokens.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 const String _termsUrl =
@@ -366,7 +367,7 @@ class _SignupFullFormStepState extends State<SignupFullFormStep> {
           ),
           const SizedBox(width: 12),
           ClipRRect(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
             child: Image.network(
               'https://az-cdn.selise.biz/selisecdn/cdn/slnetwork/assets/mobile_app_images/self_signup_document.png',
               width: 64,
@@ -377,7 +378,7 @@ class _SignupFullFormStepState extends State<SignupFullFormStep> {
                 height: 64,
                 decoration: BoxDecoration(
                   border: Border.all(color: const Color(0xFFE0E0E0)),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
                 ),
                 child: const Icon(
                   Icons.description_outlined,
@@ -399,7 +400,7 @@ class _SignupFullFormStepState extends State<SignupFullFormStep> {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         color: const Color(0xFFFFF0F2),
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -491,7 +492,7 @@ class _SignupFullFormStepState extends State<SignupFullFormStep> {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         decoration: BoxDecoration(
           border: Border.all(color: const Color(0xFFC9C9C9), width: 1.0),
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
         ),
         child: Row(
           children: [
@@ -601,7 +602,7 @@ class _SignupFullFormStepState extends State<SignupFullFormStep> {
         Container(
           decoration: BoxDecoration(
             border: Border.all(color: const Color(0xFFC9C9C9), width: 1.0),
-            borderRadius: BorderRadius.circular(6),
+            borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
@@ -682,7 +683,7 @@ class _SignupFullFormStepState extends State<SignupFullFormStep> {
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
             decoration: BoxDecoration(
               border: Border.all(color: const Color(0xFFC9C9C9), width: 1.0),
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
             ),
             child: Row(
               children: [
@@ -878,11 +879,11 @@ class _CountrySelectSheetState extends State<_CountrySelectSheet> {
                 ),
                 contentPadding: const EdgeInsets.symmetric(vertical: 10),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
                   borderSide: const BorderSide(color: Color(0xFFDDDDDD)),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
                   borderSide: const BorderSide(
                     color: Color(0xFFD91F32),
                     width: 1.5,
@@ -943,3 +944,4 @@ class _CountrySelectSheetState extends State<_CountrySelectSheet> {
     );
   }
 }
+

@@ -80,7 +80,7 @@ class AppBottomNav extends StatelessWidget {
                                       'assets/images/dashboard/dashboard_duo.png',
                                   activeAssetPath:
                                       'assets/images/dashboard/dashboard_duo_select.png',
-                                  label: l10n.tr('dashboard.navDashboard'),
+                                  label: l10n.tr('tns.dashboard'),
                                   isActive: activeTab == AppNavTab.dashboard,
                                   onTap: onDashboardTap,
                                 ),
@@ -91,7 +91,7 @@ class AppBottomNav extends StatelessWidget {
                                       'assets/images/dashboard/contracts_duo.png',
                                   activeAssetPath:
                                       'assets/images/dashboard/contracts_duo_select.png',
-                                  label: l10n.tr('dashboard.navContracts'),
+                                  label: l10n.tr('tns.contracts'),
                                   isActive: activeTab == AppNavTab.contracts,
                                   onTap: onContractsTap,
                                 ),
@@ -103,7 +103,7 @@ class AppBottomNav extends StatelessWidget {
                                       'assets/images/dashboard/real_estate_duo.png',
                                   activeAssetPath:
                                       'assets/images/dashboard/real_estate_duo_select.png',
-                                  label: l10n.tr('dashboard.navRealEstate'),
+                                  label: l10n.tr('tns.myrealEstate'),
                                   isActive: activeTab == AppNavTab.realEstate,
                                   onTap: onRealEstateTap,
                                 ),
@@ -114,7 +114,7 @@ class AppBottomNav extends StatelessWidget {
                                       'assets/images/dashboard/message_duo.png',
                                   activeAssetPath:
                                       'assets/images/dashboard/message_duo_select.png',
-                                  label: l10n.tr('dashboard.navMessage'),
+                                  label: l10n.tr('tns.messageBottomNav'),
                                   isActive: activeTab == AppNavTab.message,
                                   onTap: onMessagesTap,
                                 ),

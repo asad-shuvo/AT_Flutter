@@ -116,8 +116,8 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
 
     final slides = <_ExplorerSlideData>[
       _ExplorerSlideData(
-        title: l10n.tr('explorer.slider.contracts.title'),
-        description: l10n.tr('explorer.slider.contracts.description'),
+        title: l10n.tr('tns.title'),
+        description: l10n.tr('tns.description'),
         icon: const IconData(0xE9E8, fontFamily: _filipIconFamily),
         onTap: () => _openPage(
           ContractsPage(
@@ -136,14 +136,14 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
         ),
       ),
       _ExplorerSlideData(
-        title: l10n.tr('explorer.slider.realEstate.title'),
-        description: l10n.tr('explorer.slider.realEstate.description'),
+        title: l10n.tr('tns.title'),
+        description: l10n.tr('tns.description'),
         icon: const IconData(0xE9B4, fontFamily: _filipIconFamily),
         onTap: () => _openPage(const RealEstatePage()),
       ),
       _ExplorerSlideData(
-        title: l10n.tr('explorer.slider.drive.title'),
-        description: l10n.tr('explorer.slider.drive.description'),
+        title: l10n.tr('tns.title'),
+        description: l10n.tr('tns.description'),
         icon: const IconData(0xE9C9, fontFamily: _filipIconFamily),
         onTap: () => _openPage(DocumentsPage(
           driveRepository: widget.driveRepository,
@@ -159,8 +159,8 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
         )),
       ),
       _ExplorerSlideData(
-        title: l10n.tr('explorer.slider.message.title'),
-        description: l10n.tr('explorer.slider.message.description'),
+        title: l10n.tr('tns.title'),
+        description: l10n.tr('tns.description'),
         icon: const IconData(0xEA03, fontFamily: _filipIconFamily),
         onTap: () => _openPage(const ChatPage()),
       ),
@@ -196,7 +196,7 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
                   );
                 },
               ),
-              AppPageHeader(title: l10n.tr('dashboard.explorerTitle')),
+              AppPageHeader(title: l10n.tr('tns.explorerTitle')),
               Expanded(
                 child: Stack(
                   fit: StackFit.expand,
@@ -251,7 +251,7 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20),
                             child: Text(
-                              l10n.tr('explorer.oneStopSolution'),
+                              l10n.tr('tns.oneStopSolution'),
                               textAlign: TextAlign.center,
                               style: const TextStyle(
                                 fontFamily: 'Calibri',
@@ -333,7 +333,7 @@ class _ExplorerTileGrid extends StatelessWidget {
           children: [
             Expanded(
               child: _ExplorerTile(
-                label: l10n.tr('dashboard.navRealEstate'),
+                label: l10n.tr('tns.myrealEstate'),
                 icon: const IconData(0xE9B4, fontFamily: _filipIconFamily),
                 onTap: onMyRealEstateTap,
               ),
@@ -341,7 +341,7 @@ class _ExplorerTileGrid extends StatelessWidget {
             const SizedBox(width: 14),
             Expanded(
               child: _ExplorerTile(
-                label: l10n.tr('explorer.tileDrive'),
+                label: l10n.tr('tns.tileDrive'),
                 icon: const IconData(0xE9C9, fontFamily: _filipIconFamily),
                 onTap: onDriveTap,
               ),
@@ -353,7 +353,7 @@ class _ExplorerTileGrid extends StatelessWidget {
           children: [
             Expanded(
               child: _ExplorerTile(
-                label: l10n.tr('dashboard.navContracts'),
+                label: l10n.tr('tns.contracts'),
                 icon: const IconData(0xE9E8, fontFamily: _filipIconFamily),
                 onTap: onContractsTap,
               ),
@@ -361,7 +361,7 @@ class _ExplorerTileGrid extends StatelessWidget {
             const SizedBox(width: 14),
             Expanded(
               child: _ExplorerTile(
-                label: l10n.tr('dashboard.navMessage'),
+                label: l10n.tr('tns.messageBottomNav'),
                 icon: const IconData(0xEA03, fontFamily: _filipIconFamily),
                 onTap: onMessageTap,
               ),

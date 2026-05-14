@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:filip_at_flutter/shared/theme/form_tokens.dart';
 import 'package:filip_at_flutter/shared/theme/app_colors.dart';
 
 class AppTheme {
@@ -53,10 +54,11 @@ class AppTheme {
           color: AppColors.textLight,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
           borderSide: BorderSide.none,
         ),
       ),
     );
   }
 }
+

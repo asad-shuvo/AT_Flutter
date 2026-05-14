@@ -1,6 +1,9 @@
 import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/shared/theme/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:filip_at_flutter/shared/theme/form_tokens.dart';
+
+
 
 class ContractsAddFormSheet extends StatelessWidget {
   const ContractsAddFormSheet({
@@ -95,7 +98,9 @@ class ContractsAddFormSheet extends StatelessWidget {
                       elevation: 0,
                       minimumSize: const Size.fromHeight(56),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(
+                          AppFormTokens.fieldRadius,
+                        ),
                       ),
                     ),
                     child: isSubmitting
@@ -276,7 +281,7 @@ class ContractsDropdownField<T> extends StatelessWidget {
                       onChanged?.call(picked);
                     }
                   },
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
             child: InputDecorator(
               isEmpty: !hasValue,
               decoration: _contractsInputDecoration(
@@ -363,7 +368,7 @@ class ContractsDateField extends StatelessWidget {
                     onTap();
                   }
                 : null,
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
             child: InputDecorator(
               isEmpty: text.isEmpty,
               decoration: _contractsInputDecoration(
@@ -565,8 +570,8 @@ InputDecoration _contractsInputDecoration({
     errorText: errorText,
     labelStyle: TextStyle(
       fontFamily: 'Calibri',
-      fontSize: 14,
-      color: disabled ? const Color(0xFFAAAAAA) : const Color(0xFF737373),
+      fontSize: 16,
+      color: disabled ? const Color(0xFFAAAAAA) : const Color(0xFF808184),
     ),
     hintStyle: const TextStyle(
       fontFamily: 'Calibri',
@@ -579,26 +584,26 @@ InputDecoration _contractsInputDecoration({
       color: AppColors.primaryRed,
     ),
     filled: true,
-    fillColor: disabled ? const Color(0xFFF2F2F2) : const Color(0xFFF8F8F8),
+    fillColor: disabled ? const Color(0xFFF2F2F2) : Colors.white,
     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
       borderSide: const BorderSide(color: Color(0xFFE1E1E1)),
     ),
     disabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
       borderSide: const BorderSide(color: Color(0xFFE6E6E6)),
     ),
     focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
       borderSide: const BorderSide(color: AppColors.primaryRed),
     ),
     errorBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
       borderSide: const BorderSide(color: AppColors.primaryRed),
     ),
     focusedErrorBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
       borderSide: const BorderSide(color: AppColors.primaryRed),
     ),
   );
@@ -621,4 +626,6 @@ TextStyle _disabledFieldStyle() {
     height: 1.15,
   );
 }
+
+
 

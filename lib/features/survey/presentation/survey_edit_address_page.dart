@@ -5,6 +5,7 @@ import 'package:filip_at_flutter/features/survey/presentation/survey_postal_sear
 import 'package:filip_at_flutter/features/survey/presentation/widgets/survey_styles.dart';
 import 'package:filip_at_flutter/shared/icons/app_icon_packs.dart';
 import 'package:flutter/material.dart';
+import 'package:filip_at_flutter/shared/theme/form_tokens.dart';
 
 class SurveyEditAddressResult {
   const SurveyEditAddressResult({
@@ -170,7 +171,7 @@ class _SurveyEditAddressPageState extends State<SurveyEditAddressPage> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
-          l10n.tr('editAddress'),
+          l10n.tr('tns.editAddress'),
           style: const TextStyle(
             fontFamily: 'Calibri',
             fontSize: 18,
@@ -191,20 +192,20 @@ class _SurveyEditAddressPageState extends State<SurveyEditAddressPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _AddressField(
-                      label: l10n.tr('street'),
+                      label: l10n.tr('tns.street'),
                       controller: _streetController,
                     ),
                     const SizedBox(height: 16),
                     _AddressField(
-                      label: l10n.tr('city'),
+                      label: l10n.tr('tns.city'),
                       controller: _cityStateController,
                     ),
                     const SizedBox(height: 16),
-                    _AddressLabel(label: l10n.tr('postalZipCode')),
+                    _AddressLabel(label: l10n.tr('tns.postalZipCode')),
                     const SizedBox(height: 6),
                     _TappableAddressField(
                       controller: _postalController,
-                      hintText: l10n.tr('postalZipCode'),
+                      hintText: l10n.tr('tns.postalZipCode'),
                       trailing: const Icon(
                         FilipIcons.edit,
                         color: Color(0xFFB23A4D),
@@ -213,11 +214,11 @@ class _SurveyEditAddressPageState extends State<SurveyEditAddressPage> {
                       onTap: _pickPostalCode,
                     ),
                     const SizedBox(height: 16),
-                    _AddressLabel(label: '${l10n.tr('selectCountry')} *'),
+                    _AddressLabel(label: '${l10n.tr('tns.selectCountry')} *'),
                     const SizedBox(height: 6),
                     _TappableAddressField(
                       controller: _countryController,
-                      hintText: l10n.tr('selectCountry'),
+                      hintText: l10n.tr('tns.selectCountry'),
                       trailing: const Icon(
                         SelectNetworkIcons.arrowDown,
                         color: Color(0xFFB23A4D),
@@ -242,7 +243,7 @@ class _SurveyEditAddressPageState extends State<SurveyEditAddressPage> {
                   disabledBackgroundColor: SurveyStyles.submitDisabled,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
+                    borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
                   ),
                 ),
                 child: _submitting
@@ -255,7 +256,7 @@ class _SurveyEditAddressPageState extends State<SurveyEditAddressPage> {
                         ),
                       )
                     : Text(
-                        l10n.tr('confirm').toUpperCase(),
+                        l10n.tr('tns.confirm').toUpperCase(),
                         style: const TextStyle(
                           fontFamily: 'Calibri',
                           fontSize: 16,
@@ -316,11 +317,11 @@ class _AddressField extends StatelessWidget {
             filled: true,
             fillColor: Colors.white,
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
               borderSide: const BorderSide(color: SurveyStyles.borderColor),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
               borderSide: const BorderSide(color: Color(0xFFB23A4D), width: 1.5),
             ),
           ),
@@ -346,12 +347,12 @@ class _TappableAddressField extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(6),
+      borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 13),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
           border: Border.all(color: SurveyStyles.borderColor),
         ),
         child: Row(
@@ -439,7 +440,7 @@ class _CountryPickerSheetState extends State<_CountryPickerSheet> {
                 controller: _search,
                 style: const TextStyle(fontFamily: 'Calibri', fontSize: 16),
                 decoration: InputDecoration(
-                  hintText: l10n.tr('selectCountry'),
+                  hintText: l10n.tr('tns.selectCountry'),
                   hintStyle: const TextStyle(
                     fontFamily: 'Calibri',
                     fontSize: 16,
@@ -448,11 +449,11 @@ class _CountryPickerSheetState extends State<_CountryPickerSheet> {
                   prefixIcon: const Icon(Icons.search, color: Color(0xFFB23A4D)),
                   contentPadding: const EdgeInsets.symmetric(vertical: 10),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(6),
+                    borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
                     borderSide: const BorderSide(color: SurveyStyles.borderColor),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(6),
+                    borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
                     borderSide:
                         const BorderSide(color: Color(0xFFB23A4D), width: 1.5),
                   ),
@@ -497,3 +498,4 @@ class _CountryPickerSheetState extends State<_CountryPickerSheet> {
     );
   }
 }
+

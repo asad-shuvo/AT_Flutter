@@ -99,26 +99,26 @@ class _OnboardingPageState extends State<OnboardingPage> {
       _OnboardingSlide(
         backgroundAsset: 'assets/images/onboarding/wave1.png',
         contentAsset: 'assets/images/onboarding/managecontracts.png',
-        title: l10n.tr('onboarding.manageContracts.title'),
-        description: l10n.tr('onboarding.manageContracts.description'),
+        title: l10n.tr('tns.title'),
+        description: l10n.tr('tns.description'),
       ),
       _OnboardingSlide(
         backgroundAsset: 'assets/images/onboarding/wave2.png',
         contentAsset: 'assets/images/onboarding/real_estate.png',
-        title: l10n.tr('onboarding.realEstate.title'),
-        description: l10n.tr('onboarding.realEstate.description'),
+        title: l10n.tr('tns.title'),
+        description: l10n.tr('tns.description'),
       ),
       _OnboardingSlide(
         backgroundAsset: 'assets/images/onboarding/wave3.png',
         contentAsset: 'assets/images/onboarding/drive.png',
-        title: l10n.tr('onboarding.documents.title'),
-        description: l10n.tr('onboarding.documents.description'),
+        title: l10n.tr('tns.title'),
+        description: l10n.tr('tns.description'),
       ),
       _OnboardingSlide(
         backgroundAsset: 'assets/images/onboarding/wave4.png',
         contentAsset: 'assets/images/onboarding/chatwithadvisor.png',
-        title: l10n.tr('onboarding.chat.title'),
-        description: l10n.tr('onboarding.chat.description'),
+        title: l10n.tr('tns.title'),
+        description: l10n.tr('tns.description'),
       ),
     ];
   }
@@ -200,8 +200,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   ),
                   child: Text(
                     _isLastSlide
-                        ? l10n.tr('onboarding.startNow')
-                        : l10n.tr('onboarding.skip'),
+                        ? l10n.tr('tns.startNow')
+                        : l10n.tr('tns.skip'),
                     style: const TextStyle(
                       fontFamily: 'Calibri',
                       fontWeight: FontWeight.w700,

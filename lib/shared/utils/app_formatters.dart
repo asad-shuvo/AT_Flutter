@@ -137,10 +137,10 @@ class AppDateFormatter {
       '${_hhmm(d)}:${d.second.toString().padLeft(2, '0')}';
 
   static String _oclock(AppLocalizations? l10n) =>
-      l10n?.tr('common.oclock') ?? "o'clock";
+      l10n?.tr('oclock') ?? "o'clock";
 
   static String _monthName(int month, AppLocalizations? l10n) {
-    if (l10n != null) return l10n.tr('common.month.$month');
+    if (l10n != null) return l10n.tr('tns.month');
     const names = [
       '',
       'January', 'February', 'March', 'April', 'May', 'June',

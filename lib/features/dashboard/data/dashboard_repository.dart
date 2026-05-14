@@ -357,8 +357,8 @@ class DashboardRepository {
     );
 
     return DashboardDistributionCardData(
-      cardTitle: 'dashboard.totalInvestment',
-      chartTitle: 'dashboard.currentInvestmentDistribution',
+      cardTitle: 'tns.totalInvestment',
+      chartTitle: 'tns.currentInvestmentDistribution',
       totalValue: totalValue,
       totalValueColorValue: 0xFF15847B,
       chartBackgroundColorValue: 0xFFE3F0EF,
@@ -373,7 +373,7 @@ class DashboardRepository {
     final results = await Future.wait<dynamic>(<Future<dynamic>>[
       _fetchContractOverview(
         context: context,
-        tags: const <String>['IsANonLifeInsure'],
+        tags: const <String>['Is-A-Non-Life-Insure'],
       ),
       _fetchDistributionChartData(
         context: context,
@@ -385,8 +385,8 @@ class DashboardRepository {
     final chartData = _readChartData(results[1]);
 
     return DashboardDistributionCardData(
-      cardTitle: 'dashboard.monthlyPremium',
-      chartTitle: 'dashboard.monthlyPremiumDistribution',
+      cardTitle: 'tns.monthlyPremium',
+      chartTitle: 'tns.monthlyPremiumDistribution',
       totalValue: totalValue,
       totalValueColorValue: 0xFFB4495E,
       chartBackgroundColorValue: 0xFFFFF5F6,
@@ -408,7 +408,7 @@ class DashboardRepository {
     final results = await Future.wait<dynamic>(<Future<dynamic>>[
       _fetchContractOverview(
         context: context,
-        tags: const <String>['IsALifeInsure'],
+        tags: const <String>['Is-A-Life-Insure'],
       ),
       _fetchDistributionChartData(
         context: context,
@@ -420,8 +420,8 @@ class DashboardRepository {
     final chartData = _readChartData(results[1]);
 
     return DashboardDistributionCardData(
-      cardTitle: 'dashboard.monthlyPayment',
-      chartTitle: 'dashboard.monthlyPensionDistribution',
+      cardTitle: 'tns.monthlyPayment',
+      chartTitle: 'tns.monthlyPensionDistribution',
       totalValue: totalValue,
       totalValueColorValue: 0xFF607E46,
       chartBackgroundColorValue: 0xFFECF0E9,
@@ -720,7 +720,7 @@ class DashboardRepository {
       if (remainingAmount > 0) {
         segments.add(
           DashboardDistributionSegment(
-            label: 'dashboard.otherCategories',
+            label: 'OTHER_CATEGORIES',
             value: remainingAmount,
             colorValue: colorValues.length > 5 ? colorValues[5] : 0xFFD2D2D2,
           ),

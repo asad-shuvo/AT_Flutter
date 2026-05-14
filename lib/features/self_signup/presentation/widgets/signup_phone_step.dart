@@ -4,6 +4,7 @@ import 'package:filip_at_flutter/features/self_signup/application/self_signup_co
 import 'package:filip_at_flutter/features/self_signup/data/country_data.dart';
 import 'package:filip_at_flutter/features/self_signup/presentation/widgets/signup_shared.dart';
 import 'package:flutter/material.dart';
+import 'package:filip_at_flutter/shared/theme/form_tokens.dart';
 import 'package:flutter/services.dart';
 
 CountryInfo _defaultCountry() =>
@@ -183,7 +184,7 @@ class _SignupPhoneStepState extends State<SignupPhoneStep> {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
         decoration: BoxDecoration(
           border: Border.all(color: const Color(0xFFC9C9C9), width: 1.0),
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -237,11 +238,11 @@ class _SignupPhoneStepState extends State<SignupPhoneStep> {
             decoration: BoxDecoration(
               color: const Color(0xFFF5F5F5),
               border: Border.all(color: const Color(0xFFD0D0D0), width: 0.8),
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
             ),
             child: bytes != null
                 ? ClipRRect(
-                    borderRadius: BorderRadius.circular(6),
+                    borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
                     child: Image.memory(
                       bytes,
                       gaplessPlayback: true,
@@ -335,11 +336,11 @@ class _CountryPickerSheetState extends State<_CountryPickerSheet> {
                 ),
                 contentPadding: const EdgeInsets.symmetric(vertical: 10),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
                   borderSide: const BorderSide(color: Color(0xFFDDDDDD)),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
                   borderSide: const BorderSide(
                     color: Color(0xFFD91F32),
                     width: 1.5,
@@ -416,3 +417,4 @@ class _FlagEmoji extends StatelessWidget {
     return Text(emoji, style: const TextStyle(fontSize: 20));
   }
 }
+

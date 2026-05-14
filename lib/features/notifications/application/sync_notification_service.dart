@@ -8,8 +8,11 @@ class SyncNotificationService {
   final synccustomercontract = StreamController<Map<String, dynamic>>.broadcast();
   final investmentSync = StreamController<Map<String, dynamic>>.broadcast();
   final portfolioInvestmentSync = StreamController<Map<String, dynamic>>.broadcast();
+  final portfolioForceSync = StreamController<Map<String, dynamic>>.broadcast();
   final synccustomerdatabyid = StreamController<Map<String, dynamic>>.broadcast();
   final gdprConsentSync = StreamController<Map<String, dynamic>>.broadcast();
+  final personContractSync = StreamController<Map<String, dynamic>>.broadcast();
+  final householdExternalSync = StreamController<Map<String, dynamic>>.broadcast();
 
   void dispose() {
     contractSyncCompleted.close();
@@ -19,7 +22,10 @@ class SyncNotificationService {
     synccustomercontract.close();
     investmentSync.close();
     portfolioInvestmentSync.close();
+    portfolioForceSync.close();
     synccustomerdatabyid.close();
     gdprConsentSync.close();
+    personContractSync.close();
+    householdExternalSync.close();
   }
 }

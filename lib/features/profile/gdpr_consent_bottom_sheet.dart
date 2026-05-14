@@ -59,31 +59,31 @@ class _GdprConsentBottomSheetState extends State<GdprConsentBottomSheet> {
     final options = <({bool checked, String title, String subtitle})>[
       (
         checked: _state.isMarktforschung,
-        title: l10n.tr('account.gdprOption1Title'),
-        subtitle: l10n.tr('account.gdprOption1Subtitle'),
+        title: l10n.tr('tns.gdrpConsentCheckboxTitle1'),
+        subtitle: l10n.tr('tns.gdrpConsentCheckboxSubtitle1'),
       ),
       (
         checked: _state.isKundenveranstaltung,
-        title: l10n.tr('account.gdprOption2Title'),
-        subtitle: l10n.tr('account.gdprOption2Subtitle'),
+        title: l10n.tr('tns.gdrpConsentCheckboxTitle2'),
+        subtitle: l10n.tr('tns.gdrpConsentCheckboxSubtitle2'),
       ),
       (
         checked: _state.isPost,
-        title: l10n.tr('account.gdprOption3Title'),
-        subtitle: l10n.tr('account.gdprOption3Subtitle'),
+        title: l10n.tr('tns.gdrpConsentCheckboxTitle3'),
+        subtitle: l10n.tr('tns.gdrpConsentCheckboxSubtitle3'),
       ),
       (
         checked: _state.isNewsletter,
-        title: l10n.tr('account.gdprOption4Title'),
-        subtitle: l10n.tr('account.gdprOption4Subtitle'),
+        title: l10n.tr('tns.gdrpConsentCheckboxTitle4'),
+        subtitle: l10n.tr('tns.gdrpConsentCheckboxSubtitle4'),
       ),
     ];
     if (widget.showHouseholdOption) {
       options.add(
         (
           checked: _state.isHousehold,
-          title: l10n.tr('account.gdprOption5Title'),
-          subtitle: l10n.tr('account.gdprOption5Subtitle'),
+          title: l10n.tr('tns.gdrpConsentCheckboxTitle5'),
+          subtitle: l10n.tr('tns.gdrpConsentCheckboxSubtitle5'),
         ),
       );
     }
@@ -106,7 +106,7 @@ class _GdprConsentBottomSheetState extends State<GdprConsentBottomSheet> {
                 ),
                 const SizedBox(width: 10),
                 Text(
-                  l10n.tr('account.gdprTitle'),
+                  l10n.tr('tns.gdprConsentTitle'),
                   style: const TextStyle(
                     fontFamily: 'Calibri',
                     fontSize: 22 / 1.2,
@@ -118,7 +118,7 @@ class _GdprConsentBottomSheetState extends State<GdprConsentBottomSheet> {
             ),
             const SizedBox(height: 16),
             Text(
-              l10n.tr('account.gdprDescription'),
+              l10n.tr('tns.gdprConsentDescription'),
               style: const TextStyle(
                 fontFamily: 'Calibri',
                 fontSize: 21 / 1.2,
@@ -128,7 +128,7 @@ class _GdprConsentBottomSheetState extends State<GdprConsentBottomSheet> {
             ),
             const SizedBox(height: 18),
             Text(
-              l10n.tr('account.gdprPreferenceTitle'),
+              l10n.tr('tns.myPreference'),
               style: const TextStyle(
                 fontFamily: 'Calibri',
                 fontSize: 22 / 1.2,
@@ -138,7 +138,7 @@ class _GdprConsentBottomSheetState extends State<GdprConsentBottomSheet> {
             ),
             const SizedBox(height: 6),
             Text(
-              l10n.tr('account.gdprPreferenceSubtitle'),
+              l10n.tr('tns.myPreferenceSubtitle'),
               style: const TextStyle(
                 fontFamily: 'Calibri',
                 fontSize: 18 / 1.2,

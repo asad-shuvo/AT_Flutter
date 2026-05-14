@@ -26,21 +26,21 @@ class GdprConsentFlow {
           final result = await repository.updateGdprConsent(next);
           if (!context.mounted) return;
           if (!result.isSuccess) {
-            _showSnack(context, context.l10n.tr('account.gdprUpdateFailed'));
+            _showSnack(context, context.l10n.tr('tns.consentCouldNotUpdated'));
             return;
           }
 
-          _showSnack(context, context.l10n.tr('account.gdprSyncInProgress'));
+          _showSnack(context, context.l10n.tr('tns.gdprSyncSubtitle'));
           final payload = await _waitForGdprSyncNotification(syncNotificationService);
           if (!context.mounted) return;
 
           final isSuccess = payload != null && _isGdprSyncSuccess(payload);
           if (isSuccess) {
             Navigator.of(context).pop();
-            _showSnack(context, context.l10n.tr('account.gdprUpdatedSuccess'));
+            _showSnack(context, context.l10n.tr('tns.consentsUpdatedSuccessfully'));
             return;
           }
-          _showSnack(context, context.l10n.tr('account.gdprNotificationMissing'));
+          _showSnack(context, context.l10n.tr('tns.gdprFailedSubTitle'));
         },
       ),
     );

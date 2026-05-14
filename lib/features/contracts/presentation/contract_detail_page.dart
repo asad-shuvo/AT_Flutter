@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 
 import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/features/contracts/data/contracts_add_models.dart';
@@ -6,9 +6,13 @@ import 'package:filip_at_flutter/features/contracts/data/contracts_repository.da
 import 'package:filip_at_flutter/features/contracts/data/insure_contract_model.dart';
 import 'package:filip_at_flutter/features/contracts/data/investment_contract_model.dart';
 import 'package:filip_at_flutter/features/contracts/presentation/widgets/contracts_add_contract_modal.dart';
+import 'package:filip_at_flutter/features/contracts/presentation/widgets/contract_detail_doc_widgets.dart';
+import 'package:filip_at_flutter/features/contracts/presentation/widgets/contract_detail_field_row.dart';
+import 'package:filip_at_flutter/features/contracts/presentation/widgets/contract_detail_note_widgets.dart';
 import 'package:filip_at_flutter/features/contracts/presentation/widgets/contract_document_add_sheet.dart';
 import 'package:filip_at_flutter/shared/theme/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:filip_at_flutter/shared/theme/form_tokens.dart';
 
 class ContractDetailPage extends StatefulWidget {
   const ContractDetailPage._({
@@ -126,7 +130,7 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
     }
   }
 
-  // ── helpers that prefer fresh API data ──────────────────────────────────
+  // â”€â”€ helpers that prefer fresh API data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   String? _fresh(String key) {
     final d = _freshDetails;
@@ -272,7 +276,7 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
     });
   }
 
-  // Current values — fresh data takes precedence over original contract.
+  // Current values â€” fresh data takes precedence over original contract.
   String? get _notes {
     if (_optimisticNotes != null) return _optimisticNotes;
     if (_freshDetails != null) return _fresh('Notes');
@@ -344,7 +348,7 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
     }
   }
 
-  // ── formatting ─────────────────────────────────────────────────────────
+  // â”€â”€ formatting â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   String _formatDate(String? iso) {
     if (iso == null || iso.isEmpty) return '-';
@@ -382,7 +386,7 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
       RegExp(r'(\d)(?=(\d{3})+$)'),
       (m) => '${m[1]}.',
     );
-    final result = '€ $intPart,${parts[1]}';
+    final result = 'â‚¬ $intPart,${parts[1]}';
     return v < 0 ? '- $result' : result;
   }
 
@@ -394,7 +398,7 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
   bool get _isRetirement => widget.entityName == 'Retirement';
   bool get _isInvestment => widget.entityName == 'Investment';
 
-  // ── edit flow ───────────────────────────────────────────────────────────
+  // â”€â”€ edit flow â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   ContractsAddKind get _addKind {
     switch (widget.entityName) {
@@ -599,7 +603,7 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (_) => _ContractNoteEditorSheet(
+      builder: (_) => ContractNoteEditorSheet(
         title: context.l10n.tr(
           (_notes?.trim().isNotEmpty ?? false) ? 'tns.editNOTE' : 'tns.addNOTE',
         ),
@@ -655,7 +659,7 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
       isScrollControlled: true,
       isDismissible: false,
       enableDrag: false,
-      builder: (_) => const _NoteDeleteConfirmSheet(),
+      builder: (_) => const ContractNoteDeleteConfirmSheet(),
     );
     if (confirmed != true || !mounted || _notesSaving) return;
 
@@ -689,20 +693,20 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
   }
 
   Future<void> _showNoteActionSheet() async {
-    final action = await showModalBottomSheet<_NoteAction>(
+    final action = await showModalBottomSheet<ContractNoteAction>(
       context: context,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
       ),
-      builder: (_) => const _NoteActionSheet(),
+      builder: (_) => const ContractNoteActionSheet(),
     );
     if (!mounted) return;
     switch (action) {
-      case _NoteAction.edit:
+      case ContractNoteAction.edit:
         await _handleAddOrEditNote();
         break;
-      case _NoteAction.delete:
+      case ContractNoteAction.delete:
         await _handleDeleteNote();
         break;
       case null:
@@ -719,7 +723,7 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
       );
   }
 
-  // ── build ───────────────────────────────────────────────────────────────
+  // â”€â”€ build â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   @override
   Widget build(BuildContext context) {
@@ -786,7 +790,7 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -801,7 +805,7 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
                   height: 52,
                   decoration: BoxDecoration(
                     color: iconBg,
-                    borderRadius: BorderRadius.circular(6),
+                    borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
                   ),
                   child: Icon(
                     IconData(
@@ -813,9 +817,9 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Expanded(
+                Expanded(
                   child: Text(
-                    'Contract Overview',
+                    context.l10n.tr('tns.contractOverview'),
                     style: TextStyle(
                       fontFamily: 'Calibri',
                       fontSize: 17,
@@ -900,58 +904,70 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
   }
 
   List<Widget> _insureFields() {
-    final freqLabel = _isRetirement ? 'Pension Frequency' : 'Premium Frequency';
-    final amountLabel = _isRetirement ? 'Insurance Amount' : 'Maturity Benefits';
+    final l10n = context.l10n;
+    final freqLabel = _isRetirement
+        ? l10n.tr('tns.pensionFrequency')
+        : l10n.tr('tns.premiumFrequency');
+    final amountLabel = _isRetirement
+        ? l10n.tr('tns.insuranceAmount')
+        : l10n.tr('tns.maturityBenefits');
     return [
-      _FieldRow(label: 'Contract Number', value: _ic('ContractNumber')),
-      _FieldRow(label: 'Type', value: _ic('Type')),
-      _FieldRow(label: freqLabel, value: _ic('PremiumFrequency')),
-      _FieldRow(
-        label: 'Gross Premium',
+      ContractDetailFieldRow(label: l10n.tr('tns.contractNumber'), value: _ic('ContractNumber')),
+      ContractDetailFieldRow(
+        label: l10n.tr('tns.type'),
+        value: _localizedTypeValue(_ic('Type')),
+      ),
+      ContractDetailFieldRow(label: freqLabel, value: _ic('PremiumFrequency')),
+      ContractDetailFieldRow(
+        label: l10n.tr('tns.grossPremium'),
         value: _formatCurrency(_ic('GrossPremium')),
       ),
-      _FieldRow(label: 'Source', value: _ic('Source')),
-      _FieldRow(label: 'Start Date', value: _formatDate(_ic('StartDate'))),
-      _FieldRow(label: 'End Date', value: _formatDate(_ic('EndDate'))),
+      ContractDetailFieldRow(label: l10n.tr('tns.source'), value: _ic('Source')),
+      ContractDetailFieldRow(label: l10n.tr('tns.startDate'), value: _formatDate(_ic('StartDate'))),
+      ContractDetailFieldRow(label: l10n.tr('tns.endDate'), value: _formatDate(_ic('EndDate'))),
       if (_isRetirement)
-        _FieldRow(label: 'Due Date', value: _formatDate(_ic('DueDate'))),
-      _FieldRow(label: 'Status', value: _ic('Status')),
-      _FieldRow(label: 'Partner', value: _ic('PartnerName')),
-      _FieldRow(
+        ContractDetailFieldRow(label: l10n.tr('tns.dueDate'), value: _formatDate(_ic('DueDate'))),
+      ContractDetailFieldRow(label: l10n.tr('tns.selectStatus'), value: _ic('Status')),
+      ContractDetailFieldRow(label: l10n.tr('tns.productPartner'), value: _ic('PartnerName')),
+      ContractDetailFieldRow(
         label: amountLabel,
         value: _formatCurrency(_ic('MaturityBenefits')),
       ),
-      _FieldRow(label: 'Contract Reference', value: _ic('ContractNumber')),
+      ContractDetailFieldRow(label: l10n.tr('tns.contractReference'), value: _ic('ContractNumber')),
     ];
   }
 
   List<Widget> _investmentFields() {
+    final l10n = context.l10n;
     return [
-      _FieldRow(label: 'Investment Type', value: _inv('InvestmentType')),
-      _FieldRow(label: 'Partner', value: _inv('PartnerName')),
-      _FieldRow(label: 'Account Number', value: _inv('AccountNumber')),
-      _FieldRow(label: 'Contract Number', value: _inv('ContractNumber')),
-      _FieldRow(
-        label: 'Start Date',
+      ContractDetailFieldRow(
+        label: l10n.tr('tns.investmentType'),
+        value: _localizedTypeValue(_inv('InvestmentType')),
+      ),
+      ContractDetailFieldRow(label: l10n.tr('tns.productPartner'), value: _inv('PartnerName')),
+      ContractDetailFieldRow(label: l10n.tr('tns.accountNumber'), value: _inv('AccountNumber')),
+      ContractDetailFieldRow(label: l10n.tr('tns.contractNumber'), value: _inv('ContractNumber')),
+      ContractDetailFieldRow(
+        label: l10n.tr('tns.startDate'),
         value: _formatDate(_inv('InvestmentStartDate')),
       ),
-      _FieldRow(
-        label: 'End Date',
+      ContractDetailFieldRow(
+        label: l10n.tr('tns.endDate'),
         value: _formatDate(_inv('InvestmentEndDate')),
       ),
-      _FieldRow(
-        label: 'Book Value',
+      ContractDetailFieldRow(
+        label: l10n.tr('tns.bookValue'),
         value: _formatCurrency(_inv('InvestmentBookValue')),
       ),
-      _FieldRow(
-        label: 'Current Value',
+      ContractDetailFieldRow(
+        label: l10n.tr('tns.currentValue'),
         value: _formatCurrency(_inv('InvestmentCurrentValue')),
       ),
-      _FieldRow(
-        label: 'Payment Frequency',
+      ContractDetailFieldRow(
+        label: l10n.tr('tns.paymentFrequency'),
         value: _inv('PaymentFrequency'),
       ),
-      if (_inv('ISIN') != null) _FieldRow(label: 'ISIN', value: _inv('ISIN')),
+      if (_inv('ISIN') != null) ContractDetailFieldRow(label: 'ISIN', value: _inv('ISIN')),
     ];
   }
 
@@ -961,7 +977,7 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
       ),
       child: Column(
         children: [
@@ -980,8 +996,8 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
                     color: Color(0xFF888888),
                   ),
                   const SizedBox(width: 12),
-                  const Text(
-                    'Notes',
+                  Text(
+                    context.l10n.tr('tns.notes'),
                     style: TextStyle(
                       fontFamily: 'Calibri',
                       fontSize: 16,
@@ -1052,7 +1068,7 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   color: const Color(0xFFF5F5F5),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
                 ),
                 child: Text(
                   currentNotes ?? '',
@@ -1076,7 +1092,7 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
       ),
       child: Column(
         children: [
@@ -1095,8 +1111,8 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
                     color: Color(0xFF888888),
                   ),
                   const SizedBox(width: 12),
-                  const Text(
-                    'Important Documents',
+                  Text(
+                    context.l10n.tr('tns.relatedDocument'),
                     style: TextStyle(
                       fontFamily: 'Calibri',
                       fontSize: 16,
@@ -1145,7 +1161,7 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
           else if (hasData && _docsExpanded) ...[
             const Divider(height: 1, color: Color(0xFFEEEEEE)),
             ...docs.map(
-              (doc) => _DocumentRow(
+              (doc) => ContractDetailDocumentRow(
                 document: doc,
                 formatDate: _formatDateDt,
                 onArchiveTap: () => _confirmArchive(doc),
@@ -1174,6 +1190,9 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
               urlAddress: urlAddress,
               entityName: widget.entityName,
               personId: widget.currentPersonId,
+              sourceTitle: widget.title,
+              partnerName: widget.insureContract?.partnerName ??
+                  widget.investmentContract?.partnerName,
             );
           } else if (uploadedFilePath != null) {
             await widget.contractsRepository.uploadContractDocument(
@@ -1182,6 +1201,9 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
               filePath: uploadedFilePath,
               personId: widget.currentPersonId,
               entityName: widget.entityName,
+              sourceTitle: widget.title,
+              partnerName: widget.insureContract?.partnerName ??
+                  widget.investmentContract?.partnerName,
             );
           }
         },
@@ -1205,7 +1227,7 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (_) => const _ArchiveConfirmSheet(),
+      builder: (_) => const ContractDetailArchiveConfirmSheet(),
     );
     if (confirmed != true || !mounted) return;
 
@@ -1241,7 +1263,7 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
       ),
       child: Column(
         children: [
@@ -1317,11 +1339,12 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
   Widget _buildPortfolioFundsSection() {
     final funds = _retirementPortfolioFunds;
     final hasData = funds.isNotEmpty;
+    final l10n = context.l10n;
 
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
       ),
       child: Column(
         children: [
@@ -1338,8 +1361,8 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
                     color: Color(0xFF888888),
                   ),
                   const SizedBox(width: 12),
-                  const Text(
-                    'Portfolio Funds',
+                  Text(
+                    l10n.tr('tns.portfolioFunds'),
                     style: TextStyle(
                       fontFamily: 'Calibri',
                       fontSize: 16,
@@ -1351,8 +1374,8 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      const Text(
-                        'Total portfolio Value',
+                      Text(
+                        l10n.tr('tns.totalPortfolioValue'),
                         style: TextStyle(
                           fontFamily: 'Calibri',
                           fontSize: 12,
@@ -1420,18 +1443,19 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
     _RetirementInsuranceModuleData module,
   ) {
     final expanded = _insuranceModuleExpanded[index];
+    final l10n = context.l10n;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
           border: Border.all(color: const Color(0xFFE2E2E2)),
         ),
         child: Column(
           children: [
             InkWell(
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
               onTap: () => _toggleInsuranceModule(index),
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
@@ -1454,7 +1478,7 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
                           ),
                           const SizedBox(height: 10),
                           Text(
-                            'Type ${module.division.isEmpty ? '-' : module.division}',
+                            '${l10n.tr('tns.type')} ${module.division.isEmpty ? '-' : module.division}',
                             style: const TextStyle(
                               fontFamily: 'Calibri',
                               fontSize: 15,
@@ -1468,8 +1492,8 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        const Text(
-                          'Gross Premium',
+                        Text(
+                          l10n.tr('tns.grossPremium'),
                           style: TextStyle(
                             fontFamily: 'Calibri',
                             fontSize: 14,
@@ -1525,6 +1549,7 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
     int index,
     _RetirementModuleItemData item,
   ) {
+    final l10n = context.l10n;
     final details = <String>[
       if (item.name.trim().isNotEmpty) item.name.trim(),
       if (item.type.trim().isNotEmpty) '(${item.type.trim()})',
@@ -1535,7 +1560,7 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
         Expanded(
           flex: 1,
           child: Text(
-            'MODULE ${index + 1}',
+            '${l10n.tr('tns.module')} ${index + 1}',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
@@ -1565,11 +1590,12 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
   }
 
   Widget _buildPortfolioFundCard(_RetirementPortfolioFundData fund) {
+    final l10n = context.l10n;
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
         border: Border.all(color: const Color(0xFFE2E2E2)),
       ),
       child: Padding(
@@ -1590,7 +1616,7 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
             ),
             const SizedBox(height: 12),
             Text(
-              'Value (€): ${_formatCurrencyValue(fund.value)}   Date: ${_formatDateDt(fund.date)}',
+              '${l10n.tr('tns.value')} (\u20AC): ${_formatCurrencyValue(fund.value)}   ${l10n.tr('tns.date')}: ${_formatDateDt(fund.date)}',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
@@ -1606,11 +1632,11 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
   }
 
   Widget _buildRetirementEmptyState() {
-    return const Padding(
+    return Padding(
       padding: EdgeInsets.symmetric(vertical: 24),
       child: Center(
         child: Text(
-          'No data found',
+          context.l10n.tr('tns.noDataFound'),
           style: TextStyle(
             fontFamily: 'Calibri',
             fontSize: 16,
@@ -1620,9 +1646,21 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
       ),
     );
   }
+
+  String _localizedTypeValue(String? value) {
+    if (value == null || value.trim().isEmpty) return value ?? '';
+    final trimmed = value.trim();
+    final translated = context.l10n.trBestEffort(trimmed);
+    if (translated != trimmed) return translated;
+    return trimmed
+        .toLowerCase()
+        .split('_')
+        .map((part) => part.isEmpty ? part : '${part[0].toUpperCase()}${part.substring(1)}')
+        .join(' ');
+  }
 }
 
-// ── shared widgets ──────────────────────────────────────────────────────────
+// â”€â”€ shared widgets â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class _RetirementInsuranceModuleData {
   const _RetirementInsuranceModuleData({
@@ -1658,641 +1696,3 @@ class _RetirementPortfolioFundData {
   final DateTime? date;
 }
 
-class _FieldRow extends StatelessWidget {
-  const _FieldRow({required this.label, this.value});
-
-  final String label;
-  final String? value;
-
-  @override
-  Widget build(BuildContext context) {
-    final isEmpty = value == null || value!.isEmpty || value == '-';
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 4,
-            child: Text(
-              label,
-              style: const TextStyle(
-                fontFamily: 'Calibri',
-                fontSize: 15,
-                color: Color(0xFF888888),
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 6,
-            child: Text(
-              isEmpty ? 'No data found' : value!,
-              textAlign: TextAlign.end,
-              style: TextStyle(
-                fontFamily: 'Calibri',
-                fontSize: 15,
-                color: isEmpty
-                    ? const Color(0xFFBBBBBB)
-                    : const Color(0xFF333333),
-                fontStyle:
-                    isEmpty ? FontStyle.italic : FontStyle.normal,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _DocumentRow extends StatelessWidget {
-  const _DocumentRow({
-    required this.document,
-    required this.formatDate,
-    required this.onArchiveTap,
-  });
-
-  final ContractDocument document;
-  final String Function(DateTime?) formatDate;
-  final VoidCallback onArchiveTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(12, 8, 12, 4),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: const Color(0xFFE5E5E5)),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              document.name ?? 'Document',
-              style: const TextStyle(
-                fontFamily: 'Calibri',
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: AppColors.primaryRed,
-              ),
-            ),
-          ),
-          Text(
-            formatDate(document.uploadDate),
-            style: const TextStyle(
-              fontFamily: 'Calibri',
-              fontSize: 13,
-              color: Color(0xFF888888),
-            ),
-          ),
-          const SizedBox(width: 12),
-          GestureDetector(
-            onTap: onArchiveTap,
-            child: const Icon(
-              IconData(0xEA29, fontFamily: 'filip_at_iconpack_29022024'),
-              size: 20,
-              color: Color(0xFF888888),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-enum _NoteAction { edit, delete }
-
-class _NoteActionSheet extends StatelessWidget {
-  const _NoteActionSheet();
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(0, 8, 0, 18),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _NoteActionTile(
-              icon: 0xE969,
-              label: l10n.tr('tns.editNOTE'),
-              onTap: () => Navigator.of(context).pop(_NoteAction.edit),
-            ),
-            const Divider(height: 1, indent: 18, endIndent: 18),
-            _NoteActionTile(
-              icon: 0xE9F9,
-              label: l10n.tr('tns.deleteNote'),
-              onTap: () => Navigator.of(context).pop(_NoteAction.delete),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _NoteActionTile extends StatelessWidget {
-  const _NoteActionTile({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  final int icon;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(28, 20, 28, 20),
-        child: Row(
-          children: [
-            Icon(
-              IconData(icon, fontFamily: 'filip_at_iconpack_29022024'),
-              size: 26,
-              color: AppColors.primaryRed,
-            ),
-            const SizedBox(width: 20),
-            Text(
-              label,
-              style: const TextStyle(
-                fontFamily: 'Calibri',
-                fontSize: 18,
-                color: Color(0xFF333333),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _NoteDeleteConfirmSheet extends StatelessWidget {
-  const _NoteDeleteConfirmSheet();
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
-        child: Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(18, 34, 18, 20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  IconData(0xE9F9, fontFamily: 'filip_at_iconpack_29022024'),
-                  size: 72,
-                  color: AppColors.primaryRed,
-                ),
-                const SizedBox(height: 28),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 18),
-                  child: Text(
-                    l10n.tr('tns.deleteNoteConfirmationMessage'),
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontFamily: 'Calibri',
-                      fontSize: 22,
-                      color: Color(0xFF333333),
-                      height: 1.2,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 42),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.of(context).pop(false),
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Color(0xFFD0D0D0)),
-                          minimumSize: const Size.fromHeight(58),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                        ),
-                        child: Text(
-                          l10n.tr('tns.cancel').toUpperCase(),
-                          style: const TextStyle(
-                            color: AppColors.primaryRed,
-                            fontSize: 18,
-                            fontFamily: 'Calibri',
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 1.6,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.of(context).pop(true),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryRed,
-                          minimumSize: const Size.fromHeight(58),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                        ),
-                        child: Text(
-                          l10n.tr('tns.confirm').toUpperCase(),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontFamily: 'Calibri',
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 1.6,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ContractNoteEditorSheet extends StatefulWidget {
-  const _ContractNoteEditorSheet({
-    required this.title,
-    required this.initialValue,
-    required this.isSubmitting,
-    required this.onSubmit,
-  });
-
-  final String title;
-  final String initialValue;
-  final bool isSubmitting;
-  final Future<void> Function(String value) onSubmit;
-
-  @override
-  State<_ContractNoteEditorSheet> createState() => _ContractNoteEditorSheetState();
-}
-
-class _ContractNoteEditorSheetState extends State<_ContractNoteEditorSheet> {
-  late final TextEditingController _controller;
-  String? _errorText;
-  bool _submitting = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = TextEditingController(text: widget.initialValue);
-    _controller.addListener(_handleTextChanged);
-  }
-
-  @override
-  void dispose() {
-    _controller
-      ..removeListener(_handleTextChanged)
-      ..dispose();
-    super.dispose();
-  }
-
-  void _handleTextChanged() {
-    if (!mounted) return;
-    setState(() {
-      _errorText = _validate(_controller.text, context.l10n);
-    });
-  }
-
-  String? _validate(String value, AppLocalizations l10n) {
-    final trimmed = value.trim();
-    if (trimmed.isNotEmpty && trimmed.length < 10) {
-      return l10n.tr('tns.minimumCharacters', {'count': '10'});
-    }
-    if (trimmed.length > 300) {
-      return l10n.tr('tns.maximumCharacters', {'count': '300'});
-    }
-    return null;
-  }
-
-  Future<void> _submit() async {
-    final l10n = context.l10n;
-    final validationError = _validate(_controller.text, l10n);
-    setState(() => _errorText = validationError);
-    if (validationError != null || _submitting || widget.isSubmitting) return;
-
-    setState(() => _submitting = true);
-    try {
-      await widget.onSubmit(_controller.text);
-      if (!mounted) return;
-      Navigator.of(context).pop(true);
-    } catch (_) {
-      if (!mounted) return;
-      setState(() => _submitting = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final effectiveSubmitting = _submitting || widget.isSubmitting;
-    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
-    final textLength = _controller.text.length;
-
-    return AnimatedPadding(
-      duration: const Duration(milliseconds: 200),
-      padding: EdgeInsets.only(bottom: bottomInset),
-      child: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(0)),
-        ),
-        child: SafeArea(
-          top: false,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 8, 12),
-                child: Row(
-                  children: [
-                    const Icon(
-                      IconData(0xE976, fontFamily: 'filip_at_iconpack_29022024'),
-                      size: 22,
-                      color: Color(0xFF333333),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        widget.title,
-                        style: const TextStyle(
-                          fontFamily: 'Calibri',
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF333333),
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: effectiveSubmitting
-                          ? null
-                          : () => Navigator.of(context).pop(),
-                      icon: const Icon(
-                        Icons.close,
-                        color: Color(0xFF666666),
-                        size: 22,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const Divider(height: 1, color: Color(0xFFEEEEEE)),
-              Flexible(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
-                  child: TextField(
-                    controller: _controller,
-                    enabled: !effectiveSubmitting,
-                    maxLength: 300,
-                    maxLines: 7,
-                    minLines: 7,
-                    decoration: InputDecoration(
-                      hintText: '${l10n.tr('tns.writeTextHere')}...',
-                      counterText: '$textLength/300',
-                      errorText: _errorText,
-                      filled: true,
-                      fillColor: Colors.white,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 18,
-                        vertical: 18,
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(color: Color(0xFFA11C36)),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(
-                          color: Color(0xFFA11C36),
-                          width: 1.2,
-                        ),
-                      ),
-                      disabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide:
-                            const BorderSide(color: Color(0xFFD9D9D9)),
-                      ),
-                      errorBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide:
-                            const BorderSide(color: AppColors.primaryRed),
-                      ),
-                      focusedErrorBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(
-                          color: AppColors.primaryRed,
-                          width: 1.2,
-                        ),
-                      ),
-                      hintStyle: const TextStyle(
-                        fontFamily: 'Calibri',
-                        fontSize: 16,
-                        color: Color(0xFFB5B5B5),
-                      ),
-                      counterStyle: const TextStyle(
-                        fontFamily: 'Calibri',
-                        fontSize: 13,
-                        color: Color(0xFF8C8C8C),
-                      ),
-                    ),
-                    style: const TextStyle(
-                      fontFamily: 'Calibri',
-                      fontSize: 16,
-                      color: Color(0xFF333333),
-                    ),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: effectiveSubmitting ? null : _submit,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryRed,
-                      disabledBackgroundColor:
-                          AppColors.primaryRed.withValues(alpha: 0.55),
-                      elevation: 0,
-                      minimumSize: const Size.fromHeight(56),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                    ),
-                    child: effectiveSubmitting
-                        ? const SizedBox(
-                            width: 22,
-                            height: 22,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white,
-                              ),
-                            ),
-                          )
-                        : Text(
-                            l10n.tr('tns.save').toUpperCase(),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 17,
-                              fontFamily: 'Calibri',
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 1.4,
-                            ),
-                          ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ArchiveConfirmSheet extends StatelessWidget {
-  const _ArchiveConfirmSheet();
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 52,
-                  height: 14,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: AppColors.primaryRed, width: 2),
-                    borderRadius: BorderRadius.circular(3),
-                  ),
-                  child: Center(
-                    child: Container(
-                      width: 20,
-                      height: 2,
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryRed,
-                        borderRadius: BorderRadius.circular(1),
-                      ),
-                    ),
-                  ),
-                ),
-                Container(
-                  width: 44,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: AppColors.primaryRed, width: 2),
-                    borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(3),
-                      bottomRight: Radius.circular(3),
-                    ),
-                  ),
-                  child: Center(
-                    child: Container(
-                      width: 18,
-                      height: 2,
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryRed,
-                        borderRadius: BorderRadius.circular(1),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              'Are you sure you want to archive this document?',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'Calibri',
-                fontSize: 16,
-                color: Color(0xFF333333),
-              ),
-            ),
-            const SizedBox(height: 32),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.of(context).pop(false),
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: AppColors.primaryRed),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                    ),
-                    child: const Text(
-                      'CANCEL',
-                      style: TextStyle(
-                        fontFamily: 'Calibri',
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.primaryRed,
-                        letterSpacing: 1,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.of(context).pop(true),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryRed,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                    ),
-                    child: const Text(
-                      'CONFIRM',
-                      style: TextStyle(
-                        fontFamily: 'Calibri',
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                        letterSpacing: 1,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

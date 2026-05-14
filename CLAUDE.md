@@ -131,6 +131,8 @@ alwys follow this font style from at nativescript mobile app
 # Follow uilm of nativecsript app
 
 # Please language support ensure for both de and en language. please check en.json and de.json for language .
+# en/de.json now single source of truth.
+# No mixed hardcoded-vs-JSON mismatch path.
 
 # File size  should not be vry big, break it into multiple files follow nativecsript codebase for file formatting
 

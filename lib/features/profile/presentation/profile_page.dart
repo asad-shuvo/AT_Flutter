@@ -78,7 +78,7 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
         titleSpacing: 0,
         title: Text(
-          l10n.tr('account.title'),
+          l10n.tr('tns.myAccountHeader'),
           style: const TextStyle(
             fontFamily: 'Calibri',
             fontSize: 18,
@@ -117,30 +117,30 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   const Divider(height: 1, thickness: 1, color: Color(0xFFE5E5E5)),
                   _AccountInfoSection(
-                    label: l10n.tr('account.fullName'),
+                    label: l10n.tr('tns.fullName'),
                     value: profile.displayName,
                   ),
                   _AccountActionSection(
-                    label: l10n.tr('account.emailAddress'),
+                    label: l10n.tr('tns.emailAddress'),
                     value: profile.email,
-                    actionLabel: l10n.tr('account.updateEmail'),
+                    actionLabel: l10n.tr('tns.updateEmail'),
                     onTap: () => _startEmailUpdateFlow(
                       context: context,
                       currentEmail: profile.email,
                     ),
                   ),
                   _AccountActionSection(
-                    label: l10n.tr('account.phoneNumber'),
+                    label: l10n.tr('tns.phoneNumber'),
                     value: _phoneNumberOverride ?? profile.phoneNumber,
-                    actionLabel: l10n.tr('account.updatePhone'),
+                    actionLabel: l10n.tr('tns.updatePhone'),
                     onTap: () => _startPhoneUpdateFlow(
                       context: context,
                       currentPhone: _phoneNumberOverride ?? profile.phoneNumber,
                     ),
                   ),
                   _PasswordSection(
-                    label: l10n.tr('account.password'),
-                    actionLabel: l10n.tr('account.changePassword'),
+                    label: l10n.tr('tns.password'),
+                    actionLabel: l10n.tr('tns.changePassword'),
                     onTap: () => _startPasswordUpdateFlow(context),
                   ),
                   Container(
@@ -155,7 +155,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      l10n.tr('account.preferences').toUpperCase(),
+                      l10n.tr('tns.preferences').toUpperCase(),
                       style: const TextStyle(
                         fontFamily: 'Calibri',
                         fontSize: 12,
@@ -166,8 +166,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
                   _PreferencesSection(
-                    title: l10n.tr('account.consentsTitle'),
-                    description: l10n.tr('account.consentsDescription'),
+                    title: l10n.tr('tns.myConsentsAndPreferences'),
+                    description: l10n.tr('tns.myConsentsAndPreferencesDescription'),
                     onTap: () => _openConsentModal(context),
                   ),
                   Padding(
@@ -185,7 +185,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           backgroundColor: Colors.white,
                         ),
                         child: Text(
-                          l10n.tr('account.deleteAccount'),
+                          l10n.tr('tns.deleteAccount'),
                           style: const TextStyle(
                             fontFamily: 'Calibri',
                             fontSize: 16,
@@ -209,7 +209,7 @@ class _ProfilePageState extends State<ProfilePage> {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
-        SnackBar(content: Text(context.l10n.tr('account.actionPending'))),
+        SnackBar(content: Text(context.l10n.tr('tns.retry'))),
       );
   }
 
@@ -299,10 +299,10 @@ class _ProfilePageState extends State<ProfilePage> {
       isScrollControlled: true,
       builder: (_) => VerificationCodeSheet(
         controller: controller,
-        title: 'Update Email Address',
+        title: context.l10n.tr('tns.changeEmailAddress'),
         icon: SelectNetworkIcons.email,
         descriptionText:
-            'Please enter the 4 digit security code sent to your email address ${controller.newEmail}',
+            '${context.l10n.tr('tns.verificationCodeTitleForEmail')} ${controller.newEmail}',
         onConfirm: (code) async {
           final success = await controller.confirmVerificationCode(code);
           if (!success || !mounted) {
@@ -316,7 +316,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ..hideCurrentSnackBar()
             ..showSnackBar(
               SnackBar(
-                content: Text(context.l10n.tr('account.emailUpdatedLogout')),
+                content: Text(context.l10n.tr('tns.consentsUpdatedSuccessfully')),
               ),
             );
           await Future<void>.delayed(const Duration(milliseconds: 1000));
@@ -428,10 +428,10 @@ class _ProfilePageState extends State<ProfilePage> {
       isScrollControlled: true,
       builder: (_) => VerificationCodeSheet(
         controller: controller,
-        title: 'Update Phone Number',
+        title: context.l10n.tr('tns.changePhoneNumber'),
         icon: SelectNetworkIcons.phone,
         descriptionText:
-            'Please enter the 4 digit security code sent to your mobile no. ${controller.newPhone}',
+            '${context.l10n.tr('tns.verificationCodeTitleForPhoneNumber')} ${controller.newPhone}',
         onConfirm: (code) async {
           final success = await controller.confirmVerificationCode(code);
           if (!success || !mounted) {
@@ -447,7 +447,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ..hideCurrentSnackBar()
             ..showSnackBar(
               SnackBar(
-                content: Text(context.l10n.tr('account.phoneUpdatedSuccess')),
+                content: Text(context.l10n.tr('tns.consentsUpdatedSuccessfully')),
               ),
             );
         },
@@ -507,7 +507,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ..hideCurrentSnackBar()
             ..showSnackBar(
               SnackBar(
-                content: Text(context.l10n.tr('account.passwordUpdateSuccess')),
+                content: Text(context.l10n.tr('tns.passwordUpdateSuccess')),
               ),
             );
           await Future<void>.delayed(const Duration(milliseconds: 1000));
@@ -526,9 +526,9 @@ class _ProfilePageState extends State<ProfilePage> {
   void _showPasswordError(BuildContext context, String? code) {
     final l10n = context.l10n;
     final text = switch (code) {
-      'OLD_PASSWORD_NOT_MATCHED' => l10n.tr('account.oldPasswordNotMatched'),
-      'PREVIOUS_PASSWORD' => l10n.tr('account.previousPasswordError'),
-      _ => l10n.tr('account.passwordUpdateFailed'),
+      'OLD_PASSWORD_NOT_MATCHED' => l10n.tr('tns.currentPasswordNotMatched'),
+      'PREVIOUS_PASSWORD' => l10n.tr('tns.currentPasswordNotMatched'),
+      _ => l10n.tr('tns.passwordUpdateFailed'),
     };
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
@@ -536,11 +536,12 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   void _showErrorCode(BuildContext context, String? code) {
+    final l10n = context.l10n;
     final text = switch (code) {
-      'USER_EXISTS_WITH_NEW_CONTACT' => 'User already exists with this contact.',
-      '2FA_CODE_IS_NOT_VALID' => 'Wrong verification code.',
-      'CAPTCHA_NOT_MATCHED' => 'Captcha value did not match.',
-      _ => 'Something went wrong.',
+      'USER_EXISTS_WITH_NEW_CONTACT' => l10n.tr('USER_ALREADY_EXIST_WITH_THIS_CONTACT'),
+      '2FA_CODE_IS_NOT_VALID' => l10n.tr('tns.twoFacodeInvalid'),
+      'CAPTCHA_NOT_MATCHED' => l10n.tr('tns.captchaNotMatchError'),
+      _ => l10n.tr('tns.retry'),
     };
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()

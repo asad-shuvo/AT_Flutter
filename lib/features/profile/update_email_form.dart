@@ -3,6 +3,7 @@ import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/shared/icons/app_icon_packs.dart';
 import 'package:filip_at_flutter/shared/theme/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:filip_at_flutter/shared/theme/form_tokens.dart';
 
 class UpdateEmailForm extends StatefulWidget {
   const UpdateEmailForm({
@@ -39,15 +40,15 @@ class _UpdateEmailFormState extends State<UpdateEmailForm> {
     final l10n = context.l10n;
     final email = _emailController.text.trim();
     if (email.isEmpty) {
-      setState(() => _localError = l10n.tr('account.emailRequired'));
+      setState(() => _localError = l10n.tr('tns.emailRequired'));
       return;
     }
     if (!_isValidEmail(email)) {
-      setState(() => _localError = l10n.tr('account.emailInvalid'));
+      setState(() => _localError = l10n.tr('tns.emailInvalid'));
       return;
     }
     if (email == widget.currentEmail) {
-      setState(() => _localError = l10n.tr('account.emailUnchanged'));
+      setState(() => _localError = l10n.tr('tns.emailUnchanged'));
       return;
     }
     setState(() => _localError = null);
@@ -92,7 +93,7 @@ class _UpdateEmailFormState extends State<UpdateEmailForm> {
                               ),
                               SizedBox(width: 10),
                               Text(
-                                l10n.tr('account.changeEmailAddress'),
+                                l10n.tr('tns.changeEmailAddress'),
                                 style: TextStyle(
                                   fontFamily: 'Calibri',
                                   fontSize: 18,
@@ -104,7 +105,7 @@ class _UpdateEmailFormState extends State<UpdateEmailForm> {
                           ),
                           const SizedBox(height: 28),
                           Text(
-                            l10n.tr('account.updateEmailSubHeader'),
+                            l10n.tr('tns.updateEmailSubHeader'),
                             style: TextStyle(
                               fontFamily: 'Calibri',
                               fontSize: 16,
@@ -115,7 +116,7 @@ class _UpdateEmailFormState extends State<UpdateEmailForm> {
                           ),
                           const SizedBox(height: 28),
                           Text(
-                            l10n.tr('account.newEmailAddress'),
+                            l10n.tr('tns.newEmailAddress'),
                             style: TextStyle(
                               fontFamily: 'Calibri',
                               fontSize: 12,
@@ -134,7 +135,7 @@ class _UpdateEmailFormState extends State<UpdateEmailForm> {
                               color: Color(0xFF808080),
                             ),
                             decoration: InputDecoration(
-                              hintText: l10n.tr('account.enterNewEmailAddress'),
+                              hintText: l10n.tr('tns.enterNewEmailAddress'),
                               hintStyle: const TextStyle(
                                 fontFamily: 'Calibri',
                                 fontSize: 16,
@@ -147,21 +148,21 @@ class _UpdateEmailFormState extends State<UpdateEmailForm> {
                                 vertical: 17,
                               ),
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
                                 borderSide: const BorderSide(
                                   color: Color(0xFF8E2D3A),
                                   width: 1.5,
                                 ),
                               ),
                               enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
                                 borderSide: const BorderSide(
                                   color: Color(0xFF8E2D3A),
                                   width: 1.5,
                                 ),
                               ),
                               focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
                                 borderSide: const BorderSide(
                                   color: Color(0xFF8E2D3A),
                                   width: 1.5,
@@ -194,7 +195,7 @@ class _UpdateEmailFormState extends State<UpdateEmailForm> {
                         backgroundColor: AppColors.primaryRed,
                         disabledBackgroundColor: const Color(0xFFE39CA6),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(6),
+                          borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
                         ),
                       ),
                       child: const Text(
@@ -218,3 +219,4 @@ class _UpdateEmailFormState extends State<UpdateEmailForm> {
     );
   }
 }
+

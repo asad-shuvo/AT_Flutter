@@ -975,6 +975,8 @@ class ContractsRepository {
     required String urlAddress,
     required String entityName,
     required String personId,
+    required String sourceTitle,
+    String? partnerName,
   }) async {
     final authCtx = await _getAuthorizedPersonContext();
     if (authCtx == null) throw StateError('No authorized context');
@@ -997,42 +999,23 @@ class ContractsRepository {
         'WorkspaceId': workspaceId,
         'GenerateThumbnail': false,
         'MetaData': <String, dynamic>{
-          'DocumentSize': <String, dynamic>{
-            'Type': 'String',
-            'Value': '0',
-          },
+          'RelatedTo': <String, dynamic>{'Type': 'String', 'Value': 'Contract'},
+          'SourceEntityName': <String, dynamic>{'Type': 'String', 'Value': entityName},
+          'SourceId': <String, dynamic>{'Type': 'String', 'Value': contractItemId},
+          'SourceTitle': <String, dynamic>{'Type': 'String', 'Value': sourceTitle},
+          'PartnerName': <String, dynamic>{'Type': 'String', 'Value': partnerName},
+          'BankAccountType': <String, dynamic>{'Type': 'String', 'Value': null},
+          'ContractDataSource': <String, dynamic>{'Type': 'String', 'Value': 'FilipContract'},
+          'Source': <String, dynamic>{'Type': 'String', 'Value': 'Filip'},
+          'CustomerResourceId': <String, dynamic>{'Type': 'String', 'Value': null},
+          'FileType': <String, dynamic>{'Type': 'String', 'Value': 'url'},
+          'DocumentId': <String, dynamic>{'Type': 'String', 'Value': resourceTitle},
+          'DocumentSize': <String, dynamic>{'Type': 'String', 'Value': '0'},
           'ExternalDocumentCreateDate': <String, dynamic>{
             'Type': 'String',
             'Value': DateTime.now().toIso8601String(),
           },
-          'FileType': <String, dynamic>{
-            'Type': 'String',
-            'Value': 'url',
-          },
-          'RelatedTo': <String, dynamic>{
-            'Type': 'String',
-            'Value': 'Drive',
-          },
-          'Source': <String, dynamic>{
-            'Type': 'String',
-            'Value': 'Filip',
-          },
-          'SourceEntityName': <String, dynamic>{
-            'Type': 'String',
-            'Value': entityName,
-          },
-          'SourceId': <String, dynamic>{
-            'Type': 'String',
-            'Value': contractItemId,
-          },
-          'DocumentId': <String, dynamic>{
-            'Type': 'String',
-            'Value': resourceTitle,
-          },
-          'Url': <String, dynamic>{
-            'Type': 'String',
-            'Value': urlAddress,
-          },
+          'Url': <String, dynamic>{'Type': 'String', 'Value': urlAddress},
         },
       },
       headers: _authorizedHeaders(authCtx.accessToken),
@@ -1043,29 +1026,6 @@ class ContractsRepository {
       throw StateError(
           'Failed to create external link document (status $dmsStatus)');
     }
-
-    _apiClient
-        .postJson(
-          url: '${_apiClient.dataCoreUrl}DataManipulationCommand/Insert',
-          body: <String, dynamic>{
-            'EntityName': 'SnActivityLog',
-            'JsonString': jsonEncode(<String, dynamic>{
-              'ItemId': _newGuid(),
-              'Tags': <String>['Is-A-FilipUpdate', 'portal-url'],
-              'Language': 'en-US',
-              'ActionType': 'Insert',
-              'ActivityEntityName': 'ObjectArtifact',
-              'ActivityEntityId': objectArtifactId,
-              'ActivityTitle': resourceTitle,
-              'OrganizerPersonId': personId,
-              'ActivitySource': 'MANUAL',
-              'IsLatest': true,
-            }),
-            'EventData': null,
-          },
-          headers: _authorizedHeaders(authCtx.accessToken),
-        )
-        .ignore();
   }
 
   Future<String> _fetchOrCreateWorkspaceId(
@@ -1129,6 +1089,8 @@ class ContractsRepository {
     required String filePath,
     required String personId,
     required String entityName,
+    required String sourceTitle,
+    String? partnerName,
   }) async {
     final authCtx = await _getAuthorizedPersonContext();
     if (authCtx == null) throw StateError('No authorized context');
@@ -1141,10 +1103,6 @@ class ContractsRepository {
     final ext = fileName.contains('.')
         ? fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase()
         : '';
-    final fileSize = bytes.length;
-    final fileSizeStr = fileSize < 1024 * 1024
-        ? '${(fileSize / 1024).toStringAsFixed(1)} KB'
-        : '${(fileSize / (1024 * 1024)).toStringAsFixed(1)} MB';
     final fileStorageId = _newGuid();
 
     final displayName = resourceTitle.isNotEmpty ? resourceTitle : fileName;
@@ -1188,53 +1146,41 @@ class ContractsRepository {
     }
 
     // Step 3: Register file in DMS
+    // Tags: portal-file (NS ObjectArtifactTags.PortalFile via ResourceTypeObject for File type)
+    // Metadata: businessConfiguration fields merged with prepareMetaDataByResource fields
     final workspaceId = await _fetchOrCreateWorkspaceId(
       authCtx.userId,
       authCtx.accessToken,
     );
     final objectArtifactId = _newGuid();
+    final fileSize = bytes.length;
+    final fileSizeStr = fileSize < 1024 * 1024
+        ? '${(fileSize / 1024).toStringAsFixed(1)} KB'
+        : '${(fileSize / (1024 * 1024)).toStringAsFixed(1)} MB';
     final dmsResponse = await _apiClient.postJson(
       url: '${_apiClient.dmsServiceUrl}DmsCommand/UploadFile',
       body: <String, dynamic>{
-        'ParentId': null,
         'ObjectArtifactId': objectArtifactId,
         'FileStorageId': fileStorageId,
-        'Tags': <String>['UploadFile'],
-        'FileName': displayName,
+        'Tags': <String>['portal-file'],
+        'FileName': fileName,
         'WorkspaceId': workspaceId,
         'GenerateThumbnail': ext == 'pdf',
         'MetaData': <String, dynamic>{
-          'DocumentSize': <String, dynamic>{
-            'Type': 'String',
-            'Value': fileSizeStr,
-          },
+          'Source': <String, dynamic>{'Type': 'String', 'Value': entityName},
+          'RelatedTo': <String, dynamic>{'Type': 'String', 'Value': 'Contract'},
+          'SourceEntityName': <String, dynamic>{'Type': 'String', 'Value': entityName},
+          'SourceId': <String, dynamic>{'Type': 'String', 'Value': contractItemId},
+          'SourceTitle': <String, dynamic>{'Type': 'String', 'Value': sourceTitle},
+          'PartnerName': <String, dynamic>{'Type': 'String', 'Value': partnerName},
+          'BankAccountType': <String, dynamic>{'Type': 'String', 'Value': null},
+          'CustomerResourceId': <String, dynamic>{'Type': 'String', 'Value': null},
+          'FileType': <String, dynamic>{'Type': 'String', 'Value': ext},
+          'DocumentId': <String, dynamic>{'Type': 'String', 'Value': displayName},
+          'DocumentSize': <String, dynamic>{'Type': 'String', 'Value': fileSizeStr},
           'ExternalDocumentCreateDate': <String, dynamic>{
             'Type': 'String',
             'Value': DateTime.now().toIso8601String(),
-          },
-          'FileType': <String, dynamic>{
-            'Type': 'String',
-            'Value': ext,
-          },
-          'RelatedTo': <String, dynamic>{
-            'Type': 'String',
-            'Value': 'Drive',
-          },
-          'Source': <String, dynamic>{
-            'Type': 'String',
-            'Value': 'Filip',
-          },
-          'SourceEntityName': <String, dynamic>{
-            'Type': 'String',
-            'Value': entityName,
-          },
-          'SourceId': <String, dynamic>{
-            'Type': 'String',
-            'Value': contractItemId,
-          },
-          'DocumentId': <String, dynamic>{
-            'Type': 'String',
-            'Value': displayName,
           },
         },
       },
@@ -1246,31 +1192,121 @@ class ContractsRepository {
       throw StateError('Failed to register document in DMS (status $dmsStatus)');
     }
 
-    // Step 4: Insert SnActivityLog (fire-and-forget — do not fail upload if this errors)
-    final activityJsonString = jsonEncode(<String, dynamic>{
-      'ItemId': _newGuid(),
-      'Tags': <String>['Is-A-FilipUpdate', 'upload-file'],
-      'Language': 'en-US',
-      'ActionType': 'Insert',
-      'ActivityEntityName': 'ObjectArtifact',
-      'ActivityEntityId': objectArtifactId,
-      'ActivityTitle': displayName,
-      'OrganizerPersonId': personId,
-      'ActivitySource': 'MANUAL',
-      'IsLatest': true,
-    });
+    _insertContractDocActivityLog(
+      objectArtifactId: objectArtifactId,
+      title: fileName,
+      tag: 'portal-file',
+      personId: authCtx.personId,
+      accessToken: authCtx.accessToken,
+      managerNr: authCtx.managerNr,
+      displayName: authCtx.displayName,
+    );
+  }
 
-    _apiClient
-        .postJson(
-          url: '${_apiClient.dataCoreUrl}DataManipulationCommand/Insert',
-          body: <String, dynamic>{
-            'EntityName': 'SnActivityLog',
-            'JsonString': activityJsonString,
-            'EventData': null,
-          },
-          headers: _authorizedHeaders(authCtx.accessToken),
-        )
-        .ignore();
+  void _insertContractDocActivityLog({
+    required String objectArtifactId,
+    required String title,
+    required String tag,
+    required String personId,
+    required String accessToken,
+    String? managerNr,
+    String? displayName,
+  }) {
+    const portalFolderId = '7195e98c-925c-49d6-b461-91eadcae7e14';
+    final activityEntityId = '$objectArtifactId,$portalFolderId';
+    final logPayload = {
+      'EntityName': 'SnActivityLog',
+      'JsonString': jsonEncode({
+        'ItemId': _newGuid(),
+        'Tags': ['Is-A-FilipUpdate', tag],
+        'Language': 'en-US',
+        'ActionType': 'Insert',
+        'ActivityEntityName': 'ObjectArtifact',
+        'ActivityEntityId': activityEntityId,
+        'ActivityTitle': title,
+        'OrganizerPersonId': personId,
+        'ActivitySource': 'MANUAL',
+        'IsLatest': true,
+      }),
+      'EventData': {'EventType': 'SnActivityLog.Created'},
+    };
+    _apiClient.postJson(
+      url: '${_apiClient.dataCoreUrl}DataManipulationCommand/Insert',
+      body: logPayload,
+      headers: _authorizedHeaders(accessToken),
+    );
+    if (tag == 'portal-file' &&
+        managerNr != null &&
+        managerNr.isNotEmpty &&
+        displayName != null &&
+        displayName.isNotEmpty) {
+      _sendContractDocUploadEmail(
+        managerNr: managerNr,
+        fileName: title,
+        personId: personId,
+        displayName: displayName,
+        accessToken: accessToken,
+      );
+    }
+  }
+
+  void _sendContractDocUploadEmail({
+    required String managerNr,
+    required String fileName,
+    required String personId,
+    required String displayName,
+    required String accessToken,
+  }) {
+    final query =
+        'Select <DisplayName,PersonId,Language>from<AdvisorDenormalized>where<ManagerNr=__eql($managerNr)>pageNumber=<0>pageSize= <1>';
+    _apiClient.postJson(
+      url: '${_apiClient.dataCoreUrl}DataManipulationQuery/GetBySQLFilter',
+      body: {'EntityName': 'AdvisorDenormalized', 'Text': query, 'ExcludeCount': true},
+      headers: _authorizedHeaders(accessToken),
+    ).then((response) {
+      final body = response['body'] as Map<String, dynamic>? ?? {};
+      final results = body['Results'];
+      if (results is! List || results.isEmpty) return;
+      final advisor = results.first;
+      if (advisor is! Map) return;
+      final advisorPersonId = advisor['PersonId'] as String?;
+      if (advisorPersonId == null || advisorPersonId.isEmpty) return;
+      final advisorDisplayName = advisor['DisplayName'] as String? ?? '';
+      final advisorLanguage = advisor['Language'] as String? ?? 'en-US';
+      final addedBy = advisorLanguage == 'en-US'
+          ? 'your customer $displayName'
+          : 'von Ihrem Kunde $displayName';
+      final mailPayload = {
+        'To': [advisorPersonId],
+        'Bcc': <String>[],
+        'Cc': <String>[],
+        'DataContext': {
+          'FullName': advisorDisplayName,
+          'FileName': fileName,
+          'AddedBy': addedBy,
+          'DocumentLink':
+              '${_apiClient.originUrl}/customers/$personId/drive/folder/root',
+        },
+        'Purpose': 'DriveFileUploadEmailForFE',
+        'Language': advisorLanguage,
+      };
+      final mailUri =
+          '${_apiClient.mailServiceUrl.replaceFirst('https:', 'http:')}/MailCommand/SendEmail';
+      _apiClient.postJson(
+        url: '${_apiClient.aggregatorUrl}Execute',
+        body: {
+          'HttpCalls': [
+            {
+              'Uri': mailUri,
+              'Verb': 'Post',
+              'Payload': jsonEncode(mailPayload),
+              'SuccessIf': jsonEncode({'StatusCode': 0}),
+            }
+          ],
+        },
+        headers: _authorizedHeaders(accessToken),
+      );
+    }).catchError((_) {});
   }
 
   Future<List<ContractsLookupOption>> fetchContractTypes(
@@ -1585,6 +1621,7 @@ class ContractsRepository {
       personId: session.personId,
       customerId: session.customerId,
       displayName: session.displayName,
+      managerNr: session.managerNr,
     );
   }
 
@@ -1995,6 +2032,7 @@ class _ContractsPersonContext {
     required this.personId,
     required this.customerId,
     required this.displayName,
+    this.managerNr,
   });
 
   final String accessToken;
@@ -2002,5 +2040,6 @@ class _ContractsPersonContext {
   final String personId;
   final String customerId;
   final String? displayName;
+  final String? managerNr;
 }
 

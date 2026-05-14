@@ -92,8 +92,8 @@ class DistributionChartSlider extends StatelessWidget {
   DashboardDistributionCardData _loadingCard(int index) {
     const cards = <DashboardDistributionCardData>[
       DashboardDistributionCardData(
-        cardTitle: 'dashboard.totalInvestment',
-        chartTitle: 'dashboard.currentInvestmentDistribution',
+        cardTitle: 'tns.totalInvestment',
+        chartTitle: 'tns.currentInvestmentDistribution',
         totalValue: 0,
         totalValueColorValue: 0xFF15847B,
         chartBackgroundColorValue: 0xFFE3F0EF,
@@ -101,8 +101,8 @@ class DistributionChartSlider extends StatelessWidget {
         segments: <DashboardDistributionSegment>[],
       ),
       DashboardDistributionCardData(
-        cardTitle: 'dashboard.monthlyPremium',
-        chartTitle: 'dashboard.monthlyPremiumDistribution',
+        cardTitle: 'tns.monthlyPremium',
+        chartTitle: 'tns.monthlyPremiumDistribution',
         totalValue: 0,
         totalValueColorValue: 0xFFB4495E,
         chartBackgroundColorValue: 0xFFFFF5F6,
@@ -110,8 +110,8 @@ class DistributionChartSlider extends StatelessWidget {
         segments: <DashboardDistributionSegment>[],
       ),
       DashboardDistributionCardData(
-        cardTitle: 'dashboard.monthlyPayment',
-        chartTitle: 'dashboard.monthlyPensionDistribution',
+        cardTitle: 'tns.monthlyPayment',
+        chartTitle: 'tns.monthlyPensionDistribution',
         totalValue: 0,
         totalValueColorValue: 0xFF607E46,
         chartBackgroundColorValue: 0xFFECF0E9,
@@ -225,7 +225,7 @@ class _DistributionSliderCardState extends State<_DistributionSliderCard>
                       const SizedBox(height: 14),
                       Text(
                         widget.isLoading
-                            ? context.l10n.tr('common.loading')
+                            ? context.l10n.tr('tns.loading')
                             : CurrencyFormatter.formatEuro(
                                 widget.card.totalValue,
                               ),
@@ -328,7 +328,7 @@ class _DistributionSliderCardState extends State<_DistributionSliderCard>
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             child: Center(
               child: Text(
-                context.l10n.tr('dashboard.noDataAdded'),
+                context.l10n.tr('tns.chartNoDataAdded'),
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontSize: 14, color: Color(0xFF9D9D9D)),
               ),
