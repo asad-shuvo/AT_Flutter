@@ -101,8 +101,8 @@ class _GdprConsentBottomSheetState extends State<GdprConsentBottomSheet> {
               children: [
                 const Icon(
                   SelectNetworkIcons.preferencesConsent,
-                  color: Color(0xFF808080),
-                  size: 26,
+                  color: Color(0xFF333333),
+                  size: 24,
                 ),
                 const SizedBox(width: 10),
                 Text(

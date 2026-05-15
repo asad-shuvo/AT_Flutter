@@ -565,13 +565,14 @@ class _ProfileAvatar extends StatelessWidget {
           shape: BoxShape.circle,
           border: Border.all(color: Colors.white, width: 2),
         ),
-        clipBehavior: Clip.antiAlias,
-        child: Image.network(
-          imageUrl,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return _ProfileAvatarFallback(profile: profile);
-          },
+        child: ClipOval(
+          child: Image.network(
+            imageUrl,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return _ProfileAvatarFallback(profile: profile);
+            },
+          ),
         ),
       );
     }

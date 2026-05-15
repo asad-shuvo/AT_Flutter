@@ -232,7 +232,7 @@ class _ContractsNonLifeInsuranceTabState
                     showActions: true,
                     onInfoTap: _showInfoSheet,
                     onAddTap: _showAddInsuranceForm,
-                    isAddEnabled: widget.canAddContracts,
+                    isAddEnabled: widget.canAddContracts && !isLoadingContracts,
                   ),
                   const SizedBox(height: 14),
                   if (isLoadingContracts)
@@ -266,9 +266,7 @@ class _ContractsNonLifeInsuranceTabState
                               contractsData.contracts[index],
                             ),
                             onTap: () async {
-                              final edited = await Navigator.of(
-                                context,
-                              ).push<bool>(
+                              await Navigator.of(context).push<bool>(
                                 MaterialPageRoute(
                                   builder: (_) =>
                                       ContractDetailPage.fromInsure(
@@ -282,7 +280,7 @@ class _ContractsNonLifeInsuranceTabState
                                       ),
                                 ),
                               );
-                              if (edited == true && mounted) {
+                              if (mounted) {
                                 await _reloadContractsAfterDelete();
                               }
                             },

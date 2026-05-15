@@ -442,7 +442,7 @@ class _ContractsInvestmentTabState extends State<ContractsInvestmentTab> {
                     showActions: true,
                     onInfoTap: _showInfoSheet,
                     onAddTap: _showAddInvestmentForm,
-                    isAddEnabled: widget.canAddContracts,
+                    isAddEnabled: widget.canAddContracts && !isLoadingContracts,
                   ),
                   const SizedBox(height: 14),
                   if (isLoadingContracts)
@@ -478,9 +478,7 @@ class _ContractsInvestmentTabState extends State<ContractsInvestmentTab> {
                               contractsData.contracts[index],
                             ),
                             onTap: () async {
-                              final edited = await Navigator.of(
-                                context,
-                              ).push<bool>(
+                              await Navigator.of(context).push<bool>(
                                 MaterialPageRoute(
                                   builder: (_) =>
                                       ContractDetailPage.fromInvestment(
@@ -493,7 +491,7 @@ class _ContractsInvestmentTabState extends State<ContractsInvestmentTab> {
                                       ),
                                 ),
                               );
-                              if (edited == true && mounted) {
+                              if (mounted) {
                                 await _reloadContractsAfterDelete();
                               }
                             },

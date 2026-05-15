@@ -40,6 +40,7 @@ class _SurveyServiceCheckPageState extends State<SurveyServiceCheckPage> {
       TextEditingController();
   final TextEditingController _questionFourController = TextEditingController();
   bool _isSubmitting = false;
+  bool _isLoadingCustomerInfo = true;
   String? _serviceCheckId;
   SurveyCustomerInfo? _customerInfo;
   UpdateEmailController? _emailController;
@@ -113,6 +114,7 @@ class _SurveyServiceCheckPageState extends State<SurveyServiceCheckPage> {
     final customer = results[0] as SurveyCustomerInfo?;
     final record = results[1] as SurveyServiceCheckRecord?;
     setState(() {
+      _isLoadingCustomerInfo = false;
       _customerInfo = customer;
       _serviceCheckId = record?.itemId;
     });
@@ -582,6 +584,7 @@ class _SurveyServiceCheckPageState extends State<SurveyServiceCheckPage> {
                     question: l10n.tr('QUES_ONE_TITLE'),
                     child: _ReadOnlyDetailsCard(
                       customerInfo: _customerInfo,
+                      isLoading: _isLoadingCustomerInfo,
                       selectedAnswer: _singleAnswers[1],
                       onSelect: (answer) => _setSingleAnswer(1, answer),
                       onEmailEditTap: _emailController != null
@@ -715,6 +718,7 @@ class _SurveyServiceCheckPageState extends State<SurveyServiceCheckPage> {
 class _ReadOnlyDetailsCard extends StatelessWidget {
   const _ReadOnlyDetailsCard({
     required this.customerInfo,
+    required this.isLoading,
     required this.selectedAnswer,
     required this.onSelect,
     this.onEmailEditTap,
@@ -723,6 +727,7 @@ class _ReadOnlyDetailsCard extends StatelessWidget {
   });
 
   final SurveyCustomerInfo? customerInfo;
+  final bool isLoading;
   final String? selectedAnswer;
   final ValueChanged<String> onSelect;
   final VoidCallback? onEmailEditTap;
@@ -740,33 +745,42 @@ class _ReadOnlyDetailsCard extends StatelessWidget {
           selected: selectedAnswer == 'yes',
           onTap: () => onSelect('yes'),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         _ChoiceTile(
           text: l10n.tr('Q1NO'),
           selected: selectedAnswer == 'no',
           onTap: () => onSelect('no'),
         ),
-        SizedBox(height: 12),
-        _FieldTile(text: customerInfo?.displayName ?? ''),
-        SizedBox(height: 10),
-        _FieldTile(
-          text: customerInfo?.email ?? '',
-          showEdit: selectedAnswer == 'no',
-          onTap: selectedAnswer == 'no' ? onEmailEditTap : null,
-        ),
-        SizedBox(height: 10),
-        _FieldTile(
-          text: customerInfo?.phoneNumber ?? '',
-          showEdit: selectedAnswer == 'no',
-          onTap: selectedAnswer == 'no' ? onPhoneEditTap : null,
-        ),
-        SizedBox(height: 10),
-        _FieldTile(
-          text: customerInfo?.address ?? '',
-          showEdit: selectedAnswer == 'no',
-          onTap: selectedAnswer == 'no' ? onAddressEditTap : null,
-        ),
-        SizedBox(height: 10),
+        const SizedBox(height: 12),
+        if (isLoading)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 24),
+            child: Center(
+              child: CircularProgressIndicator(strokeWidth: 2.5),
+            ),
+          )
+        else ...[
+          _FieldTile(text: customerInfo?.displayName ?? ''),
+          const SizedBox(height: 10),
+          _FieldTile(
+            text: customerInfo?.email ?? '',
+            showEdit: selectedAnswer == 'no',
+            onTap: selectedAnswer == 'no' ? onEmailEditTap : null,
+          ),
+          const SizedBox(height: 10),
+          _FieldTile(
+            text: customerInfo?.phoneNumber ?? '',
+            showEdit: selectedAnswer == 'no',
+            onTap: selectedAnswer == 'no' ? onPhoneEditTap : null,
+          ),
+          const SizedBox(height: 10),
+          _FieldTile(
+            text: customerInfo?.address ?? '',
+            showEdit: selectedAnswer == 'no',
+            onTap: selectedAnswer == 'no' ? onAddressEditTap : null,
+          ),
+          const SizedBox(height: 10),
+        ],
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 2),
           child: Text(

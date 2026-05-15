@@ -237,7 +237,7 @@ class _ContractsLoanTabState extends State<ContractsLoanTab> {
                     showActions: true,
                     onInfoTap: _showInfoSheet,
                     onAddTap: _showAddLoanForm,
-                    isAddEnabled: widget.canAddContracts,
+                    isAddEnabled: widget.canAddContracts && !isLoadingContracts,
                   ),
                   const SizedBox(height: 14),
                   if (isLoadingContracts)
@@ -271,9 +271,7 @@ class _ContractsLoanTabState extends State<ContractsLoanTab> {
                               contractsData.contracts[index],
                             ),
                             onTap: () async {
-                              final edited = await Navigator.of(
-                                context,
-                              ).push<bool>(
+                              await Navigator.of(context).push<bool>(
                                 MaterialPageRoute(
                                   builder: (_) =>
                                       ContractDetailPage.fromInsure(
@@ -287,7 +285,7 @@ class _ContractsLoanTabState extends State<ContractsLoanTab> {
                                       ),
                                 ),
                               );
-                              if (edited == true && mounted) {
+                              if (mounted) {
                                 await _reloadContractsAfterDelete();
                               }
                             },
