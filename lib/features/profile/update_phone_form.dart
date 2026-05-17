@@ -231,9 +231,9 @@ class _UpdatePhoneFormState extends State<UpdatePhoneForm> {
                         disabledBackgroundColor: const Color(0xFFE39CA6),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius)),
                       ),
-                      child: const Text(
-                        'UPDATE',
-                        style: TextStyle(
+                      child: Text(
+                        l10n.tr('tns.update'),
+                        style: const TextStyle(
                           fontFamily: 'Calibri',
                           fontSize: 16,
                           fontWeight: FontWeight.w700,

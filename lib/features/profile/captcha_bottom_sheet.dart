@@ -210,9 +210,9 @@ class _CaptchaBottomSheetState extends State<CaptchaBottomSheet> {
                                 borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
                               ),
                             ),
-                            child: const Text(
-                              'SUBMIT',
-                              style: TextStyle(
+                            child: Text(
+                              context.l10n.tr('SUBMIT'),
+                              style: const TextStyle(
                                 fontFamily: 'Calibri',
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,

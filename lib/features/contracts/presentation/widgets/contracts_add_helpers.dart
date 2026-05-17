@@ -441,9 +441,9 @@ const List<ContractsLookupOption> investmentPaymentFrequencyOptions =
 
 const List<ContractsLookupOption> couponTypeOptions = <ContractsLookupOption>[
   ContractsLookupOption(label: 'FIXED_RATE', value: 'Fixed Rate'),
-  ContractsLookupOption(label: 'Step-Up Rate', value: 'Step-Up Rate'),
+  ContractsLookupOption(label: 'STEPUP_RATE', value: 'Step-Up Rate'),
   ContractsLookupOption(label: 'VARIABLE_RATE', value: 'Variable Rate'),
-  ContractsLookupOption(label: 'Zero Coupon', value: 'Zero Coupon'),
+  ContractsLookupOption(label: 'ZERO_COUPON', value: 'Zero Coupon'),
 ];
 
 const List<ContractsLookupOption> currencyOptions = <ContractsLookupOption>[

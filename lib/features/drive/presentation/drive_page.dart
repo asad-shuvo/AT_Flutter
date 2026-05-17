@@ -1044,7 +1044,7 @@ class _FileListTile extends StatelessWidget {
     if (file.fileSizeLabel.isNotEmpty) sizeParts.add(file.fileSizeLabel);
     final shortDate = _formatListDate(file.createDate);
     if (shortDate.isNotEmpty) sizeParts.add(shortDate);
-    final subtitle = sizeParts.join(' • ');
+    final subtitle = sizeParts.join(' ï¿½ ');
 
     return Container(
       decoration: BoxDecoration(
@@ -1296,7 +1296,7 @@ class _FileGridCard extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 2),
               child: Text(
-                sizeParts.join(' • '),
+                sizeParts.join(' ï¿½ '),
                 style: const TextStyle(
                   fontFamily: 'Calibri',
                   fontSize: 12,
@@ -2177,11 +2177,11 @@ class _FileDetailSheet extends StatelessWidget {
           file.createDate,
     );
     final rows = [
-      ('Name', file.name),
-      ('Size', file.fileSizeLabel.isNotEmpty ? file.fileSizeLabel : '-'),
-      ('Type', file.fileType.isNotEmpty ? file.fileType : '-'),
-      ('Created By', file.ownerName ?? '-'),
-      ('Date Created (UTC)', createdDate),
+      (l10n.tr('Name'), file.name),
+      (l10n.tr('Size'), file.fileSizeLabel.isNotEmpty ? file.fileSizeLabel : '-'),
+      (l10n.tr('Type'), file.fileType.isNotEmpty ? file.fileType : '-'),
+      (l10n.tr('CreatedBy'), file.ownerName ?? '-'),
+      (l10n.tr('DateCreated'), createdDate),
     ];
 
     return Column(

@@ -231,9 +231,9 @@ class _TwoFactorPageState extends State<TwoFactorPage> {
                                 color: Colors.white,
                               ),
                             )
-                          : const Text(
-                              'VERIFY',
-                              style: TextStyle(
+                          : Text(
+                              l10n.tr('tns.verify'),
+                              style: const TextStyle(
                                 fontFamily: 'Calibri',
                                 fontSize: 14,
                                 fontWeight: FontWeight.w700,

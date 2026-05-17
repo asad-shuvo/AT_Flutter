@@ -555,9 +555,9 @@ class _ContractDocumentAddSheetState extends State<ContractDocumentAddSheet> {
                     valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                   ),
                 )
-              : const Text(
-                  'CONFIRM',
-                  style: TextStyle(
+              : Text(
+                  context.l10n.tr('tns.confirm'),
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 17,
                     fontFamily: 'Calibri',

@@ -97,9 +97,9 @@ class _VerificationCodeSheetState extends State<VerificationCodeSheet> {
                             ),
                           ),
                           const SizedBox(height: 28),
-                          const Text(
-                            'Verification Code',
-                            style: TextStyle(
+                          Text(
+                            context.l10n.tr('tns.verificationCode'),
+                            style: const TextStyle(
                               fontFamily: 'Calibri',
                               fontSize: 12,
                               color: Color(0xFF808080),
@@ -158,9 +158,9 @@ class _VerificationCodeSheetState extends State<VerificationCodeSheet> {
                           const SizedBox(height: 18),
                           Row(
                             children: [
-                              const Text(
-                                'TIME LEFT',
-                                style: TextStyle(
+                              Text(
+                                context.l10n.tr('tns.timeLeft'),
+                                style: const TextStyle(
                                   fontFamily: 'Calibri',
                                   fontSize: 20 / 1.2,
                                   color: Color(0xFF808080),
@@ -278,9 +278,9 @@ class _VerificationCodeSheetState extends State<VerificationCodeSheet> {
                                 borderRadius: BorderRadius.circular(AppFormTokens.fieldRadius),
                               ),
                             ),
-                            child: const Text(
-                              'CONFIRM',
-                              style: TextStyle(
+                            child: Text(
+                              context.l10n.tr('tns.confirm'),
+                              style: const TextStyle(
                                 fontFamily: 'Calibri',
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,

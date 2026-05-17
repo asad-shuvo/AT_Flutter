@@ -99,26 +99,26 @@ class _OnboardingPageState extends State<OnboardingPage> {
       _OnboardingSlide(
         backgroundAsset: 'assets/images/onboarding/wave1.png',
         contentAsset: 'assets/images/onboarding/managecontracts.png',
-        title: l10n.tr('tns.title'),
-        description: l10n.tr('tns.description'),
+        title: l10n.tr('tns.filipExplorarContractsCardTitle'),
+        description: l10n.tr('tns.filipExplorarContractsCardSubTitle'),
       ),
       _OnboardingSlide(
         backgroundAsset: 'assets/images/onboarding/wave2.png',
         contentAsset: 'assets/images/onboarding/real_estate.png',
-        title: l10n.tr('tns.title'),
-        description: l10n.tr('tns.description'),
+        title: l10n.tr('tns.filipExplorerCardRealEsateTitle'),
+        description: l10n.tr('tns.filipExplorerCardRealEsateSubTitle'),
       ),
       _OnboardingSlide(
         backgroundAsset: 'assets/images/onboarding/wave3.png',
         contentAsset: 'assets/images/onboarding/drive.png',
-        title: l10n.tr('tns.title'),
-        description: l10n.tr('tns.description'),
+        title: l10n.tr('tns.filipExplorerCardDriveTitle'),
+        description: l10n.tr('tns.filipExplorerCardDriveSubTitle'),
       ),
       _OnboardingSlide(
         backgroundAsset: 'assets/images/onboarding/wave4.png',
         contentAsset: 'assets/images/onboarding/chatwithadvisor.png',
-        title: l10n.tr('tns.title'),
-        description: l10n.tr('tns.description'),
+        title: l10n.tr('tns.filipExplorarMessagingCardTitle'),
+        description: l10n.tr('tns.filipExplorarMessagingCardSubTitle'),
       ),
     ];
   }

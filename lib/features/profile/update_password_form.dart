@@ -193,9 +193,9 @@ class _UpdatePasswordFormState extends State<UpdatePasswordForm> {
                         disabledBackgroundColor: const Color(0xFFE39CA6),
                         shape: const RoundedRectangleBorder(),
                       ),
-                      child: const Text(
-                        'UPDATE',
-                        style: TextStyle(
+                      child: Text(
+                        l10n.tr('tns.update'),
+                        style: const TextStyle(
                           fontFamily: 'Calibri',
                           fontSize: 19,
                           fontWeight: FontWeight.w700,

@@ -77,7 +77,7 @@ class ContractDetailDocumentRow extends StatelessWidget {
         children: [
           Expanded(
             child: Text(
-              document.name ?? 'Document',
+              document.name ?? '-',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(

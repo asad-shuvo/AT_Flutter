@@ -967,7 +967,7 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
         label: l10n.tr('tns.paymentFrequency'),
         value: _inv('PaymentFrequency'),
       ),
-      if (_inv('ISIN') != null) ContractDetailFieldRow(label: 'ISIN', value: _inv('ISIN')),
+      if (_inv('ISIN') != null) ContractDetailFieldRow(label: l10n.tr('isin'), value: _inv('ISIN')),
     ];
   }
 
@@ -1259,6 +1259,7 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
   Widget _buildInsuranceModulesSection() {
     final modules = _retirementInsuranceModules;
     final hasData = modules.isNotEmpty;
+    final l10n = context.l10n;
 
     return Container(
       decoration: BoxDecoration(
@@ -1277,9 +1278,9 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
                   color: Color(0xFF888888),
                 ),
                 const SizedBox(width: 12),
-                const Text(
-                  'Insurance Modules',
-                  style: TextStyle(
+                Text(
+                  l10n.tr('tns.insuranceModules'),
+                  style: const TextStyle(
                     fontFamily: 'Calibri',
                     fontSize: 16,
                     fontWeight: FontWeight.w600,

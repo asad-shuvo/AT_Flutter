@@ -116,8 +116,8 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
 
     final slides = <_ExplorerSlideData>[
       _ExplorerSlideData(
-        title: l10n.tr('tns.title'),
-        description: l10n.tr('tns.description'),
+        title: l10n.tr('tns.filipExplorarContractsCardTitle'),
+        description: l10n.tr('tns.filipExplorarContractsCardSubTitle'),
         icon: const IconData(0xE9E8, fontFamily: _filipIconFamily),
         onTap: () => _openPage(
           ContractsPage(
@@ -136,14 +136,14 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
         ),
       ),
       _ExplorerSlideData(
-        title: l10n.tr('tns.title'),
-        description: l10n.tr('tns.description'),
+        title: l10n.tr('tns.filipExplorerCardRealEsateTitle'),
+        description: l10n.tr('tns.filipExplorerCardRealEsateSubTitle'),
         icon: const IconData(0xE9B4, fontFamily: _filipIconFamily),
         onTap: () => _openPage(const RealEstatePage()),
       ),
       _ExplorerSlideData(
-        title: l10n.tr('tns.title'),
-        description: l10n.tr('tns.description'),
+        title: l10n.tr('tns.filipExplorerCardDriveTitle'),
+        description: l10n.tr('tns.filipExplorerCardDriveSubTitle'),
         icon: const IconData(0xE9C9, fontFamily: _filipIconFamily),
         onTap: () => _openPage(DocumentsPage(
           driveRepository: widget.driveRepository,
@@ -159,8 +159,8 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
         )),
       ),
       _ExplorerSlideData(
-        title: l10n.tr('tns.title'),
-        description: l10n.tr('tns.description'),
+        title: l10n.tr('tns.filipExplorarMessagingCardTitle'),
+        description: l10n.tr('tns.filipExplorarMessagingCardSubTitle'),
         icon: const IconData(0xEA03, fontFamily: _filipIconFamily),
         onTap: () => _openPage(const ChatPage()),
       ),
