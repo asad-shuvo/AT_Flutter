@@ -13,6 +13,7 @@ import 'package:filip_at_flutter/core/storage/secure_storage_service.dart';
 import 'package:filip_at_flutter/features/auth/application/auth_session_controller.dart';
 import 'package:filip_at_flutter/features/auth/application/user_session_cache.dart';
 import 'package:filip_at_flutter/features/auth/data/auth_repository.dart';
+import 'package:filip_at_flutter/features/auth/data/forgot_password_repository.dart';
 import 'package:filip_at_flutter/features/auth/data/login_sync_repository.dart';
 import 'package:filip_at_flutter/features/contracts/application/household_member_filter_controller.dart';
 import 'package:filip_at_flutter/features/contracts/data/contracts_repository.dart';
@@ -142,6 +143,11 @@ Future<void> bootstrap(AppFlavor flavor) async {
     userSessionCache: userSessionCache,
     captchaUrl: config.captchaUrl,
   );
+  final forgotPasswordRepository = ForgotPasswordRepository(
+    apiClient: apiClient,
+    captchaUrl: config.captchaUrl,
+    tokenUrl: config.tokenUrl,
+  );
   final surveyAddressRepository = SurveyAddressRepository(
     apiClient: apiClient,
     userSessionCache: userSessionCache,
@@ -169,6 +175,7 @@ Future<void> bootstrap(AppFlavor flavor) async {
     apiClient: apiClient,
     secureStorageService: secureStorageService,
     authRepository: authRepository,
+    forgotPasswordRepository: forgotPasswordRepository,
     authSessionController: authSessionController,
     userSessionCache: userSessionCache,
     loginSyncRepository: loginSyncRepository,

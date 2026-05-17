@@ -8,6 +8,7 @@ import 'package:filip_at_flutter/core/storage/secure_storage_service.dart';
 import 'package:filip_at_flutter/features/auth/application/auth_session_controller.dart';
 import 'package:filip_at_flutter/features/auth/application/user_session_cache.dart';
 import 'package:filip_at_flutter/features/auth/data/auth_repository.dart';
+import 'package:filip_at_flutter/features/auth/data/forgot_password_repository.dart';
 import 'package:filip_at_flutter/features/auth/data/login_sync_repository.dart';
 import 'package:filip_at_flutter/features/contracts/application/household_member_filter_controller.dart';
 import 'package:filip_at_flutter/features/contracts/data/contracts_repository.dart';
@@ -143,6 +144,13 @@ void main() {
       ),
       driveRepository: driveRepository,
       profileRepository: profileRepository,
+      forgotPasswordRepository: ForgotPasswordRepository(
+        apiClient: apiClient,
+        captchaUrl:
+            'https://msblocks.selisestage.com/api/captcha/v1/Captcha/CaptchaCommand/',
+        tokenUrl:
+            'https://msblocks.selisestage.com/api/identity/v25/identity/token',
+      ),
       surveyAddressRepository: SurveyAddressRepository(
         apiClient: apiClient,
         userSessionCache: userSessionCache,

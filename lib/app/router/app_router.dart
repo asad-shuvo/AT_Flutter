@@ -61,7 +61,9 @@ class AppRouter {
         );
       case forgotPassword:
         return MaterialPageRoute<void>(
-          builder: (_) => const ForgotPasswordPage(),
+          builder: (_) => ForgotPasswordPage(
+            repository: services.forgotPasswordRepository,
+          ),
           settings: settings,
         );
       case twoFactor:
