@@ -142,6 +142,7 @@ Future<void> bootstrap(AppFlavor flavor) async {
     apiClient: apiClient,
     userSessionCache: userSessionCache,
     captchaUrl: config.captchaUrl,
+    secureStorageService: secureStorageService,
   );
   final forgotPasswordRepository = ForgotPasswordRepository(
     apiClient: apiClient,

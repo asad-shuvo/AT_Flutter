@@ -127,6 +127,64 @@ class AuthRepository {
     );
   }
 
+  Future<void> signInWithPin({
+    required String username,
+    required String pin,
+  }) async {
+    await _ensureAnonymousSession();
+
+    final anonymousAccessToken = await _secureStorageService.read(
+      AppStorageKeys.anonymousAccessToken,
+    );
+
+    final response = await _apiClient.postForm(
+      url: _apiClient.tokenUrl,
+      body: <String, String>{
+        'grant_type': 'pin',
+        'username': username,
+        'pin': pin,
+      },
+      headers: <String, String>{
+        'Origin': _apiClient.originUrl,
+        if (anonymousAccessToken != null && anonymousAccessToken.isNotEmpty)
+          'Authorization': 'bearer $anonymousAccessToken',
+      },
+    );
+
+    final statusCode = response['statusCode'] as int? ?? 0;
+    final responseBody = response['body'] as Map<String, dynamic>;
+
+    if (statusCode < 200 || statusCode >= 300) {
+      throw _mapAuthException(responseBody);
+    }
+
+    final accessToken = responseBody['access_token'] as String?;
+    final refreshToken = responseBody['refresh_token'] as String?;
+
+    if (accessToken == null || accessToken.isEmpty) {
+      throw const AuthException(
+        message: 'PIN login succeeded but no access token was returned.',
+      );
+    }
+
+    await _secureStorageService.write(
+      key: AppStorageKeys.accessToken,
+      value: accessToken,
+    );
+    if (refreshToken != null && refreshToken.isNotEmpty) {
+      await _secureStorageService.write(
+        key: AppStorageKeys.refreshToken,
+        value: refreshToken,
+      );
+    }
+
+    final loginCount = await getLoginCount();
+    await _secureStorageService.write(
+      key: AppStorageKeys.loginCount,
+      value: '${loginCount + 1}',
+    );
+  }
+
   Future<void> clearSession() async {
     try {
       await _logoutFromPlatform();

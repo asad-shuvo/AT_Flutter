@@ -6,6 +6,9 @@ import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/app/router/app_router.dart';
 import 'package:filip_at_flutter/features/auth/application/auth_session_controller.dart';
 import 'package:filip_at_flutter/features/auth/data/auth_exception.dart';
+import 'package:filip_at_flutter/features/auth/presentation/fingerprint_activation_page.dart';
+import 'package:filip_at_flutter/features/profile/profile_repository.dart';
+import 'package:filip_at_flutter/features/settings/application/biometric_service.dart';
 import 'package:filip_at_flutter/shared/icons/app_icon_packs.dart';
 import 'package:flutter/material.dart';
 import 'package:filip_at_flutter/shared/theme/form_tokens.dart';
@@ -15,10 +18,12 @@ class LoginPage extends StatefulWidget {
     super.key,
     required this.config,
     required this.authSessionController,
+    required this.profileRepository,
   });
 
   final AppConfig config;
   final AuthSessionController authSessionController;
+  final ProfileRepository profileRepository;
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -29,6 +34,8 @@ class _LoginPageState extends State<LoginPage> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  final _biometricService = BiometricService();
+
   bool _rememberMe = true;
   bool _isPasswordHidden = true;
   bool _isSubmitting = false;
@@ -38,6 +45,43 @@ class _LoginPageState extends State<LoginPage> {
   void initState() {
     super.initState();
     _loadRememberMeInfo();
+    _scheduleAutoTriggerBiometric();
+  }
+
+  Future<void> _scheduleAutoTriggerBiometric() async {
+    await Future<void>.delayed(const Duration(milliseconds: 1500));
+    if (!mounted) return;
+    final enabled = await widget.profileRepository.getBiometricEnabled();
+    final credential = await widget.profileRepository.getPinCredential();
+    if (!mounted) return;
+    if (!enabled || credential == null) return;
+    await _triggerBiometricLogin(credential);
+  }
+
+  Future<void> _triggerBiometricLogin(({String email, String pin}) credential) async {
+    final l10n = context.l10n;
+    final authStatus = await _biometricService.authenticate(
+      reason: l10n.tr('tns.fingerprintAuthentication'),
+    );
+    if (!mounted) return;
+    if (authStatus == BiometricAuthStatus.success) {
+      try {
+        await widget.authSessionController.signInWithPin(
+          username: credential.email,
+          pin: credential.pin,
+        );
+        if (!mounted) return;
+        Navigator.of(context).pushReplacementNamed(AppRouter.loginIntermediary);
+      } catch (_) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            SnackBar(content: Text(l10n.tr('SOMETHING_WENT_WRONG'))),
+          );
+      }
+    }
+    // cancelled / failed → stay on login page silently
   }
 
   @override
@@ -45,6 +89,28 @@ class _LoginPageState extends State<LoginPage> {
     _usernameController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _onBiometricTap() async {
+    final enabled = await widget.profileRepository.getBiometricEnabled();
+    final credential = await widget.profileRepository.getPinCredential();
+    if (!mounted) return;
+
+    if (enabled && credential != null) {
+      await _triggerBiometricLogin(credential);
+      return;
+    }
+
+    await Navigator.of(context).push<bool>(
+      MaterialPageRoute<bool>(
+        builder: (_) => FingerprintActivationPage(
+          authSessionController: widget.authSessionController,
+          profileRepository: widget.profileRepository,
+          biometricService: _biometricService,
+          navigateToDashboardOnSuccess: true,
+        ),
+      ),
+    );
   }
 
   Future<void> _loadRememberMeInfo() async {
@@ -433,7 +499,7 @@ class _LoginPageState extends State<LoginPage> {
                                     child: SizedBox(
                                       height: 50,
                                       child: OutlinedButton(
-                                        onPressed: () {},
+                                        onPressed: _onBiometricTap,
                                         style: OutlinedButton.styleFrom(
                                           foregroundColor: const Color(
                                             0xFFD91F32,

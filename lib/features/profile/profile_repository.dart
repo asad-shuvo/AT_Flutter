@@ -1,21 +1,49 @@
 import 'dart:math';
 
 import 'package:filip_at_flutter/core/network/api_client.dart';
+import 'package:filip_at_flutter/core/storage/app_storage_keys.dart';
+import 'package:filip_at_flutter/core/storage/secure_storage_service.dart';
 import 'package:filip_at_flutter/features/auth/application/user_session_cache.dart';
 import 'package:filip_at_flutter/features/profile/profile_models.dart';
+
+const _kBiometricEnabledKey = 'biometric_fingerprint_enabled';
 
 class ProfileRepository {
   const ProfileRepository({
     required ApiClient apiClient,
     required UserSessionCache userSessionCache,
     required String captchaUrl,
+    required SecureStorageService secureStorageService,
   }) : _apiClient = apiClient,
        _sessionCache = userSessionCache,
-       _captchaUrl = captchaUrl;
+       _captchaUrl = captchaUrl,
+       _storage = secureStorageService;
 
   final ApiClient _apiClient;
   final UserSessionCache _sessionCache;
   final String _captchaUrl;
+  final SecureStorageService _storage;
+
+  Future<bool> getBiometricEnabled() async {
+    final val = await _storage.read(_kBiometricEnabledKey);
+    return val == 'true';
+  }
+
+  Future<void> setBiometricEnabled({required bool enabled}) async {
+    await _storage.write(key: _kBiometricEnabledKey, value: enabled.toString());
+  }
+
+  Future<bool> getDontAskBiometricPrompt() async {
+    final val = await _storage.read(AppStorageKeys.biometricDontAskAgain);
+    return val == 'true';
+  }
+
+  Future<void> setDontAskBiometricPrompt({required bool value}) async {
+    await _storage.write(
+      key: AppStorageKeys.biometricDontAskAgain,
+      value: value.toString(),
+    );
+  }
 
   Future<CaptchaChallenge> getCaptcha() async {
     final headers = await _authorizedHeaders();
@@ -184,6 +212,121 @@ class ProfileRepository {
     );
   }
 
+  Future<bool> getPinStatus() async {
+    final headers = await _authorizedHeaders();
+    final response = await _apiClient.getJson(
+      url: '${_securityBaseUrl}SecurityQuery/GetPinStatus',
+      headers: headers,
+    );
+    final statusCode = response['statusCode'] as int? ?? 0;
+    if (statusCode < 200 || statusCode >= 300) return false;
+    final body = response['body'];
+    if (body == true) return true;
+    if (body is Map<String, dynamic>) {
+      final inner = body['body'] ?? body['Body'];
+      return inner == true;
+    }
+    return false;
+  }
+
+  Future<({bool isSuccess, String? errorCode})> verifyPinForBiometric({
+    required String pin,
+  }) async {
+    final user = await _requireUser();
+    final anonymousToken = await _storage.read('anonymous_access_token');
+    final response = await _apiClient.postForm(
+      url: _apiClient.tokenUrl,
+      body: <String, String>{
+        'grant_type': 'pin',
+        'username': user.email,
+        'pin': pin,
+      },
+      headers: <String, String>{
+        'Origin': _apiClient.originUrl,
+        if (anonymousToken != null && anonymousToken.isNotEmpty)
+          'Authorization': 'bearer $anonymousToken',
+      },
+    );
+    final statusCode = response['statusCode'] as int? ?? 0;
+    if (statusCode >= 200 && statusCode < 300) {
+      return (isSuccess: true, errorCode: null);
+    }
+    final body = response['body'];
+    if (body is Map<String, dynamic>) {
+      final errorCode = body['error'] as String? ?? '';
+      if (errorCode == 'incorrect_user_name_or_pin' ||
+          errorCode == 'Session_Lock_Id') {
+        return (isSuccess: false, errorCode: errorCode);
+      }
+    }
+    return (isSuccess: false, errorCode: 'SOMETHING_WENT_WRONG');
+  }
+
+  Future<OperationResult> resetPin({
+    required String pin,
+    required String retypePin,
+    required String password,
+  }) async {
+    final headers = await _authorizedHeaders();
+    final response = await _apiClient.postJson(
+      url: '${_securityBaseUrl}SecurityCommand/resetPin',
+      body: <String, dynamic>{
+        'Pin': pin,
+        'RetypePin': retypePin,
+        'Password': password,
+      },
+      headers: headers,
+    );
+    final statusCode = response['statusCode'] as int? ?? 0;
+    if (statusCode < 200 || statusCode >= 300) {
+      return const OperationResult(isSuccess: false, errorCode: 'SOMETHING_WENT_WRONG');
+    }
+    final body = response['body'] as Map<String, dynamic>;
+    final errors = body['Errors'] as Map<String, dynamic>?;
+    if (errors?['IsValid'] == true) {
+      return const OperationResult(isSuccess: true, errorCode: null);
+    }
+    final errorMessages = List<dynamic>.from(
+      (body['ErrorMessages'] as List<dynamic>?) ?? const <dynamic>[],
+    );
+    final msg = errorMessages.isNotEmpty ? errorMessages.first.toString() : '';
+    if (msg.contains('Wrong password')) {
+      return const OperationResult(isSuccess: false, errorCode: 'WRONG_PASSWORD');
+    }
+    return const OperationResult(isSuccess: false, errorCode: 'SOMETHING_WENT_WRONG');
+  }
+
+  Future<OperationResult> setPin({
+    required String pin,
+    required String retypePin,
+  }) async {
+    final headers = await _authorizedHeaders();
+    final response = await _apiClient.postJson(
+      url: '${_securityBaseUrl}SecurityCommand/SetPin',
+      body: <String, dynamic>{'Pin': pin, 'RetypePin': retypePin},
+      headers: headers,
+    );
+    final body = response['body'];
+    if (body is Map<String, dynamic> && body['StatusCode'] == 0) {
+      return const OperationResult(isSuccess: true, errorCode: null);
+    }
+    return const OperationResult(isSuccess: false, errorCode: 'SOMETHING_WENT_WRONG');
+  }
+
+  Future<OperationResult> deletePin({required String password}) async {
+    final headers = await _authorizedHeaders();
+    final response = await _apiClient.postJson(
+      url: '${_securityBaseUrl}SecurityCommand/DeletePin',
+      body: <String, dynamic>{'password': password},
+      headers: headers,
+    );
+    final body = response['body'];
+    if (body is Map<String, dynamic> && body['StatusCode'] == 0) {
+      return const OperationResult(isSuccess: true, errorCode: null);
+    }
+    return const OperationResult(isSuccess: false, errorCode: 'WRONG_PASSWORD');
+  }
+
   Future<OperationResult> changePassword({
     required String oldPassword,
     required String newPassword,
@@ -224,6 +367,33 @@ class ProfileRepository {
       isSuccess: false,
       errorCode: errorCode ?? 'SOMETHING_WENT_WRONG',
     );
+  }
+
+  Future<void> storePinCredential({required String pin}) async {
+    final user = await _requireUser();
+    await _storage.write(key: 'biometric_credential_email', value: user.email);
+    await _storage.write(key: 'biometric_credential_pin', value: pin);
+  }
+
+  Future<({String email, String pin})?> getPinCredential() async {
+    final email = await _storage.read('biometric_credential_email');
+    final pin = await _storage.read('biometric_credential_pin');
+    if (email == null || email.isEmpty || pin == null || pin.isEmpty) {
+      return null;
+    }
+    return (email: email, pin: pin);
+  }
+
+  Future<void> clearPinCredential() async {
+    await _storage.write(key: 'biometric_credential_email', value: '');
+    await _storage.write(key: 'biometric_credential_pin', value: '');
+  }
+
+  Future<void> updateStoredPinIfBiometricEnabled({required String pin}) async {
+    final enabled = await getBiometricEnabled();
+    if (enabled) {
+      await storePinCredential(pin: pin);
+    }
   }
 
   String get _securityBaseUrl {

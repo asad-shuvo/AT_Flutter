@@ -132,7 +132,7 @@ class AppSideDrawer extends StatelessWidget {
             label: l10n.tr('tns.preferences'),
             onTap: () => _openPage(
               context,
-              SettingsPage(authSessionController: authSessionController),
+              SettingsPage(authSessionController: authSessionController, profileRepository: null),
             ),
           ),
           _DrawerItem(

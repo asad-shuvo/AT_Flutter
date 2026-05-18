@@ -124,6 +124,7 @@ void main() {
       userSessionCache: userSessionCache,
       captchaUrl:
           'https://msblocks.selisestage.com/api/captcha/v1/Captcha/CaptchaCommand/',
+      secureStorageService: secureStorageService,
     );
     final services = AppServices(
       apiClient: apiClient,

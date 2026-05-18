@@ -181,9 +181,6 @@ class ApiClient {
       final dynamic decoded = responseBody.isEmpty
           ? <String, dynamic>{}
           : jsonDecode(responseBody);
-      if (decoded is! Map<String, dynamic>) {
-        throw const HttpException('Unexpected response format');
-      }
       return <String, dynamic>{'statusCode': response.statusCode, 'body': decoded};
     } catch (_) {
       rethrow;

@@ -9,6 +9,7 @@ class AppStorageKeys {
   static const String rememberMe = 'remember_me';
   static const String loginCount = 'login_count';
   static const String languageCode = 'language_code';
+  static const String biometricDontAskAgain = 'biometric_dont_ask_again';
 
   const AppStorageKeys._();
 }

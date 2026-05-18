@@ -43,6 +43,7 @@ class AppRouter {
           builder: (_) => LoginPage(
             config: config,
             authSessionController: services.authSessionController,
+            profileRepository: services.profileRepository,
           ),
           settings: settings,
         );
@@ -56,6 +57,8 @@ class AppRouter {
           builder: (_) => LoginIntermediaryPage(
             userSessionCache: services.userSessionCache,
             loginSyncRepository: services.loginSyncRepository,
+            profileRepository: services.profileRepository,
+            authSessionController: services.authSessionController,
           ),
           settings: settings,
         );

@@ -202,6 +202,7 @@ class AppSideDrawer extends StatelessWidget {
                       context,
                       SettingsPage(
                         authSessionController: authSessionController,
+                        profileRepository: profileRepository,
                       ),
                     ),
                   ),

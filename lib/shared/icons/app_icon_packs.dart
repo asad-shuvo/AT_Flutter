@@ -6,6 +6,9 @@ class SelectNetworkIcons {
   static const String _family = 'SelectNetwork';
 
   static const IconData fingerprint = IconData(0xEAC6, fontFamily: _family);
+  static const IconData faceScan = IconData(0xEA21, fontFamily: _family);
+  static const IconData warning = IconData(0xE948, fontFamily: _family);
+  static const IconData callList = IconData(0xEA30, fontFamily: _family);
   static const IconData eye = IconData(0xEA47, fontFamily: _family);
   static const IconData eyeDisabled = IconData(0xEA95, fontFamily: _family);
   static const IconData search = IconData(0xEA7D, fontFamily: _family);

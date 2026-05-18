@@ -47,6 +47,22 @@ class AuthSessionController extends ChangeNotifier {
     }
   }
 
+  Future<void> signInWithPin({
+    required String username,
+    required String pin,
+  }) async {
+    try {
+      await _authRepository.signInWithPin(username: username, pin: pin);
+      _hasCompletedFirstLogin = true;
+      _state = AuthSessionState.authenticated();
+      notifyListeners();
+    } catch (_) {
+      _state = AuthSessionState.unauthenticated();
+      notifyListeners();
+      rethrow;
+    }
+  }
+
   Future<void> verify2faCode({
     required String code,
     required String token,
