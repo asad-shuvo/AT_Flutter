@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/features/contracts/data/contracts_household_model.dart';
 import 'package:filip_at_flutter/features/contracts/data/contracts_repository.dart';
@@ -7,6 +9,7 @@ import 'package:filip_at_flutter/features/contracts/presentation/widgets/contrac
 import 'package:filip_at_flutter/features/contracts/presentation/widgets/contract_delete_sheet.dart';
 import 'package:filip_at_flutter/features/contracts/presentation/widgets/contract_shared_widgets.dart';
 import 'package:filip_at_flutter/features/contracts/presentation/widgets/contracts_add_contract_modal.dart';
+import 'package:filip_at_flutter/features/notifications/application/sync_notification_service.dart';
 import 'package:filip_at_flutter/shared/icons/app_icon_packs.dart';
 import 'package:flutter/material.dart';
 
@@ -14,12 +17,14 @@ class ContractsNonLifeInsuranceTab extends StatefulWidget {
   const ContractsNonLifeInsuranceTab({
     super.key,
     required this.contractsRepository,
+    required this.syncNotificationService,
     required this.personIds,
     required this.ownerMembersByPersonId,
     required this.canAddContracts,
   });
 
   final ContractsRepository contractsRepository;
+  final SyncNotificationService syncNotificationService;
   final List<String> personIds;
   final Map<String, ContractsHouseholdMember> ownerMembersByPersonId;
   final bool canAddContracts;
@@ -31,29 +36,109 @@ class ContractsNonLifeInsuranceTab extends StatefulWidget {
 
 class _ContractsNonLifeInsuranceTabState
     extends State<ContractsNonLifeInsuranceTab> {
-  late Future<void> _syncFuture;
   late Future<InsureOverview?> _overviewFuture;
-  late Future<InsureContractsData?> _contractsFuture;
+  late final StreamSubscription<Map<String, dynamic>>
+  _contractSyncSubscription;
+  late final StreamSubscription<Map<String, dynamic>>
+  _syncCustomerContractSubscription;
   bool _isReloadingContracts = false;
+  bool _isRefreshingFromSyncNotification = false;
+  bool _isContractSyncComplete = false;
+  bool _isSyncCustomerContractComplete = false;
+  bool _skipSnackbar = true;
+  final ScrollController _scrollController = ScrollController();
+  int _pageNumber = 0;
+  static const int _pageSize = 30;
+  List<InsureContract> _contracts = [];
+  int _totalCount = 0;
+  String _currentPersonId = '';
+  bool _isLoadingMore = false;
+  bool _hasMoreContracts = true;
+  bool _isInitialLoadingContracts = true;
 
   @override
   void initState() {
     super.initState();
     _loadData();
+    _scrollController.addListener(_onScroll);
+    _loadContracts(reset: true);
+    _contractSyncSubscription = widget
+        .syncNotificationService
+        .contractSyncCompleted
+        .stream
+        .listen(_handleContractSyncCompleted);
+    _syncCustomerContractSubscription = widget
+        .syncNotificationService
+        .synccustomercontract
+        .stream
+        .listen(_handleSyncCustomerContractCompleted);
   }
 
-  void _loadData() {
-    _syncFuture = _runSync();
-    _overviewFuture = _syncFuture.then((_) {
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _contractSyncSubscription.cancel();
+    _syncCustomerContractSubscription.cancel();
+    super.dispose();
+  }
+
+  void _loadData({bool triggerSync = true}) {
+    final loadGate = triggerSync ? _runSync() : Future<void>.value();
+    _overviewFuture = loadGate.then((_) {
       return widget.contractsRepository.fetchNonLifeInsureOverview(
         personIds: widget.personIds,
       );
     });
-    _contractsFuture = _syncFuture.then((_) {
-      return widget.contractsRepository.fetchNonLifeInsureContracts(
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 300 &&
+        !_isLoadingMore &&
+        _hasMoreContracts) {
+      _loadContracts();
+    }
+  }
+
+  Future<void> _loadContracts({bool reset = false}) async {
+    if (!reset && (!_hasMoreContracts || _isLoadingMore)) return;
+    if (reset) {
+      setState(() {
+        _pageNumber = 0;
+        _contracts = [];
+        _hasMoreContracts = true;
+        _isInitialLoadingContracts = true;
+      });
+    }
+    setState(() => _isLoadingMore = true);
+    try {
+      final data = await widget.contractsRepository.fetchNonLifeInsureContracts(
         personIds: widget.personIds,
+        pageNumber: _pageNumber,
+        pageSize: _pageSize,
       );
-    });
+      if (!mounted) return;
+      setState(() {
+        if (data != null) {
+          _contracts.addAll(data.contracts);
+          _currentPersonId = data.currentPersonId;
+          _totalCount = data.totalCount;
+          _hasMoreContracts = data.contracts.length == _pageSize;
+          _pageNumber++;
+        } else {
+          _hasMoreContracts = false;
+        }
+        _isLoadingMore = false;
+        _isInitialLoadingContracts = false;
+      });
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _isLoadingMore = false;
+          _isInitialLoadingContracts = false;
+        });
+      }
+    }
   }
 
   Future<void> _runSync() async {
@@ -67,23 +152,68 @@ class _ContractsNonLifeInsuranceTabState
   }
 
   Future<void> _reloadContractsAfterDelete() async {
-    setState(() {
-      _isReloadingContracts = true;
-      _loadData();
-    });
+    setState(() => _isReloadingContracts = true);
     try {
-      await Future.wait<dynamic>(<Future<dynamic>>[
-        _overviewFuture,
-        _contractsFuture,
-      ]);
-    } catch (_) {
-      // Keep existing data if refresh fails.
-    } finally {
-      if (!mounted) return;
-      setState(() {
-        _isReloadingContracts = false;
-      });
+      await Future.wait<dynamic>(<Future<dynamic>>[_overviewFuture]);
+    } catch (_) {}
+    if (!mounted) return;
+    setState(() => _isReloadingContracts = false);
+    await _loadContracts(reset: true);
+  }
+
+  void _handleContractSyncCompleted(Map<String, dynamic> event) {
+    _isContractSyncComplete = true;
+    _handleSyncCycleCompleted();
+  }
+
+  void _handleSyncCustomerContractCompleted(Map<String, dynamic> event) {
+    final skipSnackbar = readBoolLike(event['SkipContractSync']);
+    if (skipSnackbar != null) {
+      _skipSnackbar = skipSnackbar;
     }
+    _isSyncCustomerContractComplete = true;
+    _handleSyncCycleCompleted();
+  }
+
+  void _handleSyncCycleCompleted() {
+    if (!mounted ||
+        widget.personIds.isEmpty ||
+        !_isContractSyncComplete ||
+        !_isSyncCustomerContractComplete ||
+        _isRefreshingFromSyncNotification) {
+      return;
+    }
+
+    _refreshDataAfterSyncNotification();
+  }
+
+  Future<void> _refreshDataAfterSyncNotification() async {
+    setState(() {
+      _isRefreshingFromSyncNotification = true;
+      _loadData(triggerSync: false);
+    });
+
+    try {
+      await Future.wait<dynamic>(<Future<dynamic>>[_overviewFuture]);
+    } catch (_) {
+      // Preserve the previous render if the post-sync refresh fails.
+    }
+    if (!mounted) return;
+    setState(() {
+      _isRefreshingFromSyncNotification = false;
+    });
+
+    await _loadContracts(reset: true);
+
+    if (!mounted) return;
+    if (!_skipSnackbar) {
+      showContractsSnackBar(
+        context,
+        context.l10n.tr('CONTRACT_SYNC_COMPLETED'),
+      );
+    }
+    _isContractSyncComplete = false;
+    _isSyncCustomerContractComplete = false;
   }
 
   Future<void> _handleEditAction(InsureContract contract) async {
@@ -140,6 +270,7 @@ class _ContractsNonLifeInsuranceTabState
     final l10n = context.l10n;
 
     return SingleChildScrollView(
+      controller: _scrollController,
       padding: const EdgeInsets.fromLTRB(12, 12, 12, contractsBottomClearance),
       child: Column(
         children: [
@@ -209,20 +340,11 @@ class _ContractsNonLifeInsuranceTabState
             ),
           ),
           const SizedBox(height: 12),
-          FutureBuilder<InsureContractsData?>(
-            future: _contractsFuture,
-            builder: (context, snapshot) {
-              final contractsData =
-                  _isReloadingContracts ? null : snapshot.data;
-              final isLoadingContracts =
-                  _isReloadingContracts ||
-                  (snapshot.connectionState == ConnectionState.waiting &&
-                      contractsData == null);
-              final countLabel = contractsData != null
-                  ? contractsData.totalCount.toString()
-                  : isLoadingContracts
+          Builder(
+            builder: (context) {
+              final countLabel = _isInitialLoadingContracts
                   ? '...'
-                  : '0';
+                  : _totalCount.toString();
 
               return Column(
                 children: [
@@ -232,61 +354,69 @@ class _ContractsNonLifeInsuranceTabState
                     showActions: true,
                     onInfoTap: _showInfoSheet,
                     onAddTap: _showAddInsuranceForm,
-                    isAddEnabled: widget.canAddContracts && !isLoadingContracts,
+                    isAddEnabled:
+                        widget.canAddContracts && !_isInitialLoadingContracts,
                   ),
                   const SizedBox(height: 14),
-                  if (isLoadingContracts)
-                    ContractsListLoadingState(
-                      message: l10n.tr('tns.loading'),
+                  if (_isInitialLoadingContracts || _isReloadingContracts)
+                    ContractsListLoadingState(message: l10n.tr('tns.loading'))
+                  else if (_contracts.isEmpty)
+                    ContractsEmptyState(
+                      message: context.l10n.tr('tns.noDataAddedYet'),
                     )
-                  else if (contractsData == null ||
-                      contractsData.contracts.isEmpty)
-                    ContractsEmptyState(message: l10n.tr('tns.noDataAddedYet'))
                   else
                     Column(
-                      children: List<Widget>.generate(
-                        contractsData.contracts.length,
-                        (index) => Padding(
-                          padding: EdgeInsets.only(
-                            bottom: index == contractsData.contracts.length - 1
-                                ? 0
-                                : 12,
-                          ),
-                          child: ContractsInsureContractCard(
-                            contract: contractsData.contracts[index],
-                            currentPersonId: contractsData.currentPersonId,
-                            ownerMembersByPersonId:
-                                widget.ownerMembersByPersonId,
-                            formatCurrency: formatContractCurrency,
-                            formatDate: _formatDate,
-                            formatType: _formatType,
-                            onEditTap: () =>
-                                _handleEditAction(contractsData.contracts[index]),
-                            onDeleteTap: () => _handleDeleteAction(
-                              contractsData.contracts[index],
+                      children: [
+                        ...List<Widget>.generate(
+                          _contracts.length,
+                          (index) => Padding(
+                            padding: EdgeInsets.only(
+                              bottom:
+                                  index == _contracts.length - 1 ? 0 : 12,
                             ),
-                            onTap: () async {
-                              await Navigator.of(context).push<bool>(
-                                MaterialPageRoute(
-                                  builder: (_) =>
-                                      ContractDetailPage.fromInsure(
-                                        contract:
-                                            contractsData.contracts[index],
-                                        entityName: 'Insure',
-                                        contractsRepository:
-                                            widget.contractsRepository,
-                                        currentPersonId:
-                                            contractsData.currentPersonId,
-                                      ),
-                                ),
-                              );
-                              if (mounted) {
-                                await _reloadContractsAfterDelete();
-                              }
-                            },
+                            child: ContractsInsureContractCard(
+                              contract: _contracts[index],
+                              currentPersonId: _currentPersonId,
+                              ownerMembersByPersonId:
+                                  widget.ownerMembersByPersonId,
+                              formatCurrency: formatContractCurrency,
+                              formatDate: _formatDate,
+                              formatType: _formatType,
+                              onEditTap: () =>
+                                  _handleEditAction(_contracts[index]),
+                              onDeleteTap: () =>
+                                  _handleDeleteAction(_contracts[index]),
+                              onTap: () async {
+                                await Navigator.of(context).push<bool>(
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        ContractDetailPage.fromInsure(
+                                          contract: _contracts[index],
+                                          entityName: 'Insure',
+                                          contractsRepository:
+                                              widget.contractsRepository,
+                                          currentPersonId: _currentPersonId,
+                                        ),
+                                  ),
+                                );
+                                if (mounted) {
+                                  await _reloadContractsAfterDelete();
+                                }
+                              },
+                            ),
                           ),
                         ),
-                      ),
+                        if (_isLoadingMore)
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                color: Color(0xFFD91F32),
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                 ],
               );

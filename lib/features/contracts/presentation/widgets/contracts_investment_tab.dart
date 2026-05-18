@@ -37,7 +37,6 @@ class ContractsInvestmentTab extends StatefulWidget {
 
 class _ContractsInvestmentTabState extends State<ContractsInvestmentTab> {
   late Future<InvestmentOverview?> _overviewFuture;
-  late Future<InvestmentContractsData?> _contractsFuture;
   late final StreamSubscription<Map<String, dynamic>>
   _investmentContractSyncSubscription;
   late final StreamSubscription<Map<String, dynamic>>
@@ -48,11 +47,22 @@ class _ContractsInvestmentTabState extends State<ContractsInvestmentTab> {
   bool _isAdditiveSyncComplete = false;
   bool _isKvvSyncComplete = false;
   bool _skipSnackbar = true;
+  final ScrollController _scrollController = ScrollController();
+  int _pageNumber = 0;
+  static const int _pageSize = 30;
+  List<InvestmentContract> _contracts = [];
+  int _totalCount = 0;
+  String _currentPersonId = '';
+  bool _isLoadingMore = false;
+  bool _hasMoreContracts = true;
+  bool _isInitialLoadingContracts = true;
 
   @override
   void initState() {
     super.initState();
     _loadData();
+    _scrollController.addListener(_onScroll);
+    _loadContracts(reset: true);
     _investmentContractSyncSubscription = widget
         .syncNotificationService
         .investmentContractSyncCompleted
@@ -67,6 +77,7 @@ class _ContractsInvestmentTabState extends State<ContractsInvestmentTab> {
 
   @override
   void dispose() {
+    _scrollController.dispose();
     _investmentContractSyncSubscription.cancel();
     _contractSyncSubscription.cancel();
     super.dispose();
@@ -79,11 +90,56 @@ class _ContractsInvestmentTabState extends State<ContractsInvestmentTab> {
         personIds: widget.personIds,
       );
     });
-    _contractsFuture = loadGate.then((_) {
-      return widget.contractsRepository.fetchInvestmentContracts(
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 300 &&
+        !_isLoadingMore &&
+        _hasMoreContracts) {
+      _loadContracts();
+    }
+  }
+
+  Future<void> _loadContracts({bool reset = false}) async {
+    if (!reset && (!_hasMoreContracts || _isLoadingMore)) return;
+    if (reset) {
+      setState(() {
+        _pageNumber = 0;
+        _contracts = [];
+        _hasMoreContracts = true;
+        _isInitialLoadingContracts = true;
+      });
+    }
+    setState(() => _isLoadingMore = true);
+    try {
+      final data = await widget.contractsRepository.fetchInvestmentContracts(
         personIds: widget.personIds,
+        pageNumber: _pageNumber,
+        pageSize: _pageSize,
       );
-    });
+      if (!mounted) return;
+      setState(() {
+        if (data != null) {
+          _contracts.addAll(data.contracts);
+          _currentPersonId = data.currentPersonId;
+          _totalCount = data.totalCount;
+          _hasMoreContracts = data.contracts.length == _pageSize;
+          _pageNumber++;
+        } else {
+          _hasMoreContracts = false;
+        }
+        _isLoadingMore = false;
+        _isInitialLoadingContracts = false;
+      });
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _isLoadingMore = false;
+          _isInitialLoadingContracts = false;
+        });
+      }
+    }
   }
 
   Future<void> _runSync() async {
@@ -97,23 +153,13 @@ class _ContractsInvestmentTabState extends State<ContractsInvestmentTab> {
   }
 
   Future<void> _reloadContractsAfterDelete() async {
-    setState(() {
-      _isReloadingContracts = true;
-      _loadData();
-    });
+    setState(() => _isReloadingContracts = true);
     try {
-      await Future.wait<dynamic>(<Future<dynamic>>[
-        _overviewFuture,
-        _contractsFuture,
-      ]);
-    } catch (_) {
-      // Keep existing data if refresh fails.
-    } finally {
-      if (!mounted) return;
-      setState(() {
-        _isReloadingContracts = false;
-      });
-    }
+      await Future.wait<dynamic>(<Future<dynamic>>[_overviewFuture]);
+    } catch (_) {}
+    if (!mounted) return;
+    setState(() => _isReloadingContracts = false);
+    await _loadContracts(reset: true);
   }
 
   void _handleInvestmentContractSyncCompleted(Map<String, dynamic> event) {
@@ -149,18 +195,16 @@ class _ContractsInvestmentTabState extends State<ContractsInvestmentTab> {
     });
 
     try {
-      await Future.wait<dynamic>(<Future<dynamic>>[
-        _overviewFuture,
-        _contractsFuture,
-      ]);
+      await Future.wait<dynamic>(<Future<dynamic>>[_overviewFuture]);
     } catch (_) {
       // Preserve the previous render if the post-sync refresh fails.
-    } finally {
-      if (!mounted) return;
-      setState(() {
-        _isRefreshingFromSyncNotification = false;
-      });
     }
+    if (!mounted) return;
+    setState(() {
+      _isRefreshingFromSyncNotification = false;
+    });
+
+    await _loadContracts(reset: true);
 
     if (!mounted) return;
     if (!_skipSnackbar) {
@@ -245,6 +289,7 @@ class _ContractsInvestmentTabState extends State<ContractsInvestmentTab> {
     final l10n = context.l10n;
 
     return SingleChildScrollView(
+      controller: _scrollController,
       padding: const EdgeInsets.fromLTRB(12, 12, 12, contractsBottomClearance),
       child: Column(
         children: [
@@ -419,20 +464,11 @@ class _ContractsInvestmentTabState extends State<ContractsInvestmentTab> {
 
           const SizedBox(height: 12),
 
-          FutureBuilder<InvestmentContractsData?>(
-            future: _contractsFuture,
-            builder: (context, snapshot) {
-              final contractsData =
-                  _isReloadingContracts ? null : snapshot.data;
-              final isLoadingContracts =
-                  _isReloadingContracts ||
-                  (snapshot.connectionState == ConnectionState.waiting &&
-                      contractsData == null);
-              final countLabel = contractsData != null
-                  ? contractsData.totalCount.toString()
-                  : isLoadingContracts
+          Builder(
+            builder: (context) {
+              final countLabel = _isInitialLoadingContracts
                   ? '...'
-                  : '0';
+                  : _totalCount.toString();
 
               return Column(
                 children: [
@@ -442,62 +478,68 @@ class _ContractsInvestmentTabState extends State<ContractsInvestmentTab> {
                     showActions: true,
                     onInfoTap: _showInfoSheet,
                     onAddTap: _showAddInvestmentForm,
-                    isAddEnabled: widget.canAddContracts && !isLoadingContracts,
+                    isAddEnabled:
+                        widget.canAddContracts && !_isInitialLoadingContracts,
                   ),
                   const SizedBox(height: 14),
-                  if (isLoadingContracts)
-                    ContractsListLoadingState(
-                      message: l10n.tr('tns.loading'),
-                    )
-                  else if (contractsData == null ||
-                      contractsData.contracts.isEmpty)
+                  if (_isInitialLoadingContracts || _isReloadingContracts)
+                    ContractsListLoadingState(message: l10n.tr('tns.loading'))
+                  else if (_contracts.isEmpty)
                     ContractsEmptyState(
                       message: context.l10n.tr('tns.noDataAddedYet'),
                     )
                   else
                     Column(
-                      children: List<Widget>.generate(
-                        contractsData.contracts.length,
-                        (index) => Padding(
-                          padding: EdgeInsets.only(
-                            bottom: index == contractsData.contracts.length - 1
-                                ? 0
-                                : 12,
-                          ),
-                          child: ContractsInvestmentContractCard(
-                            contract: contractsData.contracts[index],
-                            currentPersonId: contractsData.currentPersonId,
-                            ownerMembersByPersonId:
-                                widget.ownerMembersByPersonId,
-                            formatCurrency: formatContractCurrency,
-                            formatDate: _formatDate,
-                            formatInvestmentType: _formatInvestmentType,
-                            onEditTap: () =>
-                                _handleEditAction(contractsData.contracts[index]),
-                            onDeleteTap: () => _handleDeleteAction(
-                              contractsData.contracts[index],
+                      children: [
+                        ...List<Widget>.generate(
+                          _contracts.length,
+                          (index) => Padding(
+                            padding: EdgeInsets.only(
+                              bottom:
+                                  index == _contracts.length - 1 ? 0 : 12,
                             ),
-                            onTap: () async {
-                              await Navigator.of(context).push<bool>(
-                                MaterialPageRoute(
-                                  builder: (_) =>
-                                      ContractDetailPage.fromInvestment(
-                                        contract:
-                                            contractsData.contracts[index],
-                                        contractsRepository:
-                                            widget.contractsRepository,
-                                        currentPersonId:
-                                            contractsData.currentPersonId,
-                                      ),
-                                ),
-                              );
-                              if (mounted) {
-                                await _reloadContractsAfterDelete();
-                              }
-                            },
+                            child: ContractsInvestmentContractCard(
+                              contract: _contracts[index],
+                              currentPersonId: _currentPersonId,
+                              ownerMembersByPersonId:
+                                  widget.ownerMembersByPersonId,
+                              formatCurrency: formatContractCurrency,
+                              formatDate: _formatDate,
+                              formatInvestmentType: _formatInvestmentType,
+                              onEditTap: () =>
+                                  _handleEditAction(_contracts[index]),
+                              onDeleteTap: () =>
+                                  _handleDeleteAction(_contracts[index]),
+                              onTap: () async {
+                                await Navigator.of(context).push<bool>(
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        ContractDetailPage.fromInvestment(
+                                          contract: _contracts[index],
+                                          contractsRepository:
+                                              widget.contractsRepository,
+                                          currentPersonId: _currentPersonId,
+                                        ),
+                                  ),
+                                );
+                                if (mounted) {
+                                  await _reloadContractsAfterDelete();
+                                }
+                              },
+                            ),
                           ),
                         ),
-                      ),
+                        if (_isLoadingMore)
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                color: Color(0xFFD91F32),
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                 ],
               );

@@ -473,6 +473,7 @@ class _ContractTabContent extends StatelessWidget {
       1 => ContractsNonLifeInsuranceTab(
         key: ValueKey<String>('insure-$selectionSignature'),
         contractsRepository: contractsRepository,
+        syncNotificationService: syncNotificationService,
         personIds: selectedPersonIds,
         ownerMembersByPersonId: ownerMembersByPersonId,
         canAddContracts: canAddContracts,

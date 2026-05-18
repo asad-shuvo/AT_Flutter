@@ -31,13 +31,29 @@ class ContractsLoanTab extends StatefulWidget {
 class _ContractsLoanTabState extends State<ContractsLoanTab> {
   late Future<void> _syncFuture;
   late Future<InsureOverview?> _overviewFuture;
-  late Future<InsureContractsData?> _contractsFuture;
-  bool _isReloadingContracts = false;
+
+  final ScrollController _scrollController = ScrollController();
+  int _pageNumber = 0;
+  static const int _pageSize = 30;
+  List<InsureContract> _contracts = [];
+  int _totalCount = 0;
+  String _currentPersonId = '';
+  bool _isLoadingMore = false;
+  bool _hasMoreContracts = true;
+  bool _isInitialLoadingContracts = true;
 
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     _loadData();
+    _loadContracts(reset: true);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   void _loadData() {
@@ -47,11 +63,58 @@ class _ContractsLoanTabState extends State<ContractsLoanTab> {
         personIds: widget.personIds,
       );
     });
-    _contractsFuture = _syncFuture.then((_) {
-      return widget.contractsRepository.fetchLoanContracts(
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200 &&
+        !_isLoadingMore &&
+        _hasMoreContracts) {
+      _loadContracts();
+    }
+  }
+
+  Future<void> _loadContracts({bool reset = false}) async {
+    if (_isLoadingMore) return;
+    if (reset) {
+      setState(() {
+        _pageNumber = 0;
+        _contracts = [];
+        _totalCount = 0;
+        _currentPersonId = '';
+        _hasMoreContracts = true;
+        _isInitialLoadingContracts = true;
+      });
+    }
+    setState(() => _isLoadingMore = true);
+    try {
+      final data = await widget.contractsRepository.fetchLoanContracts(
         personIds: widget.personIds,
+        pageNumber: _pageNumber,
+        pageSize: _pageSize,
       );
-    });
+      if (!mounted) return;
+      if (data != null) {
+        setState(() {
+          _currentPersonId = data.currentPersonId;
+          _totalCount = data.totalCount;
+          _contracts = [..._contracts, ...data.contracts];
+          _pageNumber++;
+          _hasMoreContracts = _contracts.length < data.totalCount;
+        });
+      } else {
+        setState(() => _hasMoreContracts = false);
+      }
+    } catch (_) {
+      if (mounted) setState(() => _hasMoreContracts = false);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingMore = false;
+          _isInitialLoadingContracts = false;
+        });
+      }
+    }
   }
 
   Future<void> _runSync() async {
@@ -65,23 +128,8 @@ class _ContractsLoanTabState extends State<ContractsLoanTab> {
   }
 
   Future<void> _reloadContractsAfterDelete() async {
-    setState(() {
-      _isReloadingContracts = true;
-      _loadData();
-    });
-    try {
-      await Future.wait<dynamic>(<Future<dynamic>>[
-        _overviewFuture,
-        _contractsFuture,
-      ]);
-    } catch (_) {
-      // Keep existing data if refresh fails.
-    } finally {
-      if (!mounted) return;
-      setState(() {
-        _isReloadingContracts = false;
-      });
-    }
+    _loadData();
+    await _loadContracts(reset: true);
   }
 
   Future<void> _handleEditAction(InsureContract contract) async {
@@ -139,6 +187,7 @@ class _ContractsLoanTabState extends State<ContractsLoanTab> {
     final l10n = context.l10n;
 
     return SingleChildScrollView(
+      controller: _scrollController,
       padding: const EdgeInsets.fromLTRB(12, 12, 12, contractsBottomClearance),
       child: Column(
         children: [
@@ -214,20 +263,11 @@ class _ContractsLoanTabState extends State<ContractsLoanTab> {
             icon: FilipIcons.loan,
           ),
           const SizedBox(height: 12),
-          FutureBuilder<InsureContractsData?>(
-            future: _contractsFuture,
-            builder: (context, snapshot) {
-              final contractsData =
-                  _isReloadingContracts ? null : snapshot.data;
-              final isLoadingContracts =
-                  _isReloadingContracts ||
-                  (snapshot.connectionState == ConnectionState.waiting &&
-                      contractsData == null);
-              final countLabel = contractsData != null
-                  ? contractsData.totalCount.toString()
-                  : isLoadingContracts
+          Builder(
+            builder: (context) {
+              final countLabel = _isInitialLoadingContracts
                   ? '...'
-                  : '0';
+                  : _totalCount.toString();
 
               return Column(
                 children: [
@@ -237,52 +277,46 @@ class _ContractsLoanTabState extends State<ContractsLoanTab> {
                     showActions: true,
                     onInfoTap: _showInfoSheet,
                     onAddTap: _showAddLoanForm,
-                    isAddEnabled: widget.canAddContracts && !isLoadingContracts,
+                    isAddEnabled:
+                        widget.canAddContracts && !_isInitialLoadingContracts,
                   ),
                   const SizedBox(height: 14),
-                  if (isLoadingContracts)
+                  if (_isInitialLoadingContracts)
                     ContractsListLoadingState(
                       message: l10n.tr('tns.loading'),
                     )
-                  else if (contractsData == null ||
-                      contractsData.contracts.isEmpty)
+                  else if (_contracts.isEmpty)
                     ContractsEmptyState(message: l10n.tr('tns.noDataAddedYet'))
                   else
                     Column(
                       children: List<Widget>.generate(
-                        contractsData.contracts.length,
+                        _contracts.length,
                         (index) => Padding(
                           padding: EdgeInsets.only(
-                            bottom: index == contractsData.contracts.length - 1
-                                ? 0
-                                : 12,
+                            bottom: index == _contracts.length - 1 ? 0 : 12,
                           ),
                           child: ContractsInsureContractCard(
-                            contract: contractsData.contracts[index],
-                            currentPersonId: contractsData.currentPersonId,
+                            contract: _contracts[index],
+                            currentPersonId: _currentPersonId,
                             ownerMembersByPersonId:
                                 widget.ownerMembersByPersonId,
                             formatCurrency: formatContractCurrency,
                             formatDate: _formatDate,
                             formatType: _formatType,
                             onEditTap: () =>
-                                _handleEditAction(contractsData.contracts[index]),
-                            onDeleteTap: () => _handleDeleteAction(
-                              contractsData.contracts[index],
-                            ),
+                                _handleEditAction(_contracts[index]),
+                            onDeleteTap: () =>
+                                _handleDeleteAction(_contracts[index]),
                             onTap: () async {
                               await Navigator.of(context).push<bool>(
                                 MaterialPageRoute(
-                                  builder: (_) =>
-                                      ContractDetailPage.fromInsure(
-                                        contract:
-                                            contractsData.contracts[index],
-                                        entityName: 'Loan',
-                                        contractsRepository:
-                                            widget.contractsRepository,
-                                        currentPersonId:
-                                            contractsData.currentPersonId,
-                                      ),
+                                  builder: (_) => ContractDetailPage.fromInsure(
+                                    contract: _contracts[index],
+                                    entityName: 'Loan',
+                                    contractsRepository:
+                                        widget.contractsRepository,
+                                    currentPersonId: _currentPersonId,
+                                  ),
                                 ),
                               );
                               if (mounted) {
@@ -291,6 +325,14 @@ class _ContractsLoanTabState extends State<ContractsLoanTab> {
                             },
                           ),
                         ),
+                      ),
+                    ),
+                  if (_isLoadingMore)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: Color(0xFFD91F32),
                       ),
                     ),
                 ],

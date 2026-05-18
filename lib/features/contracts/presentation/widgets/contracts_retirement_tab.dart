@@ -31,24 +31,35 @@ class ContractsRetirementTab extends StatefulWidget {
 class _ContractsRetirementTabState extends State<ContractsRetirementTab> {
   late Future<void> _syncFuture;
   late Future<InsureOverview?> _overviewFuture;
-  late Future<InsureContractsData?> _contractsFuture;
-  bool _isReloadingContracts = false;
+
+  final ScrollController _scrollController = ScrollController();
+  int _pageNumber = 0;
+  static const int _pageSize = 30;
+  List<InsureContract> _contracts = [];
+  int _totalCount = 0;
+  String _currentPersonId = '';
+  bool _isLoadingMore = false;
+  bool _hasMoreContracts = true;
+  bool _isInitialLoadingContracts = true;
 
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     _loadData();
+    _loadContracts(reset: true);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   void _loadData() {
     _syncFuture = _runSync();
     _overviewFuture = _syncFuture.then((_) {
       return widget.contractsRepository.fetchRetirementOverview(
-        personIds: widget.personIds,
-      );
-    });
-    _contractsFuture = _syncFuture.then((_) {
-      return widget.contractsRepository.fetchRetirementContracts(
         personIds: widget.personIds,
       );
     });
@@ -64,24 +75,59 @@ class _ContractsRetirementTabState extends State<ContractsRetirementTab> {
     }
   }
 
-  Future<void> _reloadContractsAfterDelete() async {
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200 &&
+        !_isLoadingMore &&
+        _hasMoreContracts) {
+      _loadContracts();
+    }
+  }
+
+  Future<void> _loadContracts({bool reset = false}) async {
+    if (_isLoadingMore) return;
     setState(() {
-      _isReloadingContracts = true;
-      _loadData();
+      _isLoadingMore = true;
+      if (reset) {
+        _pageNumber = 0;
+        _contracts = [];
+        _hasMoreContracts = true;
+        _isInitialLoadingContracts = true;
+      }
     });
     try {
-      await Future.wait<dynamic>(<Future<dynamic>>[
-        _overviewFuture,
-        _contractsFuture,
-      ]);
+      final data = await widget.contractsRepository.fetchRetirementContracts(
+        personIds: widget.personIds,
+        pageNumber: _pageNumber,
+        pageSize: _pageSize,
+      );
+      if (!mounted) return;
+      if (data != null) {
+        setState(() {
+          _currentPersonId = data.currentPersonId;
+          _totalCount = data.totalCount;
+          _contracts = [..._contracts, ...data.contracts];
+          _pageNumber += 1;
+          _hasMoreContracts = _contracts.length < data.totalCount;
+        });
+      } else {
+        setState(() {
+          _hasMoreContracts = false;
+        });
+      }
     } catch (_) {
-      // Keep existing data if refresh fails.
+      // Keep existing data if load fails.
     } finally {
       if (!mounted) return;
       setState(() {
-        _isReloadingContracts = false;
+        _isLoadingMore = false;
+        _isInitialLoadingContracts = false;
       });
     }
+  }
+
+  Future<void> _reloadContractsAfterDelete() async {
+    await _loadContracts(reset: true);
   }
 
   Future<void> _handleEditAction(InsureContract contract) async {
@@ -138,6 +184,7 @@ class _ContractsRetirementTabState extends State<ContractsRetirementTab> {
     final l10n = context.l10n;
 
     return SingleChildScrollView(
+      controller: _scrollController,
       padding: const EdgeInsets.fromLTRB(12, 12, 12, contractsBottomClearance),
       child: Column(
         children: [
@@ -213,20 +260,11 @@ class _ContractsRetirementTabState extends State<ContractsRetirementTab> {
             icon: FilipIcons.loan,
           ),
           const SizedBox(height: 12),
-          FutureBuilder<InsureContractsData?>(
-            future: _contractsFuture,
-            builder: (context, snapshot) {
-              final contractsData =
-                  _isReloadingContracts ? null : snapshot.data;
-              final isLoadingContracts =
-                  _isReloadingContracts ||
-                  (snapshot.connectionState == ConnectionState.waiting &&
-                      contractsData == null);
-              final countLabel = contractsData != null
-                  ? contractsData.totalCount.toString()
-                  : isLoadingContracts
+          Builder(
+            builder: (context) {
+              final countLabel = _isInitialLoadingContracts
                   ? '...'
-                  : '0';
+                  : _totalCount.toString();
 
               return Column(
                 children: [
@@ -236,29 +274,28 @@ class _ContractsRetirementTabState extends State<ContractsRetirementTab> {
                     showActions: true,
                     onInfoTap: _showInfoSheet,
                     onAddTap: _showAddRetirementForm,
-                    isAddEnabled: widget.canAddContracts && !isLoadingContracts,
+                    isAddEnabled:
+                        widget.canAddContracts && !_isInitialLoadingContracts,
                   ),
                   const SizedBox(height: 14),
-                  if (isLoadingContracts)
+                  if (_isInitialLoadingContracts)
                     ContractsListLoadingState(
                       message: l10n.tr('tns.loading'),
                     )
-                  else if (contractsData == null ||
-                      contractsData.contracts.isEmpty)
+                  else if (_contracts.isEmpty)
                     ContractsEmptyState(message: l10n.tr('tns.noDataAddedYet'))
                   else
                     Column(
                       children: List<Widget>.generate(
-                        contractsData.contracts.length,
+                        _contracts.length,
                         (index) => Padding(
                           padding: EdgeInsets.only(
-                            bottom: index == contractsData.contracts.length - 1
-                                ? 0
-                                : 12,
+                            bottom:
+                                index == _contracts.length - 1 ? 0 : 12,
                           ),
                           child: ContractsInsureContractCard(
-                            contract: contractsData.contracts[index],
-                            currentPersonId: contractsData.currentPersonId,
+                            contract: _contracts[index],
+                            currentPersonId: _currentPersonId,
                             ownerMembersByPersonId:
                                 widget.ownerMembersByPersonId,
                             formatCurrency: formatContractCurrency,
@@ -266,22 +303,19 @@ class _ContractsRetirementTabState extends State<ContractsRetirementTab> {
                             formatType: _formatType,
                             endDatePrefix: l10n.tr('tns.endDate'),
                             onEditTap: () =>
-                                _handleEditAction(contractsData.contracts[index]),
-                            onDeleteTap: () => _handleDeleteAction(
-                              contractsData.contracts[index],
-                            ),
+                                _handleEditAction(_contracts[index]),
+                            onDeleteTap: () =>
+                                _handleDeleteAction(_contracts[index]),
                             onTap: () async {
                               await Navigator.of(context).push<bool>(
                                 MaterialPageRoute(
                                   builder: (_) =>
                                       ContractDetailPage.fromInsure(
-                                        contract:
-                                            contractsData.contracts[index],
+                                        contract: _contracts[index],
                                         entityName: 'Retirement',
                                         contractsRepository:
                                             widget.contractsRepository,
-                                        currentPersonId:
-                                            contractsData.currentPersonId,
+                                        currentPersonId: _currentPersonId,
                                       ),
                                 ),
                               );
@@ -291,6 +325,14 @@ class _ContractsRetirementTabState extends State<ContractsRetirementTab> {
                             },
                           ),
                         ),
+                      ),
+                    ),
+                  if (_isLoadingMore && !_isInitialLoadingContracts)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: Color(0xFFD91F32),
                       ),
                     ),
                 ],
