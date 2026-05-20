@@ -1,5 +1,7 @@
 import 'package:filip_at_flutter/app/config/app_config.dart';
 import 'package:filip_at_flutter/app/services/app_services.dart';
+import 'package:filip_at_flutter/features/app_version/presentation/force_update_page.dart';
+import 'package:filip_at_flutter/features/app_version/presentation/maintenance_page.dart';
 import 'package:filip_at_flutter/features/auth/presentation/forgot_password_page.dart';
 import 'package:filip_at_flutter/features/auth/presentation/login_intermediary_page.dart';
 import 'package:filip_at_flutter/features/auth/presentation/login_page.dart';
@@ -24,6 +26,8 @@ class AppRouter {
   static const String dashboard = '/dashboard';
   static const String selfSignup = '/self-signup';
   static const String twoFactor = '/login/two-factor';
+  static const String maintenance = '/maintenance';
+  static const String forceUpdate = '/force-update';
 
   final AppConfig config;
   final AppServices services;
@@ -35,6 +39,8 @@ class AppRouter {
           builder: (_) => SplashPage(
             config: config,
             authSessionController: services.authSessionController,
+            appVersionRepository: services.appVersionRepository,
+            secureStorageService: services.secureStorageService,
           ),
           settings: settings,
         );
@@ -59,6 +65,7 @@ class AppRouter {
             loginSyncRepository: services.loginSyncRepository,
             profileRepository: services.profileRepository,
             authSessionController: services.authSessionController,
+            appVersionRepository: services.appVersionRepository,
           ),
           settings: settings,
         );
@@ -102,7 +109,20 @@ class AppRouter {
             driveRepository: services.driveRepository,
             userSessionCache: services.userSessionCache,
             profileRepository: services.profileRepository,
+            appVersionRepository: services.appVersionRepository,
             surveyAddressRepository: services.surveyAddressRepository,
+          ),
+          settings: settings,
+        );
+      case maintenance:
+        return MaterialPageRoute<void>(
+          builder: (_) => const MaintenancePage(),
+          settings: settings,
+        );
+      case forceUpdate:
+        return MaterialPageRoute<void>(
+          builder: (_) => ForceUpdatePage(
+            storeUrl: services.appVersionRepository.storeUrl,
           ),
           settings: settings,
         );
@@ -111,6 +131,8 @@ class AppRouter {
           builder: (_) => SplashPage(
             config: config,
             authSessionController: services.authSessionController,
+            appVersionRepository: services.appVersionRepository,
+            secureStorageService: services.secureStorageService,
           ),
           settings: settings,
         );

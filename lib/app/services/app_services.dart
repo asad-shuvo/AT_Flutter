@@ -1,6 +1,7 @@
 import 'package:filip_at_flutter/app/localization/app_language_controller.dart';
 import 'package:filip_at_flutter/core/network/api_client.dart';
 import 'package:filip_at_flutter/core/storage/secure_storage_service.dart';
+import 'package:filip_at_flutter/features/app_version/data/app_version_repository.dart';
 import 'package:filip_at_flutter/features/auth/application/auth_session_controller.dart';
 import 'package:filip_at_flutter/features/auth/application/user_session_cache.dart';
 import 'package:filip_at_flutter/features/auth/data/auth_repository.dart';
@@ -37,6 +38,7 @@ class AppServices {
     required this.driveRepository,
     required this.profileRepository,
     required this.surveyAddressRepository,
+    required this.appVersionRepository,
   });
 
   final ApiClient apiClient;
@@ -57,4 +59,5 @@ class AppServices {
   final DriveRepository driveRepository;
   final ProfileRepository profileRepository;
   final SurveyAddressRepository surveyAddressRepository;
+  final AppVersionRepository appVersionRepository;
 }

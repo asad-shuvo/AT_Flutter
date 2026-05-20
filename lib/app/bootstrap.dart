@@ -10,6 +10,7 @@ import 'package:filip_at_flutter/app/services/app_services.dart';
 import 'package:filip_at_flutter/core/network/api_client.dart';
 import 'package:filip_at_flutter/core/storage/app_storage_keys.dart';
 import 'package:filip_at_flutter/core/storage/secure_storage_service.dart';
+import 'package:filip_at_flutter/features/app_version/data/app_version_repository.dart';
 import 'package:filip_at_flutter/features/auth/application/auth_session_controller.dart';
 import 'package:filip_at_flutter/features/auth/application/user_session_cache.dart';
 import 'package:filip_at_flutter/features/auth/data/auth_repository.dart';
@@ -172,6 +173,11 @@ Future<void> bootstrap(AppFlavor flavor) async {
   await authSessionController.restoreSession();
   await languageController.restoreLocale();
 
+  final appVersionRepository = AppVersionRepository(
+    apiClient: apiClient,
+    appVersion: config.appVersion,
+  );
+
   final services = AppServices(
     apiClient: apiClient,
     secureStorageService: secureStorageService,
@@ -191,6 +197,7 @@ Future<void> bootstrap(AppFlavor flavor) async {
     driveRepository: driveRepository,
     profileRepository: profileRepository,
     surveyAddressRepository: surveyAddressRepository,
+    appVersionRepository: appVersionRepository,
   );
 
   // Wire auth state changes for FCM topic subscription and session cache invalidation

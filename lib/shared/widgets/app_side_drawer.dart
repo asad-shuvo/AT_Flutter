@@ -1,4 +1,3 @@
-import 'package:filip_at_flutter/app/localization/app_language_scope.dart';
 import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/features/about/presentation/about_page.dart';
 import 'package:filip_at_flutter/features/auth/application/auth_session_controller.dart';
@@ -60,9 +59,6 @@ class AppSideDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final languageController = AppLanguageScope.of(context);
-    final isEnglish = languageController.languageCode == 'en';
-
     return Drawer(
       width: 286,
       backgroundColor: Colors.white,
@@ -307,41 +303,6 @@ class AppSideDrawer extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           const Divider(height: 1, color: Color(0xFFE0E0E0)),
-          const SizedBox(height: 4),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-            child: Row(
-              children: [
-                const Icon(
-                  FilipIcons.global,
-                  size: 20,
-                  color: Color(0xFF7E7E7E),
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  isEnglish
-                      ? l10n.tr('en').toUpperCase()
-                      : l10n.tr('de').toUpperCase(),
-                  style: const TextStyle(
-                    fontFamily: 'Calibri',
-                    fontSize: 14,
-                    color: Color(0xFF333333),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const Spacer(),
-                Switch(
-                  value: isEnglish,
-                  onChanged: (value) {
-                    languageController.setLanguageCode(value ? 'en' : 'de');
-                  },
-                  activeThumbColor: AppColors.primaryRed,
-                  inactiveThumbColor: const Color(0xFFBDBDBD),
-                  inactiveTrackColor: const Color(0xFFE0E0E0),
-                ),
-              ],
-            ),
-          ),
           Padding(
             padding: const EdgeInsets.only(top: 12),
             child: Image.asset(

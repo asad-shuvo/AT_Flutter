@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:filip_at_flutter/app/router/app_router.dart';
+import 'package:filip_at_flutter/features/app_version/data/app_version_repository.dart';
 import 'package:filip_at_flutter/features/auth/application/auth_session_controller.dart';
 import 'package:filip_at_flutter/features/auth/application/user_session_cache.dart';
 import 'package:filip_at_flutter/features/auth/data/login_sync_repository.dart';
@@ -17,12 +18,14 @@ class LoginIntermediaryPage extends StatefulWidget {
     required this.loginSyncRepository,
     required this.profileRepository,
     required this.authSessionController,
+    required this.appVersionRepository,
   });
 
   final UserSessionCache userSessionCache;
   final LoginSyncRepository loginSyncRepository;
   final ProfileRepository profileRepository;
   final AuthSessionController authSessionController;
+  final AppVersionRepository appVersionRepository;
 
   @override
   State<LoginIntermediaryPage> createState() => _LoginIntermediaryPageState();
@@ -66,6 +69,21 @@ class _LoginIntermediaryPageState extends State<LoginIntermediaryPage> {
     }
 
     if (!mounted) return;
+
+    final versionStatus = await widget.appVersionRepository
+        .checkAppVersion(session?.accessToken ?? '');
+    if (!mounted) return;
+
+    if (versionStatus == AppVersionStatus.maintenance) {
+      Navigator.of(context)
+          .pushNamedAndRemoveUntil(AppRouter.maintenance, (_) => false);
+      return;
+    }
+    if (versionStatus == AppVersionStatus.forceUpdate) {
+      Navigator.of(context)
+          .pushNamedAndRemoveUntil(AppRouter.forceUpdate, (_) => false);
+      return;
+    }
 
     await _maybeShowBiometricPrompt();
 

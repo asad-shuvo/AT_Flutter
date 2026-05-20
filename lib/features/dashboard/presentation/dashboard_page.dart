@@ -3,6 +3,7 @@ import 'package:filip_at_flutter/app/config/app_config.dart';
 import 'package:filip_at_flutter/app/router/app_route_observer.dart';
 import 'package:filip_at_flutter/app/localization/app_language_scope.dart';
 import 'package:filip_at_flutter/app/localization/app_localizations.dart';
+import 'package:filip_at_flutter/features/app_version/data/app_version_repository.dart';
 import 'package:filip_at_flutter/features/auth/application/auth_session_controller.dart';
 import 'package:filip_at_flutter/features/auth/application/user_session_cache.dart';
 import 'package:filip_at_flutter/features/chat/presentation/chat_page.dart';
@@ -49,6 +50,7 @@ class DashboardPage extends StatefulWidget {
     required this.driveRepository,
     required this.userSessionCache,
     required this.profileRepository,
+    required this.appVersionRepository,
     this.surveyAddressRepository,
   });
 
@@ -62,13 +64,15 @@ class DashboardPage extends StatefulWidget {
   final DriveRepository driveRepository;
   final UserSessionCache userSessionCache;
   final ProfileRepository profileRepository;
+  final AppVersionRepository appVersionRepository;
   final SurveyAddressRepository? surveyAddressRepository;
 
   @override
   State<DashboardPage> createState() => _DashboardPageState();
 }
 
-class _DashboardPageState extends State<DashboardPage> with RouteAware {
+class _DashboardPageState extends State<DashboardPage>
+    with RouteAware, WidgetsBindingObserver {
   // Futures only assigned after the sync notification arrives
   Future<DashboardOverviewSummary>? _overviewFuture;
   Future<DashboardInsightsData>? _insightsFuture;
@@ -94,6 +98,7 @@ class _DashboardPageState extends State<DashboardPage> with RouteAware {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _summaryCardsController = PageController(viewportFraction: 0.92);
     _distributionCardsController = PageController(viewportFraction: 0.88);
     _userProfileFuture = widget.dashboardRepository.fetchUserProfile();
@@ -155,6 +160,7 @@ class _DashboardPageState extends State<DashboardPage> with RouteAware {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     appRouteObserver.unsubscribe(this);
     _summaryCardsController.dispose();
     _distributionCardsController.dispose();
@@ -162,6 +168,28 @@ class _DashboardPageState extends State<DashboardPage> with RouteAware {
     _syncCustomerContractSubscription.cancel();
     _gdprSyncSubscription?.cancel();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _checkAppVersion();
+    }
+  }
+
+  Future<void> _checkAppVersion() async {
+    final session = await widget.userSessionCache.resolve();
+    if (!mounted) return;
+    final status = await widget.appVersionRepository
+        .checkAppVersion(session?.accessToken ?? '');
+    if (!mounted) return;
+    if (status == AppVersionStatus.maintenance) {
+      Navigator.of(context)
+          .pushNamedAndRemoveUntil('/maintenance', (_) => false);
+    } else if (status == AppVersionStatus.forceUpdate) {
+      Navigator.of(context)
+          .pushNamedAndRemoveUntil('/force-update', (_) => false);
+    }
   }
 
   Future<void> _prepareDashboardGdprFlow() async {
