@@ -1,3 +1,4 @@
+import 'package:filip_at_flutter/app/localization/app_language_scope.dart';
 import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/features/about/presentation/about_page.dart';
 import 'package:filip_at_flutter/features/auth/application/auth_session_controller.dart';
@@ -307,6 +308,7 @@ class AppSideDrawer extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
+          _LanguageToggleRow(),
           const Divider(height: 1, color: Color(0xFFE0E0E0)),
           Padding(
             padding: const EdgeInsets.only(top: 12),
@@ -434,6 +436,40 @@ class _DrawerAvatar extends StatelessWidget {
       decoration: BoxDecoration(color: avatarColor, shape: BoxShape.circle),
       alignment: Alignment.center,
       child: Text(initials, style: textStyle),
+    );
+  }
+}
+
+class _LanguageToggleRow extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final langCtrl = AppLanguageScope.of(context);
+    final isDe = langCtrl.languageCode == 'de';
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+      child: Row(
+        children: [
+          const Icon(Icons.language, size: 20, color: Color(0xFF7E7E7E)),
+          const SizedBox(width: 16),
+          Text(
+            langCtrl.languageCode.toUpperCase(),
+            style: const TextStyle(
+              fontFamily: 'Calibri',
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
+              color: Color(0xFF333333),
+              letterSpacing: 0.6,
+            ),
+          ),
+          const Spacer(),
+          Switch(
+            value: isDe,
+            onChanged: (v) => langCtrl.setLanguageCode(v ? 'de' : 'en'),
+            activeThumbColor: AppColors.primaryRed,
+            activeTrackColor: AppColors.primaryRed.withValues(alpha: 0.4),
+          ),
+        ],
+      ),
     );
   }
 }
