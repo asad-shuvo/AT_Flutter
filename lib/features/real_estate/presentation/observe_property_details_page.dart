@@ -1,4 +1,4 @@
-import 'package:filip_at_flutter/app/localization/app_localizations.dart';
+﻿import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/features/real_estate/application/observation_controller.dart';
 import 'package:filip_at_flutter/features/real_estate/data/property_item.dart';
 import 'package:filip_at_flutter/features/real_estate/data/property_valuation_entry.dart';
@@ -6,7 +6,6 @@ import 'package:filip_at_flutter/features/real_estate/data/real_estate_repositor
 import 'package:filip_at_flutter/features/real_estate/presentation/property_form_page.dart';
 import 'package:filip_at_flutter/features/real_estate/presentation/dossier_web_view_page.dart';
 import 'package:filip_at_flutter/features/chat/presentation/chat_page.dart';
-import 'package:filip_at_flutter/features/dashboard/data/dashboard_models.dart';
 import 'package:filip_at_flutter/features/real_estate/presentation/widgets/contact_advisor_sheet.dart';
 import 'package:filip_at_flutter/features/real_estate/presentation/widgets/dossier_progress_sheet.dart';
 import 'package:filip_at_flutter/features/real_estate/presentation/widgets/price_line_chart.dart';
@@ -14,6 +13,10 @@ import 'package:filip_at_flutter/features/real_estate/presentation/widgets/prope
 import 'package:flutter/material.dart';
 
 const _iconFont = 'filip_at_iconpack_29022024';
+const _iconTrendUp = '';
+const _iconCoins = '';
+const _iconBell = '';
+const _iconInfo = '';
 
 class ObservePropertyDetailsPage extends StatefulWidget {
   const ObservePropertyDetailsPage({
@@ -105,6 +108,10 @@ class _ObservePropertyDetailsPageState
     switch (action) {
       case PropertyMoreVertAction.edit:
         await _openEditForm(item);
+      case PropertyMoreVertAction.observeAnother:
+        await _openObserveAnother();
+      case PropertyMoreVertAction.valuateAnother:
+        break;
       case PropertyMoreVertAction.contactAdvisor:
         await _showContactAdvisor();
       case PropertyMoreVertAction.detailedView:
@@ -115,7 +122,22 @@ class _ObservePropertyDetailsPageState
         await _confirmDelete(item);
       case PropertyMoreVertAction.addToObserve:
         break;
+      case PropertyMoreVertAction.toggleAgent:
+        break;
     }
+  }
+
+  Future<void> _openObserveAnother() async {
+    await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => PropertyFormPage(
+          source: PropertyListSource.observation,
+          repository: widget.repository,
+          initialData: null,
+          onSaved: () {},
+        ),
+      ),
+    );
   }
 
   Future<void> _showContactAdvisor() async {
@@ -235,24 +257,24 @@ class _ObservePropertyDetailsPageState
         );
         if (mounted) setState(() => _item = item.withMakeMovePrice(price));
       } catch (_) {
-        if (mounted) _showSnackBar('Could not save wish price. Please try again.');
+        if (mounted) _showSnackBar('Could not save move price. Please try again.');
       }
     } else {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('Remove Wish Price'),
-          content: const Text('Are you sure you want to remove your wish price?'),
+          title: Text(ctx.l10n.tr('setMovePrice')),
+          content: const Text('Are you sure you want to remove your move price?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(false),
-              child: const Text('Cancel'),
+              child: Text(ctx.l10n.tr('cancel')),
             ),
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(true),
-              child: const Text(
-                'Remove',
-                style: TextStyle(color: Color(0xFFD82034)),
+              child: Text(
+                ctx.l10n.tr('confirm'),
+                style: const TextStyle(color: Color(0xFFD82034)),
               ),
             ),
           ],
@@ -267,7 +289,7 @@ class _ObservePropertyDetailsPageState
         );
         if (mounted) setState(() => _item = item.withMakeMovePrice(null));
       } catch (_) {
-        if (mounted) _showSnackBar('Could not remove wish price. Please try again.');
+        if (mounted) _showSnackBar('Could not remove move price. Please try again.');
       }
     }
   }
@@ -278,106 +300,206 @@ class _ObservePropertyDetailsPageState
       context: context,
       useRootNavigator: true,
       isScrollControlled: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: Colors.white,
+      constraints: const BoxConstraints(maxWidth: double.infinity),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+      ),
+      builder: (sheetCtx) => StatefulBuilder(
+        builder: (ctx, setSheetState) {
+          final hasValue = controller.text.trim().isNotEmpty;
+          return Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(sheetCtx).viewInsets.bottom,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  child: Row(
+                    children: [
+                      Text(
+                        _iconCoins,
+                        style: const TextStyle(
+                          fontFamily: _iconFont,
+                          fontSize: 28,
+                          color: Color(0xFF808080),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        ctx.l10n.tr('setMovePrice'),
+                        style: const TextStyle(
+                          fontFamily: 'Calibri',
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF333333),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Text(
+                    ctx.l10n.tr('setPropertyPrice'),
+                    style: const TextStyle(
+                      fontFamily: 'Calibri',
+                      fontSize: 13,
+                      color: Color(0xFF808080),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Text(
+                    'Price (€)',
+                    style: const TextStyle(
+                      fontFamily: 'Calibri',
+                      fontSize: 12,
+                      color: Color(0xFF808080),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: TextField(
+                    controller: controller,
+                    keyboardType: TextInputType.number,
+                    autofocus: true,
+                    onChanged: (_) => setSheetState(() {}),
+                    style: const TextStyle(fontFamily: 'Calibri', fontSize: 16),
+                    decoration: InputDecoration(
+                      hintText: '${ctx.l10n.tr('enterPrice')} (€)',
+                      hintStyle: const TextStyle(
+                        fontFamily: 'Calibri',
+                        fontSize: 14,
+                        color: Color(0xFFBBBBBB),
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(4),
+                        borderSide: const BorderSide(color: Color(0xFFCCCCCC)),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(4),
+                        borderSide: const BorderSide(color: Color(0xFFCCCCCC)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(4),
+                        borderSide: const BorderSide(color: Color(0xFFA11C36)),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 14,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  height: 52 + MediaQuery.of(sheetCtx).padding.bottom,
+                  child: ElevatedButton(
+                    onPressed: hasValue
+                        ? () {
+                            final val = double.tryParse(
+                              controller.text
+                                  .replaceAll(',', '')
+                                  .replaceAll(' ', ''),
+                            );
+                            Navigator.of(sheetCtx).pop(val);
+                          }
+                        : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: hasValue
+                          ? const Color(0xFFD82034)
+                          : const Color(0xFFE8AEB4),
+                      foregroundColor: Colors.white,
+                      disabledBackgroundColor: const Color(0xFFE8AEB4),
+                      disabledForegroundColor: Colors.white,
+                      elevation: 0,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.zero,
+                      ),
+                      padding: EdgeInsets.only(
+                        bottom: MediaQuery.of(sheetCtx).padding.bottom,
+                      ),
+                    ),
+                    child: Text(
+                      ctx.l10n.tr('confirm').toUpperCase(),
+                      style: const TextStyle(
+                        fontFamily: 'Calibri',
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void _showMovePriceInfoSheet() {
+    showModalBottomSheet<void>(
+      context: context,
+      useRootNavigator: true,
+      backgroundColor: Colors.white,
+      constraints: const BoxConstraints(maxWidth: double.infinity),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
       ),
       builder: (sheetCtx) => Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(sheetCtx).viewInsets.bottom,
+        padding: EdgeInsets.fromLTRB(
+          20,
+          20,
+          20,
+          MediaQuery.of(sheetCtx).padding.bottom + 24,
         ),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Set Wish Price',
-                style: TextStyle(
-                  fontFamily: 'Calibri',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: Theme.of(sheetCtx).colorScheme.onSurface,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Enter the price at which you would consider selling.',
-                style: TextStyle(
-                  fontFamily: 'Calibri',
-                  fontSize: 13,
-                  color: Theme.of(sheetCtx).colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: controller,
-                keyboardType: TextInputType.number,
-                autofocus: true,
-                decoration: InputDecoration(
-                  labelText: 'Wish Price',
-                  prefixText: '€ ',
-                  border: const OutlineInputBorder(),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                      color: Theme.of(sheetCtx).colorScheme.primary,
-                    ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(
+                  _iconInfo,
+                  style: const TextStyle(
+                    fontFamily: _iconFont,
+                    fontSize: 24,
+                    color: Color(0xFF808080),
                   ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.of(sheetCtx).pop(null),
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(
-                          color: Theme.of(sheetCtx).colorScheme.primary,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        minimumSize: const Size(double.infinity, 48),
-                      ),
-                      child: Text(
-                        'Cancel',
-                        style: TextStyle(
-                          fontFamily: 'Calibri',
-                          color: Theme.of(sheetCtx).colorScheme.primary,
-                        ),
-                      ),
-                    ),
+                const SizedBox(width: 10),
+                Text(
+                  sheetCtx.l10n.tr('setMovePrice'),
+                  style: const TextStyle(
+                    fontFamily: 'Calibri',
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF333333),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: FilledButton(
-                      onPressed: () {
-                        final val = double.tryParse(
-                          controller.text
-                              .replaceAll(',', '')
-                              .replaceAll(' ', ''),
-                        );
-                        Navigator.of(sheetCtx).pop(val);
-                      },
-                      style: FilledButton.styleFrom(
-                        backgroundColor: Theme.of(sheetCtx).colorScheme.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        minimumSize: const Size(double.infinity, 48),
-                      ),
-                      child: const Text(
-                        'Save',
-                        style: TextStyle(fontFamily: 'Calibri'),
-                      ),
-                    ),
-                  ),
-                ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              sheetCtx.l10n.tr('tns.setMovePriceInfo'),
+              style: const TextStyle(
+                fontFamily: 'Calibri',
+                fontSize: 14,
+                color: Color(0xFF333333),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -391,12 +513,12 @@ class _ObservePropertyDetailsPageState
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: scheme.surfaceContainerLow,
+      backgroundColor: const Color(0xFFF3F3F3),
       body: SafeArea(
         child: Column(
           children: [
             _PageHeader(
-              title: 'Observation Property',
+              title: context.l10n.tr('tns.observationProperty'),
               onBack: () => Navigator.of(context).pop(),
               onMoreVert: _item != null ? _onMoreVert : null,
             ),
@@ -430,6 +552,7 @@ class _ObservePropertyDetailsPageState
       history: _history,
       isHistoryLoading: _isHistoryLoading,
       onMovePriceToggled: _onMovePriceToggled,
+      onMovePriceInfoTap: _showMovePriceInfoSheet,
     );
   }
 }
@@ -460,11 +583,11 @@ class _PageHeader extends StatelessWidget {
           Expanded(
             child: Text(
               title,
-              style: TextStyle(
+              style: const TextStyle(
                 fontFamily: 'Calibri',
-                fontSize: 16,
+                fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: scheme.onSurface,
+                color: Color(0xFF666666),
               ),
             ),
           ),
@@ -488,19 +611,25 @@ class _ObservationContent extends StatelessWidget {
     required this.history,
     required this.isHistoryLoading,
     required this.onMovePriceToggled,
+    required this.onMovePriceInfoTap,
   });
 
   final PropertyItem item;
   final List<PropertyValuationEntry> history;
   final bool isHistoryLoading;
   final Future<void> Function(bool) onMovePriceToggled;
+  final VoidCallback onMovePriceInfoTap;
 
   bool get _isRent => item.dealType?.toLowerCase() == 'rent';
 
   double? get _marketPrice {
-    if (history.length <= 5) return null;
-    final e = history[5];
-    return _isRent ? e.rentGross : e.salePrice;
+    if (history.isNotEmpty) {
+      final idx = history.length > 5 ? 5 : history.length - 1;
+      final e = history[idx];
+      final v = _isRent ? e.rentGross : e.salePrice;
+      if (v != null && v > 0) return v;
+    }
+    return item.salePrice;
   }
 
   bool get _isApartment => item.propertyType?.code?.toUpperCase() == 'APARTMENT';
@@ -525,7 +654,7 @@ class _ObservationContent extends StatelessWidget {
       ),
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 4),
-        padding: const EdgeInsets.all(12),
+        clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
           color: scheme.surface,
           borderRadius: BorderRadius.circular(8),
@@ -533,88 +662,93 @@ class _ObservationContent extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              item.title ?? '—',
-              style: TextStyle(
-                fontFamily: 'Calibri',
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: scheme.onSurface,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.title ?? '—',
+                    style: const TextStyle(
+                      fontFamily: 'Calibri',
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF666666),
+                    ),
+                  ),
+                  if (item.address != null || item.city != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      [item.address, item.city]
+                          .whereType<String>()
+                          .where((s) => s.isNotEmpty)
+                          .join(' '),
+                      style: const TextStyle(
+                        fontFamily: 'Calibri',
+                        fontSize: 12,
+                        color: Color(0xFF808080),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
-            if (item.address != null || item.city != null) ...[
-              const SizedBox(height: 4),
-              Text(
-                [item.address, item.city]
-                    .whereType<String>()
-                    .where((s) => s.isNotEmpty)
-                    .join(' '),
-                style: TextStyle(
-                  fontFamily: 'Calibri',
-                  fontSize: 13,
-                  color: scheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-            const SizedBox(height: 12),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: SizedBox(
-                height: 220,
-                width: double.infinity,
-                child: item.imageUrl != null
-                    ? Image.network(
-                        item.imageUrl!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => _imageFallback(scheme),
-                      )
-                    : _imageFallback(scheme),
-              ),
+            const SizedBox(height: 8),
+            SizedBox(
+              height: 240,
+              width: double.infinity,
+              child: item.imageUrl != null
+                  ? Image.network(
+                      item.imageUrl!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => _imageFallback(scheme),
+                    )
+                  : _imageFallback(scheme),
             ),
             const SizedBox(height: 16),
-            _InfoRow(
-              iconCode: '',
-              label: 'Current Market Price',
-              value: _fmtCurrency(_marketPrice),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: _InfoRow(
+                iconCode: _iconTrendUp,
+                label: context.l10n.tr('currentMarketPlace'),
+                value: _fmtCurrency(_marketPrice),
+              ),
             ),
-            Divider(height: 24, thickness: 1, color: scheme.outlineVariant),
-            _InfoRow(
-              iconCode: '',
-              label: 'Purchase Price',
-              value: _fmtCurrency(item.purchasePrice),
+            const Divider(height: 1, thickness: 1, color: Color(0xFFEEEEEE)),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              child: _InfoRow(
+                iconCode: _iconCoins,
+                label: context.l10n.tr('purchasePrice'),
+                value: _fmtCurrency(item.purchasePrice),
+              ),
             ),
-            const SizedBox(height: 16),
             _MovePriceSection(
               item: item,
               onToggled: onMovePriceToggled,
               formatCurrency: _fmtCurrency,
+              onInfoTap: onMovePriceInfoTap,
             ),
-            Divider(height: 24, thickness: 1, color: scheme.outlineVariant),
-            Text(
-              'Price History',
-              style: TextStyle(
-                fontFamily: 'Calibri',
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: scheme.onSurface,
-              ),
-            ),
+            const Divider(height: 1, thickness: 1, color: Color(0xFFEEEEEE)),
             const SizedBox(height: 12),
             if (isHistoryLoading)
-              SizedBox(
+              const SizedBox(
                 height: 100,
                 child: Center(
                   child: CircularProgressIndicator(
-                    color: scheme.primary,
+                    color: Color(0xFFA11C36),
                     strokeWidth: 2,
                   ),
                 ),
               )
             else
-              PriceLineChart(
-                entries: history,
-                isRent: _isRent,
-                isValuation: false,
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: PriceLineChart(
+                  entries: history,
+                  isRent: _isRent,
+                  isValuation: false,
+                ),
               ),
           ],
         ),
@@ -623,11 +757,11 @@ class _ObservationContent extends StatelessWidget {
   }
 
   Widget _imageFallback(ColorScheme scheme) => Container(
-        color: scheme.primary.withValues(alpha: 0.10),
+        color: const Color(0xFFF3F3F3),
         child: Icon(
           _isApartment ? Icons.apartment_outlined : Icons.home_work_outlined,
           size: 64,
-          color: scheme.primary,
+          color: const Color(0xFFCCCCCC),
         ),
       );
 }
@@ -637,117 +771,126 @@ class _MovePriceSection extends StatelessWidget {
     required this.item,
     required this.onToggled,
     required this.formatCurrency,
+    required this.onInfoTap,
   });
 
   final PropertyItem item;
   final Future<void> Function(bool) onToggled;
   final String Function(double?) formatCurrency;
+  final VoidCallback onInfoTap;
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     final isOn = item.isMakeMeMovePriceGiven;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-          color: scheme.surfaceContainer,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          color: const Color(0xFFF3F3F3),
           child: Row(
             children: [
               Text(
-                'SET WISH PRICE',
-                style: TextStyle(
+                context.l10n.tr('setMovePrice').toUpperCase(),
+                style: const TextStyle(
                   fontFamily: 'Calibri',
                   fontSize: 12,
-                  color: scheme.onSurfaceVariant,
+                  color: Color(0xFF808080),
                 ),
               ),
               const SizedBox(width: 6),
-              Text(
-                '',
-                style: TextStyle(
-                  fontFamily: _iconFont,
-                  fontSize: 14,
-                  color: scheme.onSurfaceVariant,
+              GestureDetector(
+                onTap: onInfoTap,
+                child: const Text(
+                  _iconInfo,
+                  style: TextStyle(
+                    fontFamily: _iconFont,
+                    fontSize: 14,
+                    color: Color(0xFF808080),
+                  ),
                 ),
               ),
               const Spacer(),
               Switch(
                 value: isOn,
                 onChanged: onToggled,
-                activeThumbColor: scheme.primary,
-                activeTrackColor: scheme.primaryContainer,
+                activeThumbColor: const Color(0xFFA11C36),
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
             ],
           ),
         ),
-        const SizedBox(height: 12),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              color: isOn ? scheme.primaryContainer : scheme.surfaceContainer,
-              child: Text(
-                '',
-                style: TextStyle(
-                  fontFamily: _iconFont,
-                  fontSize: 20,
-                  color: isOn ? scheme.primary : scheme.onSurfaceVariant,
+        Padding(
+          padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                color: isOn
+                    ? const Color(0xFFFFF5F6)
+                    : const Color(0xFFF3F3F3),
+                child: Text(
+                  _iconBell,
+                  style: TextStyle(
+                    fontFamily: _iconFont,
+                    fontSize: 20,
+                    color: isOn
+                        ? const Color(0xFFA11C36)
+                        : const Color(0xFF808080),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: isOn
-                  ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          formatCurrency(item.makeMeMovePrice),
-                          style: TextStyle(
-                            fontFamily: 'Calibri',
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                            color: scheme.onSurface,
+              const SizedBox(width: 10),
+              Expanded(
+                child: isOn
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            formatCurrency(item.makeMeMovePrice),
+                            style: const TextStyle(
+                              fontFamily: 'Calibri',
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF666666),
+                            ),
                           ),
-                        ),
-                        Text(
-                          'Your wish price',
-                          style: TextStyle(
-                            fontFamily: 'Calibri',
-                            fontSize: 12,
-                            color: scheme.onSurfaceVariant,
+                          Text(
+                            context.l10n.tr('yourWishedPrice'),
+                            style: const TextStyle(
+                              fontFamily: 'Calibri',
+                              fontSize: 12,
+                              color: Color(0xFF808080),
+                            ),
                           ),
-                        ),
-                      ],
-                    )
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Turn On',
-                          style: TextStyle(
-                            fontFamily: 'Calibri',
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                            color: scheme.onSurface,
+                        ],
+                      )
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            context.l10n.tr('turnOn'),
+                            style: const TextStyle(
+                              fontFamily: 'Calibri',
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF666666),
+                            ),
                           ),
-                        ),
-                        Text(
-                          'Get a notification alert when the market price matches your wish price.',
-                          style: TextStyle(
-                            fontFamily: 'Calibri',
-                            fontSize: 12,
-                            color: scheme.onSurfaceVariant,
+                          Text(
+                            context.l10n.tr('getNotificationAlert'),
+                            style: const TextStyle(
+                              fontFamily: 'Calibri',
+                              fontSize: 12,
+                              color: Color(0xFF808080),
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-            ),
-          ],
+                        ],
+                      ),
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -767,46 +910,48 @@ class _InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(10),
-          color: scheme.primaryContainer,
-          child: Text(
-            iconCode,
-            style: TextStyle(
-              fontFamily: _iconFont,
-              fontSize: 20,
-              color: scheme.primary,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            color: const Color(0xFFFFF5F6),
+            child: Text(
+              iconCode,
+              style: const TextStyle(
+                fontFamily: _iconFont,
+                fontSize: 20,
+                color: Color(0xFFA11C36),
+              ),
             ),
           ),
-        ),
-        const SizedBox(width: 10),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                fontFamily: 'Calibri',
-                fontSize: 13,
-                color: scheme.onSurfaceVariant,
+          const SizedBox(width: 10),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(
+                  fontFamily: 'Calibri',
+                  fontSize: 12,
+                  color: Color(0xFF808080),
+                ),
               ),
-            ),
-            Text(
-              value,
-              style: TextStyle(
-                fontFamily: 'Calibri',
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                color: scheme.onSurface,
+              Text(
+                value,
+                style: const TextStyle(
+                  fontFamily: 'Calibri',
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFFA11C36),
+                ),
               ),
-            ),
-          ],
-        ),
-      ],
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

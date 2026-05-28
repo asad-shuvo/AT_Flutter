@@ -12,6 +12,7 @@ class AppBottomNav extends StatelessWidget {
   static const double _centerGapWidth = 112;
 
   static const double _barBaseHeight = 78;
+  static const double circleProtrusion = (_outerCircleSize / 2) + _centerCircleLift;
   static const double _barCornerRadius = 26;
   static const double _barHorizontalInset = 0;
   static const double _notchMargin = 0;

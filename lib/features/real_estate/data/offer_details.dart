@@ -1,6 +1,42 @@
 import 'package:flutter/foundation.dart';
 
 @immutable
+class OfferValuationData {
+  const OfferValuationData({
+    this.priceLower,
+    this.priceUpper,
+    this.confidence,
+    this.isForRent = false,
+  });
+
+  final double? priceLower;
+  final double? priceUpper;
+  final String? confidence;
+  final bool isForRent;
+
+  String _fmt(double price) {
+    final str = price.toStringAsFixed(2);
+    final dotIdx = str.indexOf('.');
+    final intPart = str.substring(0, dotIdx);
+    final decPart = str.substring(dotIdx + 1);
+    final buf = StringBuffer();
+    for (int i = 0; i < intPart.length; i++) {
+      if (i > 0 && (intPart.length - i) % 3 == 0) buf.write('.');
+      buf.write(intPart[i]);
+    }
+    return '€ ${buf.toString()},$decPart';
+  }
+
+  String get priceRangeLabel {
+    final lo = priceLower;
+    final hi = priceUpper;
+    if (lo == null && hi == null) return '—';
+    if (lo != null && hi != null) return '${_fmt(lo)} - ${_fmt(hi)}';
+    return _fmt((lo ?? hi)!);
+  }
+}
+
+@immutable
 class OfferDetails {
   const OfferDetails({
     this.offerId,
@@ -44,16 +80,16 @@ class OfferDetails {
   String get priceLabel {
     final price = offerPrice;
     if (price == null) return '—';
-    String formatted;
-    if (price >= 1000000000) {
-      formatted = '${(price / 1000000000).toStringAsFixed(2)} B.';
-    } else if (price >= 1000000) {
-      formatted = '${(price / 1000000).toStringAsFixed(2)} Mio.';
-    } else if (price >= 1000) {
-      formatted = '${(price / 1000).toStringAsFixed(0)} Tsd.';
-    } else {
-      formatted = price.toStringAsFixed(0);
+    final str = price.toStringAsFixed(2);
+    final dotIdx = str.indexOf('.');
+    final intPart = str.substring(0, dotIdx);
+    final decPart = str.substring(dotIdx + 1);
+    final buf = StringBuffer();
+    for (int i = 0; i < intPart.length; i++) {
+      if (i > 0 && (intPart.length - i) % 3 == 0) buf.write('.');
+      buf.write(intPart[i]);
     }
+    final formatted = '€ ${buf.toString()},$decPart';
     return isForRent ? '$formatted / Monat' : formatted;
   }
 

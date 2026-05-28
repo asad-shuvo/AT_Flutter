@@ -4,15 +4,15 @@ import 'package:filip_at_flutter/features/real_estate/data/property_item.dart';
 import 'package:filip_at_flutter/features/real_estate/data/real_estate_repository.dart';
 import 'package:filip_at_flutter/features/real_estate/presentation/property_form_page.dart';
 import 'package:filip_at_flutter/features/real_estate/presentation/dossier_web_view_page.dart';
-import 'package:filip_at_flutter/features/real_estate/presentation/observe_property_details_page.dart';
+import 'package:filip_at_flutter/features/real_estate/presentation/valuation_property_details_page.dart';
 import 'package:filip_at_flutter/features/chat/presentation/chat_page.dart';
-import 'package:filip_at_flutter/features/dashboard/data/dashboard_models.dart';
 import 'package:filip_at_flutter/features/real_estate/presentation/widgets/contact_advisor_sheet.dart';
 import 'package:filip_at_flutter/features/real_estate/presentation/widgets/dossier_progress_sheet.dart';
 import 'package:filip_at_flutter/features/real_estate/presentation/widgets/property_card.dart';
 import 'package:filip_at_flutter/features/real_estate/presentation/widgets/property_command_card.dart';
 import 'package:filip_at_flutter/features/real_estate/presentation/widgets/property_empty_card.dart';
 import 'package:filip_at_flutter/features/real_estate/presentation/widgets/property_more_vert_sheet.dart';
+import 'package:filip_at_flutter/shared/widgets/app_bottom_nav.dart';
 import 'package:flutter/material.dart';
 
 class ValuationTab extends StatefulWidget {
@@ -80,8 +80,14 @@ class _ValuationTabState extends State<ValuationTab> {
         await _requestDossier(item);
       case PropertyMoreVertAction.addToObserve:
         await _addToObserve(item);
+      case PropertyMoreVertAction.valuateAnother:
+        await _openValuateAnother(item);
+      case PropertyMoreVertAction.observeAnother:
+        break;
       case PropertyMoreVertAction.delete:
         await _confirmDelete(item);
+      case PropertyMoreVertAction.toggleAgent:
+        break;
     }
   }
 
@@ -144,9 +150,22 @@ class _ValuationTabState extends State<ValuationTab> {
   void _openDetails(PropertyItem item) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => ObservePropertyDetailsPage(
+        builder: (_) => ValuationPropertyDetailsPage(
           id: item.itemId,
           repository: widget.repository,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openValuateAnother(PropertyItem item) async {
+    await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => PropertyFormPage(
+          source: PropertyListSource.valuation,
+          repository: widget.repository,
+          initialData: null,
+          onSaved: () {},
         ),
       ),
     );
@@ -249,7 +268,7 @@ class _ValuationTabState extends State<ValuationTab> {
       child: ListView.builder(
         controller: _scrollController,
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom + AppBottomNav.circleProtrusion + 16),
         itemCount: _itemCount(ctrl),
         itemBuilder: (context, index) => _buildItem(context, ctrl, index),
       ),

@@ -6,9 +6,9 @@ import 'package:filip_at_flutter/features/real_estate/presentation/observe_prope
 import 'package:filip_at_flutter/features/real_estate/presentation/property_form_page.dart';
 import 'package:filip_at_flutter/features/real_estate/presentation/widgets/contact_advisor_sheet.dart';
 import 'package:filip_at_flutter/features/chat/presentation/chat_page.dart';
-import 'package:filip_at_flutter/features/dashboard/data/dashboard_models.dart';
 import 'package:filip_at_flutter/features/real_estate/presentation/widgets/dossier_progress_sheet.dart';
 import 'package:filip_at_flutter/features/real_estate/presentation/widgets/property_card.dart';
+import 'package:filip_at_flutter/shared/widgets/app_bottom_nav.dart';
 import 'package:filip_at_flutter/features/real_estate/presentation/widgets/property_command_card.dart';
 import 'package:filip_at_flutter/features/real_estate/presentation/widgets/property_empty_card.dart';
 import 'package:filip_at_flutter/features/real_estate/presentation/widgets/property_more_vert_sheet.dart';
@@ -80,7 +80,13 @@ class _ObservationTabState extends State<ObservationTab> {
         await _confirmDelete(item);
       case PropertyMoreVertAction.requestDossier:
         await _requestDossier(item);
+      case PropertyMoreVertAction.observeAnother:
+        break;
+      case PropertyMoreVertAction.valuateAnother:
+        break;
       case PropertyMoreVertAction.addToObserve:
+        break;
+      case PropertyMoreVertAction.toggleAgent:
         break;
     }
   }
@@ -239,7 +245,7 @@ class _ObservationTabState extends State<ObservationTab> {
       child: ListView.builder(
         controller: _scrollController,
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom + AppBottomNav.circleProtrusion + 16),
         itemCount: _itemCount(ctrl),
         itemBuilder: (context, index) => _buildItem(context, ctrl, index),
       ),

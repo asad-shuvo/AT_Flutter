@@ -8,6 +8,8 @@ import 'package:filip_at_flutter/features/real_estate/presentation/widgets/prope
 import 'package:filip_at_flutter/features/real_estate/presentation/widgets/property_command_card.dart';
 import 'package:filip_at_flutter/features/real_estate/presentation/widgets/property_empty_card.dart';
 import 'package:filip_at_flutter/features/real_estate/presentation/widgets/property_more_vert_sheet.dart';
+import 'package:filip_at_flutter/features/real_estate/presentation/widgets/search_agent_sheets.dart';
+import 'package:filip_at_flutter/shared/widgets/app_bottom_nav.dart';
 import 'package:flutter/material.dart';
 
 class SearchTab extends StatefulWidget {
@@ -78,10 +80,40 @@ class _SearchTabState extends State<SearchTab> {
     switch (action) {
       case PropertyMoreVertAction.edit:
         await _openEditForm(item);
+      case PropertyMoreVertAction.toggleAgent:
+        await _onToggleAgent(item);
       case PropertyMoreVertAction.delete:
         await _confirmDelete(item);
       default:
         break;
+    }
+  }
+
+  Future<void> _onToggleAgent(PropertyItem item) async {
+    if (!mounted) return;
+    if (item.isSearchAgentActive) {
+      await showDeactivateAgentSheet(
+        context: context,
+        onDeactivate: () => _doToggleAgent(item, activate: false),
+      );
+    } else {
+      await showActivateAgentSheet(
+        context: context,
+        repository: widget.repository,
+        onActivate: () => _doToggleAgent(item, activate: true),
+      );
+    }
+  }
+
+  Future<void> _doToggleAgent(PropertyItem item, {required bool activate}) async {
+    try {
+      await widget.repository.toggleSearchAgent(
+        itemId: item.itemId,
+        activate: activate,
+      );
+      if (mounted) widget.controller.refresh();
+    } catch (_) {
+      if (mounted) _showSnackBar(context.l10n.tr('SOMETHING_WENT_WRONG'));
     }
   }
 
@@ -149,7 +181,7 @@ class _SearchTabState extends State<SearchTab> {
       child: ListView.builder(
         controller: _scrollController,
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom + AppBottomNav.circleProtrusion + 16),
         itemCount: _itemCount(ctrl),
         itemBuilder: (context, index) => _buildItem(context, ctrl, index),
       ),
@@ -186,6 +218,8 @@ class _SearchTabState extends State<SearchTab> {
             builder: (_) => SearchResultPage(
               qid: item.itemId,
               repository: widget.repository,
+              isAgentActive: item.isSearchAgentActive,
+              dealType: item.dealType ?? 'sale',
             ),
           ),
         ),

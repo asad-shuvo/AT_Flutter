@@ -47,6 +47,8 @@ class _PropertyFormPageState extends State<PropertyFormPage> {
   String _propertyAddress = '';
   String _propertyTypeCode = 'HOUSE';
   String _dealType = '';
+  double? _lat;
+  double? _lng;
   int _numberOfRooms = 1;
   int? _numberOfFloorsInBuilding;
   int? _floorNumber;
@@ -161,6 +163,8 @@ class _PropertyFormPageState extends State<PropertyFormPage> {
         _houseNumberCtrl.text = result.houseNumber;
         _cityCtrl.text = result.city;
         _postCodeCtrl.text = result.postCode;
+        _lat = result.lat;
+        _lng = result.lng;
       });
     }
   }
@@ -183,6 +187,8 @@ class _PropertyFormPageState extends State<PropertyFormPage> {
       postCode: _postCodeCtrl.text.trim(),
       houseNumber: _houseNumberCtrl.text.trim(),
       city: _cityCtrl.text.trim(),
+      lat: _lat,
+      lng: _lng,
       livingArea: double.tryParse(_livingAreaCtrl.text),
       landArea: _isApartment ? null : double.tryParse(_landAreaCtrl.text),
       gardenArea: double.tryParse(_gardenAreaCtrl.text),

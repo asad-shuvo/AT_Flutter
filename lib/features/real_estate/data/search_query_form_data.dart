@@ -23,6 +23,8 @@ class SearchQueryFormData {
     this.maxSalePrice,
     this.minRentGross,
     this.maxRentGross,
+    this.minLandArea = 50,
+    this.maxLandArea = 5000,
     this.lat,
     this.lng,
   });
@@ -50,6 +52,8 @@ class SearchQueryFormData {
   final int? maxSalePrice;
   final int? minRentGross;
   final int? maxRentGross;
+  final double minLandArea;
+  final double maxLandArea;
   final double? lat;
   final double? lng;
 
@@ -97,6 +101,8 @@ class SearchQueryFormData {
       maxSalePrice: _nonZero(json['MaximumSalePrice']),
       minRentGross: _nonZero(json['MinimumRentGross']),
       maxRentGross: _nonZero(json['MaximumRentGross']),
+      minLandArea: (json['MinimumLandArea'] as num?)?.toDouble() ?? 50,
+      maxLandArea: (json['MaximumLandArea'] as num?)?.toDouble() ?? 5000,
       lat: lat,
       lng: lng,
     );

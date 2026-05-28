@@ -19,7 +19,7 @@ const _offerSearchQueryFields = [
   'HasParkingSpaces', 'MinimumSalePrice', 'MaximumSalePrice', 'MinimumRentGross',
   'MaximumRentGross', 'MinimumLivingArea', 'MaximumLivingArea', 'MinimumLandArea',
   'MaximumLandArea', 'MinimumNumberOfRooms', 'MaximumNumberOfRooms',
-  'MinimumBuildingYear', 'MaximumBuildingYear', 'MaximumDistanceHospital',
+  'MinimumBuildingYear', 'MaximumDistanceHospital',
   'MaximumDistanceGroceryStore', 'MaximumDistancePublicTransport', 'IsSearchAgentActive',
 ];
 
@@ -150,10 +150,16 @@ class RealEstateRepository {
     return PropertyListResult(items: items, totalCount: total);
   }
 
+  Future<String> getUserEmail() async {
+    final session = await _sessionCache.resolve();
+    return session?.email ?? '';
+  }
+
   Future<OfferSearchResult> fetchSearchResults({
     required String queryId,
     required int offset,
     required int limit,
+    List<Map<String, String>>? orderBy,
   }) async {
     final session = await _sessionCache.resolve();
     if (session == null) return const OfferSearchResult(items: [], totalItems: 0);
@@ -163,6 +169,7 @@ class RealEstateRepository {
       'Offset': offset,
       'Limit': limit,
       'MessageCorrelationId': _uuid(),
+      if (orderBy != null && orderBy.isNotEmpty) 'OrderBy': orderBy,
     };
 
     final result = await _apiClient.postJson(
@@ -204,6 +211,90 @@ class RealEstateRepository {
     final results = (result['body'] as Map<String, dynamic>?)?['Results'] as List? ?? [];
     if (results.isEmpty) return null;
     return OfferDetails.fromJson(results.first as Map<String, dynamic>);
+  }
+
+  Future<OfferValuationData?> fetchOfferValuation(String offerId) async {
+    final session = await _sessionCache.resolve();
+    if (session == null) return null;
+
+    final result = await _apiClient.postJson(
+      url: '${_priceHubbleUrl}Query/PropertyValuation',
+      body: {
+        'OfferId': offerId,
+        'IsDbInsertionNotRequired': true,
+        'MessageCorrelationId': _uuid(),
+      },
+      headers: _headers(session.accessToken),
+    );
+
+    final body = result['body'] as Map<String, dynamic>? ?? {};
+    final error = body['Error'] as String?;
+    if (error != null && error.isNotEmpty) return null;
+
+    final valuations = body['Valuations'] as List?;
+    if (valuations == null || valuations.isEmpty) return null;
+
+    final v = valuations.first as Map<String, dynamic>;
+    final saleRange = v['SalePriceRange'] as Map<String, dynamic>?;
+    final rentRange = v['RentGrossRange'] as Map<String, dynamic>?;
+    final confidence = v['Confidence'] as String?;
+
+    double? lower, upper;
+    bool isForRent = false;
+    if (saleRange != null) {
+      lower = (saleRange['Lower'] as num?)?.toDouble();
+      upper = (saleRange['Upper'] as num?)?.toDouble();
+    } else if (rentRange != null) {
+      lower = (rentRange['Lower'] as num?)?.toDouble();
+      upper = (rentRange['Upper'] as num?)?.toDouble();
+      isForRent = true;
+    }
+
+    return OfferValuationData(
+      priceLower: lower,
+      priceUpper: upper,
+      confidence: confidence,
+      isForRent: isForRent,
+    );
+  }
+
+  Future<void> addToValuation({
+    required String offerId,
+    required String address,
+    required String language,
+  }) async {
+    final session = await _sessionCache.resolve();
+    if (session == null) throw Exception('No session');
+
+    final personId = session.personId;
+
+    final result = await _apiClient.postJson(
+      url: '${_priceHubbleUrl}Query/PropertyValuation',
+      body: {
+        'OfferId': offerId,
+        'IsDbInsertionNotRequired': false,
+        'PersonId': personId,
+        'Tags': ['Is-A-Valuation'],
+        'MessageCorrelationId': _uuid(),
+      },
+      headers: _headers(session.accessToken),
+    );
+
+    final body = result['body'] as Map<String, dynamic>? ?? {};
+    final error = body['Error'] as String?;
+    if (error != null && error.isNotEmpty) throw Exception(error);
+
+    final propertyId = body['PropertyId'] as String?;
+    if (propertyId == null || propertyId.isEmpty) throw Exception('NO_VALUATION_DATA_FOUND');
+
+    await _insertActivityLog(
+      propertyId: propertyId,
+      personId: personId,
+      tag: 'Is-A-Valuation',
+      address: address,
+      language: language,
+      session: session,
+    );
   }
 
   Future<String?> fetchDossierShareLink(String dossierId) async {
@@ -710,12 +801,31 @@ class RealEstateRepository {
     );
   }
 
+  Future<void> toggleSearchAgent({
+    required String itemId,
+    required bool activate,
+  }) async {
+    final session = await _sessionCache.resolve();
+    if (session == null) return;
+
+    await _apiClient.postJson(
+      url: '${_apiClient.dataCoreUrl}DataManipulationCommand/Update',
+      body: {
+        'EntityName': 'OfferSearchQuery',
+        'JsonString': jsonEncode({'ItemId': itemId, 'IsSearchAgentActive': activate}),
+      },
+      headers: _headers(session.accessToken),
+    );
+  }
+
   Future<void> updateSearchQuery({
     required String itemId,
     required String personId,
     required String title,
     required String postCode,
     required String city,
+    double? latitude,
+    double? longitude,
     required double radiusKm,
     required String dealType,
     required String propertyTypeCode,
@@ -725,7 +835,9 @@ class RealEstateRepository {
     required int maxRooms,
     required int minBuildingYear,
     required int maxBuildingYear,
-    bool isWheelchairAccessible = false,
+    double minLandArea = 50,
+    double maxLandArea = 5000,
+    bool? isWheelchairAccessible,
     int? maxDistanceHospital,
     int? maxDistanceGroceryStore,
     int? maxDistancePublicTransport,
@@ -742,20 +854,26 @@ class RealEstateRepository {
     final isSale = dealType.toLowerCase() == 'sale';
     final isApartment = propertyTypeCode.toLowerCase() == 'apartment';
 
-    final data = <String, dynamic>{
-      'ItemId': itemId,
+    final payload = <String, dynamic>{
+      'SaveOfferSearchQuery': true,
+      'OfferSearchQueryId': itemId,
+      'Type': 'Is-A-OfferSearchQuery',
       'PersonId': personId,
       'PropertyType': [{'Code': propertyTypeCode.toLowerCase()}],
       'DealType': dealType,
       'Title': title,
       'PostCode': postCode,
       'City': city,
+      'Street': null,
+      'HouseNumber': null,
       'CountryCode': 'AT',
+      'Latitude': latitude,
+      'Longitude': longitude,
       'Radius': (radiusKm * 1000).toInt(),
       'MinimumLivingArea': minLivingArea.toInt(),
       'MaximumLivingArea': maxLivingArea.toInt(),
-      'MinimumLandArea': 0,
-      'MaximumLandArea': 0,
+      'MinimumLandArea': isApartment ? 0 : minLandArea.toInt(),
+      'MaximumLandArea': isApartment ? 0 : maxLandArea.toInt(),
       'MinimumNumberOfRooms': minRooms,
       'MaximumNumberOfRooms': maxRooms,
       'MinimumBuildingYear': minBuildingYear,
@@ -764,22 +882,31 @@ class RealEstateRepository {
       'MaximumDistanceHospital': maxDistanceHospital,
       'MaximumDistanceGroceryStore': maxDistanceGroceryStore,
       'MaximumDistancePublicTransport': maxDistancePublicTransport,
-      if (isSale) ...{
-        'MinimumSalePrice': minSalePrice ?? 0,
-        'MaximumSalePrice': maxSalePrice ?? 0,
-        'SalePriceCurrency': 'EUR',
-      } else ...{
-        'MinimumRentGross': minRentGross ?? 0,
-        'MaximumRentGross': maxRentGross ?? 0,
-        'RentGrossCurrency': 'EUR',
-      },
-      if (isApartment) ...{'HasLift': hasLift, 'HasParkingSpaces': null}
-      else ...{'HasParkingSpaces': hasParkingSpaces, 'HasLift': null},
+      'MinimumStartDate': _sixMonthsAgo(),
+      'MessageCorrelationId': _uuid(),
     };
 
+    if (isSale) {
+      payload['MinimumSalePrice'] = minSalePrice ?? 0;
+      payload['MaximumSalePrice'] = maxSalePrice ?? 3000000;
+      payload['SalePriceCurrency'] = 'EUR';
+    } else {
+      payload['MinimumRentGross'] = minRentGross ?? 0;
+      payload['MaximumRentGross'] = maxRentGross ?? 10000;
+      payload['RentGrossCurrency'] = 'EUR';
+    }
+
+    if (isApartment) {
+      payload['HasLift'] = hasLift;
+      payload['HasParkingSpaces'] = null;
+    } else {
+      payload['HasParkingSpaces'] = hasParkingSpaces;
+      payload['HasLift'] = null;
+    }
+
     await _apiClient.postJson(
-      url: '${_apiClient.dataCoreUrl}DataManipulationCommand/Update',
-      body: {'EntityName': 'OfferSearchQuery', 'JsonString': jsonEncode(data)},
+      url: '${_priceHubbleUrl}Query/SearchOffers',
+      body: payload,
       headers: _headers(session.accessToken),
     );
   }
@@ -789,6 +916,8 @@ class RealEstateRepository {
     required String title,
     required String postCode,
     required String city,
+    double? latitude,
+    double? longitude,
     required double radiusKm,
     required String dealType,
     required String propertyTypeCode,
@@ -798,7 +927,9 @@ class RealEstateRepository {
     required int maxRooms,
     required int minBuildingYear,
     required int maxBuildingYear,
-    bool isWheelchairAccessible = false,
+    double minLandArea = 50,
+    double maxLandArea = 5000,
+    bool? isWheelchairAccessible,
     int? maxDistanceHospital,
     int? maxDistanceGroceryStore,
     int? maxDistancePublicTransport,
@@ -816,8 +947,7 @@ class RealEstateRepository {
     final isApartment = propertyTypeCode.toLowerCase() == 'apartment';
 
     final payload = <String, dynamic>{
-      'SaveOfferSearchQuery': true,
-      'Type': 'Is-A-OfferSearch',
+      'Type': 'Is-A-OfferSearchQuery',
       'PersonId': personId,
       'PropertyType': [
         {'Code': propertyTypeCode.toLowerCase()},
@@ -829,11 +959,13 @@ class RealEstateRepository {
       'Street': null,
       'HouseNumber': null,
       'CountryCode': 'AT',
+      'Latitude': latitude,
+      'Longitude': longitude,
       'Radius': (radiusKm * 1000).toInt(),
       'MinimumLivingArea': minLivingArea.toInt(),
       'MaximumLivingArea': maxLivingArea.toInt(),
-      'MinimumLandArea': 0,
-      'MaximumLandArea': 0,
+      'MinimumLandArea': isApartment ? 0 : minLandArea.toInt(),
+      'MaximumLandArea': isApartment ? 0 : maxLandArea.toInt(),
       'MinimumNumberOfRooms': minRooms,
       'MaximumNumberOfRooms': maxRooms,
       'MinimumBuildingYear': minBuildingYear,
@@ -842,16 +974,17 @@ class RealEstateRepository {
       'MaximumDistanceHospital': maxDistanceHospital,
       'MaximumDistanceGroceryStore': maxDistanceGroceryStore,
       'MaximumDistancePublicTransport': maxDistancePublicTransport,
+      'MinimumStartDate': _sixMonthsAgo(),
       'MessageCorrelationId': _uuid(),
     };
 
     if (isSale) {
       payload['MinimumSalePrice'] = minSalePrice ?? 0;
-      payload['MaximumSalePrice'] = maxSalePrice ?? 0;
+      payload['MaximumSalePrice'] = maxSalePrice ?? 3000000;
       payload['SalePriceCurrency'] = 'EUR';
     } else {
       payload['MinimumRentGross'] = minRentGross ?? 0;
-      payload['MaximumRentGross'] = maxRentGross ?? 0;
+      payload['MaximumRentGross'] = maxRentGross ?? 10000;
       payload['RentGrossCurrency'] = 'EUR';
     }
 
@@ -966,6 +1099,13 @@ class RealEstateRepository {
         'Authorization': 'bearer $accessToken',
         'Origin': _apiClient.originUrl,
       };
+
+  static String _sixMonthsAgo() {
+    final now = DateTime.now();
+    final dt = DateTime(now.year, now.month - 6, now.day);
+    String pad(int n) => n.toString().padLeft(2, '0');
+    return '${dt.year}-${pad(dt.month)}-${pad(dt.day)}';
+  }
 
   static String _uuid() {
     final rng = Random.secure();

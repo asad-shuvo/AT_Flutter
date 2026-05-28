@@ -33,6 +33,8 @@ class SelectNetworkIcons {
     fontFamily: _family,
   );
   static const IconData edit = IconData(0xE969, fontFamily: _family);
+  static const IconData livingArea = IconData(0xE9FC, fontFamily: _family);
+  static const IconData landArea = IconData(0xEA01, fontFamily: _family);
 }
 
 class FilipIcons {
@@ -66,6 +68,15 @@ class FilipIcons {
   static const IconData back = IconData(0xE9F2, fontFamily: _family);
   static const IconData edit = IconData(0xE969, fontFamily: _family);
   static const IconData pin = IconData(0xE9A5, fontFamily: _family);
+  static const IconData locationPin = IconData(0xE995, fontFamily: _family);
+  static const IconData priceCoins = IconData(0xE980, fontFamily: _family);
+  static const IconData rooms = IconData(0xE9B4, fontFamily: _family);
+  static const IconData resetCircle = IconData(0xE94C, fontFamily: _family);
+  static const IconData additionalFeatures = IconData(0xE92D, fontFamily: _family);
+  static const IconData buildingYear = IconData(0xEA1E, fontFamily: _family);
+  static const IconData parking = IconData(0xE96B, fontFamily: _family);
+  static const IconData lift = IconData(0xE99B, fontFamily: _family);
+  static const IconData wheelchair = IconData(0xE9EC, fontFamily: _family);
   static const IconData loan = IconData(0xE9B4, fontFamily: _family);
 }
 

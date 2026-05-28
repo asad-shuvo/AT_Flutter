@@ -4,11 +4,14 @@ import 'package:flutter/material.dart';
 
 enum PropertyMoreVertAction {
   edit,
+  observeAnother,
+  valuateAnother,
   contactAdvisor,
   detailedView,
   delete,
   requestDossier,
   addToObserve,
+  toggleAgent,
 }
 
 const _iconFont = 'filip_at_iconpack_29022024';
@@ -18,6 +21,7 @@ const _iconDetailedView = '';
 const _iconDelete = '';
 const _iconRequestDossier = '';
 const _iconAddToObserve = '';
+const _iconAgent = ''; // U+E95A
 
 Future<PropertyMoreVertAction?> showPropertyMoreVertSheet({
   required BuildContext context,
@@ -70,12 +74,20 @@ class _MoreVertSheet extends StatelessWidget {
     if (source == PropertyListSource.search) {
       return [
         _ActionConfig(PropertyMoreVertAction.edit, _iconEdit, l10n.tr('editSearch')),
+        _ActionConfig(
+          PropertyMoreVertAction.toggleAgent,
+          _iconAgent,
+          item.isSearchAgentActive
+              ? l10n.tr('deactivateSearchAgent')
+              : l10n.tr('activateSearchAgent'),
+        ),
         _ActionConfig(PropertyMoreVertAction.delete, _iconDelete, l10n.tr('deleteSearchAgent')),
       ];
     }
     if (source == PropertyListSource.observation) {
       return [
         _ActionConfig(PropertyMoreVertAction.edit, _iconEdit, l10n.tr('editProperty')),
+        _ActionConfig(PropertyMoreVertAction.observeAnother, _iconAddToObserve, l10n.tr('tns.observeAnother')),
         _ActionConfig(PropertyMoreVertAction.contactAdvisor, _iconContactAdvisor, l10n.tr('contactAdvisor')),
         _ActionConfig(PropertyMoreVertAction.detailedView, _iconDetailedView, l10n.tr('detailedView')),
         _ActionConfig(PropertyMoreVertAction.delete, _iconDelete, l10n.tr('deleteProperty')),
@@ -84,6 +96,7 @@ class _MoreVertSheet extends StatelessWidget {
     }
     return [
       _ActionConfig(PropertyMoreVertAction.edit, _iconEdit, l10n.tr('editProperty')),
+      _ActionConfig(PropertyMoreVertAction.valuateAnother, _iconAddToObserve, l10n.tr('tns.valuateAnother')),
       _ActionConfig(PropertyMoreVertAction.requestDossier, _iconRequestDossier, l10n.tr('requestDossier')),
       _ActionConfig(PropertyMoreVertAction.contactAdvisor, _iconContactAdvisor, l10n.tr('contactAdvisor')),
       _ActionConfig(PropertyMoreVertAction.detailedView, _iconDetailedView, l10n.tr('detailedView')),
@@ -195,7 +208,7 @@ class _DeleteConfirmSheet extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           Text(
-            l10n.tr('areYouSureDeleteRecord'),
+            l10n.tr('deleteRecord'),
             textAlign: TextAlign.center,
             style: const TextStyle(
               fontFamily: 'Calibri',

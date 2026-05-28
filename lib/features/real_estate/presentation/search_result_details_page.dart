@@ -1,7 +1,22 @@
+﻿import 'package:filip_at_flutter/app/localization/app_localizations.dart';
 import 'package:filip_at_flutter/features/real_estate/data/offer_details.dart';
 import 'package:filip_at_flutter/features/real_estate/data/real_estate_repository.dart';
+import 'package:filip_at_flutter/shared/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+const _iconFontPrimary = 'filip_at_iconpack_29022024';
+const _iconFontSN = 'SelectNetwork';
+
+// NS codepoints (Dart unicode escapes — safe from Write stripping)
+const _iconOfferPrice   = ''; // n-icon filip_at_iconpack
+const _iconBuildingYear = ''; // n-icon filip_at_iconpack
+const _iconLivingArea   = ''; // sn-icon SelectNetwork
+const _iconLandArea     = ''; // sn-icon SelectNetwork
+const _iconTotalRooms   = ''; // n-icon filip_at_iconpack
+const _iconDealBadge    = ''; // sn-icon SelectNetwork
+
+const _iconBoxBg = Color(0xFFFFF5F6);
 
 class SearchResultDetailsPage extends StatefulWidget {
   const SearchResultDetailsPage({
@@ -27,6 +42,7 @@ class _SearchResultDetailsPageState extends State<SearchResultDetailsPage> {
   OfferDetails? _details;
   bool _isLoading = true;
   String? _error;
+  bool _isValuating = false;
 
   @override
   void initState() {
@@ -63,7 +79,65 @@ class _SearchResultDetailsPageState extends State<SearchResultDetailsPage> {
     }
   }
 
-  void _openUrl(String url) async {
+  Future<void> _onValuate() async {
+    final details = _details;
+    if (details?.offerId == null || _isValuating) return;
+    setState(() => _isValuating = true);
+    try {
+      final data = await widget.repository.fetchOfferValuation(details!.offerId!);
+      if (!mounted) return;
+      setState(() => _isValuating = false);
+      if (data == null) {
+        _showSnackBar(context.l10n.tr('SOMETHING_WENT_WRONG'));
+        return;
+      }
+      await showModalBottomSheet<void>(
+        context: context,
+        useRootNavigator: true,
+        isScrollControlled: true,
+        backgroundColor: Colors.white,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+        ),
+        builder: (sheetCtx) => _ValuatePropertySheet(
+          details: details,
+          valuationData: data,
+          onAddToValuate: () async {
+            Navigator.of(sheetCtx).pop();
+            await _doAddToValuate(details);
+          },
+        ),
+      );
+    } catch (_) {
+      if (mounted) {
+        setState(() => _isValuating = false);
+        _showSnackBar(context.l10n.tr('SOMETHING_WENT_WRONG'));
+      }
+    }
+  }
+
+  Future<void> _doAddToValuate(OfferDetails details) async {
+    if (!mounted) return;
+    final lang = Localizations.localeOf(context).languageCode;
+    try {
+      await widget.repository.addToValuation(
+        offerId: details.offerId!,
+        address: details.processedAddress ?? '',
+        language: lang,
+      );
+      if (mounted) {
+        _showSnackBar(context.l10n.tr('valuationPropertySuccessfullyaddedMsg'));
+      }
+    } catch (_) {
+      if (mounted) _showSnackBar(context.l10n.tr('SOMETHING_WENT_WRONG'));
+    }
+  }
+
+  void _showSnackBar(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  }
+
+  Future<void> _openUrl(String url) async {
     final uri = Uri.tryParse(url);
     if (uri == null) return;
     if (await canLaunchUrl(uri)) {
@@ -76,23 +150,21 @@ class _SearchResultDetailsPageState extends State<SearchResultDetailsPage> {
     if (details == null) return;
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      useRootNavigator: true,
+      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
       ),
-      builder: (_) => _MoreVertSheet(
+      builder: (sheetCtx) => _MoreVertSheet(
         hasInterestedUrl: details.url != null && details.url!.isNotEmpty,
-        onRequestDossier: () async {
-          Navigator.pop(context);
-          final personId = await widget.repository.getPersonId();
-          if (personId != null && details.offerId != null && mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Dossier request sent.')),
-            );
-          }
+        onRequestDossier: () {
+          Navigator.of(sheetCtx).pop();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(context.l10n.tr('requestDossier'))),
+          );
         },
         onIAmInterested: () {
-          Navigator.pop(context);
+          Navigator.of(sheetCtx).pop();
           if (details.url != null) _openUrl(details.url!);
         },
       ),
@@ -101,36 +173,39 @@ class _SearchResultDetailsPageState extends State<SearchResultDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final l10n = context.l10n;
     return Scaffold(
-      backgroundColor: scheme.surface,
+      backgroundColor: AppColors.screenBackground,
       body: SafeArea(
         child: Column(
           children: [
             _Header(
+              title: l10n.tr('searchResultDetails'),
               onBack: () => Navigator.of(context).pop(),
               onMoreVert: _details != null ? _showMoreVert : null,
             ),
-            Divider(height: 1, thickness: 1, color: scheme.outlineVariant),
-            Expanded(child: _buildBody(scheme)),
+            const Divider(height: 1, thickness: 1, color: Color(0xFFE0E0E0)),
+            Expanded(child: _buildBody()),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildBody(ColorScheme scheme) {
+  Widget _buildBody() {
     if (_isLoading) {
-      return Center(child: CircularProgressIndicator(color: scheme.primary));
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.primaryRed),
+      );
     }
     if (_error != null || _details == null) {
       return Center(
         child: Text(
-          'Could not load property details.',
-          style: TextStyle(
+          context.l10n.tr('errorOccurred'),
+          style: const TextStyle(
             fontFamily: 'Calibri',
             fontSize: 14,
-            color: scheme.onSurfaceVariant,
+            color: Color(0xFF808080),
           ),
         ),
       );
@@ -141,35 +216,47 @@ class _SearchResultDetailsPageState extends State<SearchResultDetailsPage> {
       currentPage: _currentPage,
       onPageChanged: (i) => setState(() => _currentPage = i),
       onMapTap: () => _openUrl(_details!.mapUrl),
+      onValuate: _onValuate,
+      isValuating: _isValuating,
     );
   }
 }
 
-class _Header extends StatelessWidget {
-  const _Header({required this.onBack, this.onMoreVert});
+// ── Header ────────────────────────────────────────────────────────────────────
 
+class _Header extends StatelessWidget {
+  const _Header({
+    required this.title,
+    required this.onBack,
+    this.onMoreVert,
+  });
+
+  final String title;
   final VoidCallback onBack;
   final VoidCallback? onMoreVert;
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return SizedBox(
       height: 56,
       child: Row(
         children: [
           IconButton(
             onPressed: onBack,
-            icon: Icon(Icons.arrow_back_ios_new, size: 20, color: scheme.onSurfaceVariant),
+            icon: const Icon(
+              Icons.arrow_back_ios_new,
+              size: 20,
+              color: Color(0xFF555555),
+            ),
           ),
           Expanded(
             child: Text(
-              'Search Result Details',
-              style: TextStyle(
+              title,
+              style: const TextStyle(
                 fontFamily: 'Calibri',
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: scheme.onSurface,
+                color: AppColors.textBody,
               ),
             ),
           ),
@@ -178,7 +265,9 @@ class _Header extends StatelessWidget {
             icon: Icon(
               Icons.more_vert,
               size: 22,
-              color: onMoreVert != null ? scheme.onSurfaceVariant : scheme.outlineVariant,
+              color: onMoreVert != null
+                  ? const Color(0xFF555555)
+                  : const Color(0xFFCCCCCC),
             ),
           ),
         ],
@@ -186,6 +275,8 @@ class _Header extends StatelessWidget {
     );
   }
 }
+
+// ── Main content ──────────────────────────────────────────────────────────────
 
 class _DetailsContent extends StatelessWidget {
   const _DetailsContent({
@@ -194,6 +285,8 @@ class _DetailsContent extends StatelessWidget {
     required this.currentPage,
     required this.onPageChanged,
     required this.onMapTap,
+    required this.onValuate,
+    required this.isValuating,
   });
 
   final OfferDetails details;
@@ -201,40 +294,61 @@ class _DetailsContent extends StatelessWidget {
   final int currentPage;
   final ValueChanged<int> onPageChanged;
   final VoidCallback onMapTap;
+  final VoidCallback onValuate;
+  final bool isValuating;
 
-  bool get _isApartment => details.propertyTypeCode?.toUpperCase() == 'APARTMENT';
+  bool get _isApartment =>
+      details.propertyTypeCode?.toUpperCase() == 'APARTMENT';
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final l10n = context.l10n;
     return SingleChildScrollView(
       padding: EdgeInsets.only(
-        left: 8,
-        right: 8,
+        left: 10,
+        right: 10,
+        top: 10,
         bottom: MediaQuery.of(context).padding.bottom + 24,
       ),
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 10),
-        padding: const EdgeInsets.fromLTRB(15, 20, 15, 20),
         decoration: BoxDecoration(
-          color: scheme.surface,
+          color: Colors.white,
           borderRadius: BorderRadius.circular(4),
-          border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.5)),
-          boxShadow: [
-            BoxShadow(
-              color: scheme.shadow.withValues(alpha: 0.08),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          border: Border.all(color: const Color(0xFFE0E0E0)),
         ),
+        padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _TitleSection(details: details),
-            const SizedBox(height: 15),
-            _DealTypeBadge(isForRent: details.isForRent),
-            const SizedBox(height: 25),
+            // Title + address
+            if (details.title != null)
+              Text(
+                details.title!,
+                style: const TextStyle(
+                  fontFamily: 'Calibri',
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF333333),
+                ),
+              ),
+            if (details.processedAddress != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                details.processedAddress!,
+                style: const TextStyle(
+                  fontFamily: 'Calibri',
+                  fontSize: 13,
+                  color: Color(0xFF808080),
+                ),
+              ),
+            ],
+            const SizedBox(height: 16),
+
+            // Deal type badge
+            _DealTypeBadge(isForRent: details.isForRent, l10n: l10n),
+            const SizedBox(height: 20),
+
+            // Image carousel + thumbnails
             _ImageCarousel(
               imageUrls: details.imageUrls,
               isApartment: _isApartment,
@@ -242,15 +356,69 @@ class _DetailsContent extends StatelessWidget {
               currentPage: currentPage,
               onPageChanged: onPageChanged,
             ),
-            const SizedBox(height: 25),
-            _PriceAndValuateRow(details: details),
-            const SizedBox(height: 25),
-            _MapAndDetailsRow(details: details, onMapTap: onMapTap),
-            const SizedBox(height: 25),
-            Divider(color: scheme.outlineVariant),
-            if (details.description != null && details.description!.isNotEmpty) ...[
-              const SizedBox(height: 25),
-              _DescriptionSection(description: details.description!),
+            const SizedBox(height: 20),
+
+            // Offer price
+            _OfferPriceRow(details: details, l10n: l10n),
+            const SizedBox(height: 16),
+
+            // Valuate button
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: OutlinedButton(
+                onPressed: isValuating ? null : onValuate,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.primaryRed,
+                  side: const BorderSide(color: AppColors.primaryRed),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                child: isValuating
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.primaryRed,
+                        ),
+                      )
+                    : Text(
+                        l10n.tr('valuateThisProperty').toUpperCase(),
+                        style: const TextStyle(
+                          fontFamily: 'Calibri',
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1.0,
+                          color: AppColors.primaryRed,
+                        ),
+                      ),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Map view (full width)
+            _MapCard(onTap: onMapTap, l10n: l10n),
+            const SizedBox(height: 20),
+
+            const Divider(height: 1, color: Color(0xFFE0E0E0)),
+            const SizedBox(height: 20),
+
+            // Stats 2×2
+            _StatsGrid(details: details, l10n: l10n),
+            const SizedBox(height: 20),
+
+            const Divider(height: 1, color: Color(0xFFE0E0E0)),
+
+            // Property description
+            if (details.description != null &&
+                details.description!.isNotEmpty) ...[
+              const SizedBox(height: 20),
+              _DescriptionSection(
+                description: details.description!,
+                l10n: l10n,
+              ),
             ],
           ],
         ),
@@ -259,71 +427,42 @@ class _DetailsContent extends StatelessWidget {
   }
 }
 
-class _TitleSection extends StatelessWidget {
-  const _TitleSection({required this.details});
-  final OfferDetails details;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (details.title != null)
-          Text(
-            details.title!,
-            style: TextStyle(
-              fontFamily: 'Calibri',
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: scheme.onSurface,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-        if (details.processedAddress != null) ...[
-          const SizedBox(height: 4),
-          Text(
-            details.processedAddress!,
-            style: TextStyle(
-              fontFamily: 'Calibri',
-              fontSize: 13,
-              color: scheme.onSurfaceVariant,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ],
-    );
-  }
-}
+// ── Deal type badge ───────────────────────────────────────────────────────────
 
 class _DealTypeBadge extends StatelessWidget {
-  const _DealTypeBadge({required this.isForRent});
+  const _DealTypeBadge({required this.isForRent, required this.l10n});
+
   final bool isForRent;
+  final AppLocalizations l10n;
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return Container(
-      height: 42,
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: scheme.primaryContainer,
+        color: _iconBoxBg,
         borderRadius: BorderRadius.circular(4),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 12),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.home_outlined, size: 20, color: scheme.primary),
-          const SizedBox(width: 8),
-          Text(
-            isForRent ? 'Available for Rent' : 'Available for Sale',
+          const Text(
+            _iconDealBadge,
             style: TextStyle(
+              fontFamily: _iconFontSN,
+              fontSize: 20,
+              color: AppColors.primaryRed,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Text(
+            isForRent
+                ? l10n.tr('availableForRent')
+                : l10n.tr('availableForSale'),
+            style: const TextStyle(
               fontFamily: 'Calibri',
               fontSize: 13,
-              color: scheme.onSurface,
+              color: AppColors.primaryRed,
             ),
           ),
         ],
@@ -331,6 +470,8 @@ class _DealTypeBadge extends StatelessWidget {
     );
   }
 }
+
+// ── Image carousel ────────────────────────────────────────────────────────────
 
 class _ImageCarousel extends StatelessWidget {
   const _ImageCarousel({
@@ -349,15 +490,12 @@ class _ImageCarousel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final hasImages = imageUrls.isNotEmpty;
-
     Widget fallback() => Container(
-          color: scheme.primary.withValues(alpha: 0.10),
+          color: const Color(0xFFF0F0F0),
           child: Icon(
             isApartment ? Icons.apartment_outlined : Icons.home_work_outlined,
             size: 64,
-            color: scheme.primary,
+            color: AppColors.primaryRed,
           ),
         );
 
@@ -366,10 +504,11 @@ class _ImageCarousel extends StatelessWidget {
         ClipRRect(
           borderRadius: BorderRadius.circular(4),
           child: SizedBox(
-            height: 250,
+            height: 240,
             width: double.infinity,
-            child: hasImages
-                ? PageView.builder(
+            child: imageUrls.isEmpty
+                ? fallback()
+                : PageView.builder(
                     controller: pageController,
                     onPageChanged: onPageChanged,
                     itemCount: imageUrls.length,
@@ -378,11 +517,10 @@ class _ImageCarousel extends StatelessWidget {
                       fit: BoxFit.cover,
                       errorBuilder: (_, _, _) => fallback(),
                     ),
-                  )
-                : fallback(),
+                  ),
           ),
         ),
-        if (hasImages && imageUrls.length > 1) ...[
+        if (imageUrls.length > 1) ...[
           const SizedBox(height: 10),
           SizedBox(
             height: 65,
@@ -402,7 +540,7 @@ class _ImageCarousel extends StatelessWidget {
                     borderRadius: BorderRadius.circular(4),
                     border: Border.all(
                       color: currentPage == i
-                          ? scheme.primary
+                          ? AppColors.primaryRed
                           : Colors.transparent,
                       width: 2,
                     ),
@@ -425,117 +563,108 @@ class _ImageCarousel extends StatelessWidget {
   }
 }
 
-class _PriceAndValuateRow extends StatelessWidget {
-  const _PriceAndValuateRow({required this.details});
+// ── Offer price ───────────────────────────────────────────────────────────────
+
+class _OfferPriceRow extends StatelessWidget {
+  const _OfferPriceRow({required this.details, required this.l10n});
+
   final OfferDetails details;
+  final AppLocalizations l10n;
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Expanded(
-          child: Row(
+        Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: _iconBoxBg,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: const Center(
+            child: Text(
+              _iconOfferPrice,
+              style: TextStyle(
+                fontFamily: _iconFontPrimary,
+                fontSize: 22,
+                color: AppColors.primaryRed,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.tr('offerPrice'),
+              style: const TextStyle(
+                fontFamily: 'Calibri',
+                fontSize: 12,
+                color: Color(0xFF808080),
+              ),
+            ),
+            Text(
+              details.priceLabel,
+              style: const TextStyle(
+                fontFamily: 'Calibri',
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFFA11C36),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+// ── Map card ──────────────────────────────────────────────────────────────────
+
+class _MapCard extends StatelessWidget {
+  const _MapCard({required this.onTap, required this.l10n});
+
+  final VoidCallback onTap;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(4),
+        child: SizedBox(
+          height: 150,
+          width: double.infinity,
+          child: Stack(
+            fit: StackFit.expand,
             children: [
-              Icon(Icons.euro, size: 20, color: scheme.onSurfaceVariant),
-              const SizedBox(width: 10),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Offer Price',
-                    style: TextStyle(
-                      fontFamily: 'Calibri',
-                      fontSize: 11,
-                      color: scheme.onSurfaceVariant,
-                    ),
+              Container(
+                color: const Color(0xFFD4B8B8),
+              ),
+              Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 10,
                   ),
-                  Text(
-                    details.priceLabel,
-                    style: TextStyle(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.white, width: 1.5),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    l10n.tr('mapView').toUpperCase(),
+                    style: const TextStyle(
                       fontFamily: 'Calibri',
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
-                      color: scheme.primary,
+                      color: Colors.white,
+                      letterSpacing: 1.5,
                     ),
                   ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: OutlinedButton(
-            onPressed: null,
-            style: OutlinedButton.styleFrom(
-              side: BorderSide(color: scheme.primary),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(4),
-              ),
-              minimumSize: const Size(double.infinity, 48),
-            ),
-            child: Text(
-              'Valuate this Property',
-              style: TextStyle(
-                fontFamily: 'Calibri',
-                fontSize: 13,
-                color: scheme.primary,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _MapAndDetailsRow extends StatelessWidget {
-  const _MapAndDetailsRow({required this.details, required this.onMapTap});
-  final OfferDetails details;
-  final VoidCallback onMapTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(child: _MapCard(onTap: onMapTap)),
-        const SizedBox(width: 16),
-        Expanded(child: _PropertyStatsGrid(details: details)),
-      ],
-    );
-  }
-}
-
-class _MapCard extends StatelessWidget {
-  const _MapCard({required this.onTap});
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 128,
-        decoration: BoxDecoration(
-          color: scheme.primary,
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: const Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.map_outlined, size: 32, color: Colors.white),
-              SizedBox(height: 6),
-              Text(
-                'Map View',
-                style: TextStyle(
-                  fontFamily: 'Calibri',
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
                 ),
               ),
             ],
@@ -546,53 +675,60 @@ class _MapCard extends StatelessWidget {
   }
 }
 
-class _PropertyStatsGrid extends StatelessWidget {
-  const _PropertyStatsGrid({required this.details});
+// ── Stats 2×2 grid ────────────────────────────────────────────────────────────
+
+class _StatsGrid extends StatelessWidget {
+  const _StatsGrid({required this.details, required this.l10n});
+
   final OfferDetails details;
+  final AppLocalizations l10n;
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return Column(
       children: [
-        Divider(color: scheme.outlineVariant),
-        const SizedBox(height: 16),
         Row(
           children: [
             Expanded(
               child: _StatItem(
-                icon: Icons.calendar_today_outlined,
-                label: 'Building Year',
+                iconChar: _iconBuildingYear,
+                iconFont: _iconFontPrimary,
+                label: l10n.tr('buildingYear'),
                 value: details.buildingYear?.toString(),
               ),
             ),
+            const SizedBox(width: 12),
             Expanded(
               child: _StatItem(
-                icon: Icons.square_foot,
-                label: 'Living Area',
+                iconChar: _iconLivingArea,
+                iconFont: _iconFontSN,
+                label: l10n.tr('livingArea'),
                 value: details.livingArea != null
-                    ? '${_fmt(details.livingArea!)} m²'
+                    ? '${_fmt(details.livingArea!)}m²'
                     : null,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 14),
         Row(
           children: [
             Expanded(
               child: _StatItem(
-                icon: Icons.landscape_outlined,
-                label: 'Land Area',
+                iconChar: _iconLandArea,
+                iconFont: _iconFontSN,
+                label: l10n.tr('landArea'),
                 value: details.landArea != null
-                    ? '${_fmt(details.landArea!)} m²'
+                    ? '${_fmt(details.landArea!)}m²'
                     : null,
               ),
             ),
+            const SizedBox(width: 12),
             Expanded(
               child: _StatItem(
-                icon: Icons.meeting_room_outlined,
-                label: 'Total Rooms',
+                iconChar: _iconTotalRooms,
+                iconFont: _iconFontPrimary,
+                label: l10n.tr('totalRooms'),
                 value: details.numberOfRooms != null
                     ? _fmt(details.numberOfRooms!)
                     : null,
@@ -600,8 +736,6 @@ class _PropertyStatsGrid extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 16),
-        Divider(color: scheme.outlineVariant),
       ],
     );
   }
@@ -613,38 +747,61 @@ class _PropertyStatsGrid extends StatelessWidget {
 }
 
 class _StatItem extends StatelessWidget {
-  const _StatItem({required this.icon, required this.label, this.value});
-  final IconData icon;
+  const _StatItem({
+    required this.iconChar,
+    required this.iconFont,
+    required this.label,
+    this.value,
+  });
+
+  final String iconChar;
+  final String iconFont;
   final String label;
   final String? value;
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 20, color: scheme.onSurfaceVariant),
-        const SizedBox(width: 8),
+        Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: _iconBoxBg,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Center(
+            child: Text(
+              iconChar,
+              style: TextStyle(
+                fontFamily: iconFont,
+                fontSize: 22,
+                color: AppColors.primaryRed,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 label,
-                style: TextStyle(
+                style: const TextStyle(
                   fontFamily: 'Calibri',
-                  fontSize: 11,
-                  color: scheme.onSurfaceVariant,
+                  fontSize: 12,
+                  color: Color(0xFF808080),
                 ),
               ),
               Text(
                 value ?? '—',
-                style: TextStyle(
+                style: const TextStyle(
                   fontFamily: 'Calibri',
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: scheme.onSurface,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF333333),
                 ),
               ),
             ],
@@ -655,38 +812,320 @@ class _StatItem extends StatelessWidget {
   }
 }
 
+// ── Description ───────────────────────────────────────────────────────────────
+
 class _DescriptionSection extends StatelessWidget {
-  const _DescriptionSection({required this.description});
+  const _DescriptionSection({
+    required this.description,
+    required this.l10n,
+  });
+
   final String description;
+  final AppLocalizations l10n;
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Property Details',
-          style: TextStyle(
+          l10n.tr('propertyDetailsHeader'),
+          style: const TextStyle(
             fontFamily: 'Calibri',
-            fontSize: 14,
+            fontSize: 15,
             fontWeight: FontWeight.w700,
-            color: scheme.onSurface,
+            color: Color(0xFF333333),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
         Text(
           description,
-          style: TextStyle(
+          style: const TextStyle(
             fontFamily: 'Calibri',
-            fontSize: 13,
-            color: scheme.onSurfaceVariant,
+            fontSize: 14,
+            color: Color(0xFF333333),
+            height: 1.6,
           ),
         ),
       ],
     );
   }
 }
+
+// ── Valuate property sheet ────────────────────────────────────────────────────
+
+const _iconValuateHeader = ''; // filip_at_iconpack U+E9A6 — injected via PS
+const _iconConfidence    = ''; // filip_at_iconpack U+E9D0 — injected via PS
+
+class _ValuatePropertySheet extends StatefulWidget {
+  const _ValuatePropertySheet({
+    required this.details,
+    required this.valuationData,
+    required this.onAddToValuate,
+  });
+
+  final OfferDetails details;
+  final OfferValuationData valuationData;
+  final VoidCallback onAddToValuate;
+
+  @override
+  State<_ValuatePropertySheet> createState() => _ValuatePropertySheetState();
+}
+
+class _ValuatePropertySheetState extends State<_ValuatePropertySheet> {
+  bool _isAdding = false;
+
+  Color _confidenceColor(String? c) {
+    switch (c?.toUpperCase()) {
+      case 'HIGH':
+        return const Color(0xFF4CAF50);
+      case 'MEDIUM':
+        return const Color(0xFF66BB6A);
+      case 'LOW':
+        return const Color(0xFFE57373);
+      default:
+        return const Color(0xFF808080);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final d = widget.details;
+    final v = widget.valuationData;
+
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header row
+              Row(
+                children: [
+                  const Text(
+                    _iconValuateHeader,
+                    style: TextStyle(
+                      fontFamily: _iconFontPrimary,
+                      fontSize: 24,
+                      color: Color(0xFF808080),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    l10n.tr('valuateProperty'),
+                    style: const TextStyle(
+                      fontFamily: 'Calibri',
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF333333),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // Property image
+              if (d.imageUrls.isNotEmpty)
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: SizedBox(
+                    height: 180,
+                    width: double.infinity,
+                    child: Image.network(
+                      d.imageUrls.first,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => Container(
+                        color: const Color(0xFFF0F0F0),
+                        child: const Icon(
+                          Icons.home_work_outlined,
+                          size: 48,
+                          color: AppColors.primaryRed,
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              else
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: Container(
+                    height: 180,
+                    width: double.infinity,
+                    color: const Color(0xFFF0F0F0),
+                    child: const Icon(
+                      Icons.home_work_outlined,
+                      size: 48,
+                      color: AppColors.primaryRed,
+                    ),
+                  ),
+                ),
+              const SizedBox(height: 14),
+
+              // Title + address
+              if (d.title != null)
+                Text(
+                  d.title!,
+                  style: const TextStyle(
+                    fontFamily: 'Calibri',
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF333333),
+                  ),
+                ),
+              if (d.processedAddress != null) ...[
+                const SizedBox(height: 3),
+                Text(
+                  d.processedAddress!,
+                  style: const TextStyle(
+                    fontFamily: 'Calibri',
+                    fontSize: 13,
+                    color: Color(0xFF808080),
+                  ),
+                ),
+              ],
+              const SizedBox(height: 16),
+
+              // Offer price row
+              _SheetStatRow(
+                iconChar: _iconOfferPrice,
+                iconFont: _iconFontPrimary,
+                label: l10n.tr('offerPrice'),
+                value: v.priceRangeLabel,
+                valueColor: AppColors.primaryRed,
+              ),
+              const SizedBox(height: 12),
+
+              // Confidence row
+              _SheetStatRow(
+                iconChar: _iconConfidence,
+                iconFont: _iconFontPrimary,
+                label: l10n.tr('valuationConfidence'),
+                value: v.confidence?.toUpperCase() ?? '—',
+                valueColor: _confidenceColor(v.confidence),
+              ),
+              const SizedBox(height: 24),
+
+              // ADD TO VALUATE button
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: OutlinedButton(
+                  onPressed: _isAdding
+                      ? null
+                      : () {
+                          setState(() => _isAdding = true);
+                          widget.onAddToValuate();
+                        },
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.primaryRed,
+                    side: const BorderSide(color: AppColors.primaryRed),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  child: _isAdding
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.primaryRed,
+                          ),
+                        )
+                      : Text(
+                          l10n.tr('addToValuate').toUpperCase(),
+                          style: const TextStyle(
+                            fontFamily: 'Calibri',
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1.0,
+                            color: AppColors.primaryRed,
+                          ),
+                        ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SheetStatRow extends StatelessWidget {
+  const _SheetStatRow({
+    required this.iconChar,
+    required this.iconFont,
+    required this.label,
+    required this.value,
+    required this.valueColor,
+  });
+
+  final String iconChar;
+  final String iconFont;
+  final String label;
+  final String value;
+  final Color valueColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: _iconBoxBg,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Center(
+            child: Text(
+              iconChar,
+              style: TextStyle(
+                fontFamily: iconFont,
+                fontSize: 22,
+                color: AppColors.primaryRed,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(
+                  fontFamily: 'Calibri',
+                  fontSize: 12,
+                  color: Color(0xFF808080),
+                ),
+              ),
+              Text(
+                value,
+                style: TextStyle(
+                  fontFamily: 'Calibri',
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: valueColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ── More-vert sheet ───────────────────────────────────────────────────────────
 
 class _MoreVertSheet extends StatelessWidget {
   const _MoreVertSheet({
@@ -701,35 +1140,62 @@ class _MoreVertSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final l10n = context.l10n;
     return SafeArea(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          ListTile(
-            leading: Icon(Icons.picture_as_pdf_outlined, size: 22, color: scheme.primary),
-            title: Text(
-              'Request Dossier',
-              style: TextStyle(
-                fontFamily: 'Calibri',
-                fontSize: 14,
-                color: scheme.onSurface,
+          InkWell(
+            onTap: onRequestDossier,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.picture_as_pdf_outlined,
+                    size: 22,
+                    color: AppColors.primaryRed,
+                  ),
+                  const SizedBox(width: 16),
+                  Text(
+                    l10n.tr('requestDossier'),
+                    style: const TextStyle(
+                      fontFamily: 'Calibri',
+                      fontSize: 15,
+                      color: AppColors.textBody,
+                    ),
+                  ),
+                ],
               ),
             ),
-            onTap: onRequestDossier,
           ),
           if (hasInterestedUrl)
-            ListTile(
-              leading: Icon(Icons.thumb_up_outlined, size: 22, color: scheme.primary),
-              title: Text(
-                'I am Interested',
-                style: TextStyle(
-                  fontFamily: 'Calibri',
-                  fontSize: 14,
-                  color: scheme.onSurface,
+            InkWell(
+              onTap: onIAmInterested,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 14,
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.thumb_up_outlined,
+                      size: 22,
+                      color: AppColors.primaryRed,
+                    ),
+                    const SizedBox(width: 16),
+                    Text(
+                      l10n.tr('iAmInterested'),
+                      style: const TextStyle(
+                        fontFamily: 'Calibri',
+                        fontSize: 15,
+                        color: AppColors.textBody,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              onTap: onIAmInterested,
             ),
         ],
       ),

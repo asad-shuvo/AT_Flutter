@@ -9,6 +9,8 @@ class PropertyFormData {
     required this.postCode,
     required this.houseNumber,
     required this.city,
+    this.lat,
+    this.lng,
     this.livingArea,
     this.landArea,
     this.gardenArea,
@@ -46,6 +48,8 @@ class PropertyFormData {
   final String postCode;
   final String houseNumber;
   final String city;
+  final double? lat;
+  final double? lng;
   final double? livingArea;
   final double? landArea; // house only
   final double? gardenArea; // apartment only
@@ -135,8 +139,8 @@ class PropertyFormData {
       'DealType': dealType,
       'Title': title,
       'ValuationDates': valuationDates,
-      'Latitude': null,
-      'Longitude': null,
+      'Latitude': lat,
+      'Longitude': lng,
       'PostCode': postCode,
       'City': city,
       'Street': street,

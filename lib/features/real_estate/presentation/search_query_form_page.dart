@@ -3,7 +3,9 @@ import 'package:filip_at_flutter/features/real_estate/data/place_address_result.
 import 'package:filip_at_flutter/features/real_estate/data/real_estate_repository.dart';
 import 'package:filip_at_flutter/features/real_estate/data/search_query_form_data.dart';
 import 'package:filip_at_flutter/features/real_estate/presentation/property_address_search_page.dart';
+import 'package:filip_at_flutter/features/real_estate/presentation/search_result_page.dart';
 import 'package:filip_at_flutter/features/real_estate/presentation/widgets/search_map_card.dart';
+import 'package:filip_at_flutter/shared/icons/app_icon_packs.dart';
 import 'package:filip_at_flutter/shared/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -36,8 +38,8 @@ class _SearchQueryFormPageState extends State<SearchQueryFormPage> {
 
   final _postCodeCtrl = TextEditingController();
   final _cityCtrl = TextEditingController();
-  final _radiusCtrl = TextEditingController();
-  final _titleCtrl = TextEditingController();
+  final _radiusCtrl = TextEditingController(text: '1');
+  final _queryTitleCtrl = TextEditingController();
   final _minLivingAreaCtrl = TextEditingController(text: '10');
   final _maxLivingAreaCtrl = TextEditingController(text: '800');
   final _minRoomsCtrl = TextEditingController(text: '1');
@@ -47,8 +49,10 @@ class _SearchQueryFormPageState extends State<SearchQueryFormPage> {
   final _hospitalDistCtrl = TextEditingController();
   final _groceryDistCtrl = TextEditingController();
   final _transitDistCtrl = TextEditingController();
-  final _minPriceCtrl = TextEditingController();
-  final _maxPriceCtrl = TextEditingController();
+  final _minPriceCtrl = TextEditingController(text: '0');
+  final _maxPriceCtrl = TextEditingController(text: '10000');
+  final _minLandAreaCtrl = TextEditingController(text: '50');
+  final _maxLandAreaCtrl = TextEditingController(text: '5000');
 
   String _locationDisplay = '';
   String _dealType = '';
@@ -60,6 +64,33 @@ class _SearchQueryFormPageState extends State<SearchQueryFormPage> {
   bool get _isApartment => _propertyTypeCode?.toLowerCase() == 'apartment';
   bool get _isEditMode => widget.initialData != null;
 
+  bool _validRange(TextEditingController minC, TextEditingController maxC, {bool requireNonEmpty = true}) {
+    final minS = minC.text.trim();
+    final maxS = maxC.text.trim();
+    if (minS.isEmpty || maxS.isEmpty) return !requireNonEmpty;
+    final mn = num.tryParse(minS);
+    final mx = num.tryParse(maxS);
+    if (mn == null || mx == null) return false;
+    return mn <= mx;
+  }
+
+  bool get _canSearch {
+    if (_isSaving) return false;
+    if (_locationDisplay.isEmpty) return false;
+    if (_postCodeCtrl.text.trim().isEmpty) return false;
+    if (_cityCtrl.text.trim().isEmpty) return false;
+    if (_radiusCtrl.text.trim().isEmpty) return false;
+    if (_dealType.isEmpty) return false;
+    if (_propertyTypeCode == null) return false;
+    if (_queryTitleCtrl.text.trim().isEmpty) return false;
+    if (!_validRange(_minLivingAreaCtrl, _maxLivingAreaCtrl)) return false;
+    if (_propertyTypeCode == 'house' && !_validRange(_minLandAreaCtrl, _maxLandAreaCtrl)) return false;
+    if (!_validRange(_minRoomsCtrl, _maxRoomsCtrl)) return false;
+    if (!_validRange(_minBuildingYearCtrl, _maxBuildingYearCtrl)) return false;
+    if (!_validRange(_minPriceCtrl, _maxPriceCtrl)) return false;
+    return true;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -68,7 +99,6 @@ class _SearchQueryFormPageState extends State<SearchQueryFormPage> {
     _postCodeCtrl.text = d.postCode;
     _cityCtrl.text = d.city;
     _radiusCtrl.text = d.radiusKm > 0 ? d.radiusKm.toStringAsFixed(0) : '1';
-    _titleCtrl.text = d.title;
     _minLivingAreaCtrl.text = d.minLivingArea.toStringAsFixed(0);
     _maxLivingAreaCtrl.text = d.maxLivingArea.toStringAsFixed(0);
     _minRoomsCtrl.text = d.minRooms.toString();
@@ -83,7 +113,10 @@ class _SearchQueryFormPageState extends State<SearchQueryFormPage> {
     _isWheelchairAccessible = d.isWheelchairAccessible;
     _hasLift = d.hasLift;
     _hasParkingSpaces = d.hasParkingSpaces;
+    _minLandAreaCtrl.text = d.minLandArea.toStringAsFixed(0);
+    _maxLandAreaCtrl.text = d.maxLandArea.toStringAsFixed(0);
     _locationDisplay = [d.postCode, d.city].where((s) => s.isNotEmpty).join(', ');
+    _queryTitleCtrl.text = d.title;
     _lat = d.lat;
     _lng = d.lng;
     final isSale = d.dealType.toLowerCase() == 'sale';
@@ -140,7 +173,6 @@ class _SearchQueryFormPageState extends State<SearchQueryFormPage> {
     _postCodeCtrl.dispose();
     _cityCtrl.dispose();
     _radiusCtrl.dispose();
-    _titleCtrl.dispose();
     _minLivingAreaCtrl.dispose();
     _maxLivingAreaCtrl.dispose();
     _minRoomsCtrl.dispose();
@@ -152,6 +184,9 @@ class _SearchQueryFormPageState extends State<SearchQueryFormPage> {
     _transitDistCtrl.dispose();
     _minPriceCtrl.dispose();
     _maxPriceCtrl.dispose();
+    _minLandAreaCtrl.dispose();
+    _maxLandAreaCtrl.dispose();
+    _queryTitleCtrl.dispose();
     super.dispose();
   }
 
@@ -167,9 +202,11 @@ class _SearchQueryFormPageState extends State<SearchQueryFormPage> {
       final isSale = _dealType.toLowerCase() == 'sale';
       final params = (
         personId: personId,
-        title: _titleCtrl.text.trim(),
+        title: _queryTitleCtrl.text,
         postCode: _postCodeCtrl.text.trim(),
         city: _cityCtrl.text.trim(),
+        latitude: _lat,
+        longitude: _lng,
         radiusKm: double.tryParse(_radiusCtrl.text) ?? 1,
         dealType: _dealType,
         propertyTypeCode: _propertyTypeCode!,
@@ -179,7 +216,9 @@ class _SearchQueryFormPageState extends State<SearchQueryFormPage> {
         maxRooms: int.tryParse(_maxRoomsCtrl.text) ?? 20,
         minBuildingYear: int.tryParse(_minBuildingYearCtrl.text) ?? 1850,
         maxBuildingYear: int.tryParse(_maxBuildingYearCtrl.text) ?? 2028,
-        isWheelchairAccessible: _isWheelchairAccessible ?? false,
+        minLandArea: double.tryParse(_minLandAreaCtrl.text) ?? 50,
+        maxLandArea: double.tryParse(_maxLandAreaCtrl.text) ?? 5000,
+        isWheelchairAccessible: _isWheelchairAccessible,
         maxDistanceHospital: _hospitalDistCtrl.text.isNotEmpty ? int.tryParse(_hospitalDistCtrl.text) : null,
         maxDistanceGroceryStore: _groceryDistCtrl.text.isNotEmpty ? int.tryParse(_groceryDistCtrl.text) : null,
         maxDistancePublicTransport: _transitDistCtrl.text.isNotEmpty ? int.tryParse(_transitDistCtrl.text) : null,
@@ -190,6 +229,7 @@ class _SearchQueryFormPageState extends State<SearchQueryFormPage> {
         minRentGross: !isSale && _minPriceCtrl.text.isNotEmpty ? int.tryParse(_minPriceCtrl.text.replaceAll(',', '')) : null,
         maxRentGross: !isSale && _maxPriceCtrl.text.isNotEmpty ? int.tryParse(_maxPriceCtrl.text.replaceAll(',', '')) : null,
       );
+      String? qid;
       if (_isEditMode) {
         await widget.repository.updateSearchQuery(
           itemId: widget.initialData!.itemId,
@@ -197,6 +237,8 @@ class _SearchQueryFormPageState extends State<SearchQueryFormPage> {
           title: params.title,
           postCode: params.postCode,
           city: params.city,
+          latitude: params.latitude,
+          longitude: params.longitude,
           radiusKm: params.radiusKm,
           dealType: params.dealType,
           propertyTypeCode: params.propertyTypeCode,
@@ -206,6 +248,8 @@ class _SearchQueryFormPageState extends State<SearchQueryFormPage> {
           maxRooms: params.maxRooms,
           minBuildingYear: params.minBuildingYear,
           maxBuildingYear: params.maxBuildingYear,
+          minLandArea: params.minLandArea,
+          maxLandArea: params.maxLandArea,
           isWheelchairAccessible: params.isWheelchairAccessible,
           maxDistanceHospital: params.maxDistanceHospital,
           maxDistanceGroceryStore: params.maxDistanceGroceryStore,
@@ -218,11 +262,13 @@ class _SearchQueryFormPageState extends State<SearchQueryFormPage> {
           maxRentGross: params.maxRentGross,
         );
       } else {
-        await widget.repository.saveSearchQuery(
+        qid = await widget.repository.saveSearchQuery(
           personId: params.personId,
           title: params.title,
           postCode: params.postCode,
           city: params.city,
+          latitude: params.latitude,
+          longitude: params.longitude,
           radiusKm: params.radiusKm,
           dealType: params.dealType,
           propertyTypeCode: params.propertyTypeCode,
@@ -232,6 +278,8 @@ class _SearchQueryFormPageState extends State<SearchQueryFormPage> {
           maxRooms: params.maxRooms,
           minBuildingYear: params.minBuildingYear,
           maxBuildingYear: params.maxBuildingYear,
+          minLandArea: params.minLandArea,
+          maxLandArea: params.maxLandArea,
           isWheelchairAccessible: params.isWheelchairAccessible,
           maxDistanceHospital: params.maxDistanceHospital,
           maxDistanceGroceryStore: params.maxDistanceGroceryStore,
@@ -246,10 +294,25 @@ class _SearchQueryFormPageState extends State<SearchQueryFormPage> {
       }
       if (!mounted) return;
       widget.onSaved?.call();
-      Navigator.of(context).pop(true);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.tr('searchPropertySuccessfullyAddedMsg'))),
-      );
+      if (_isEditMode) {
+        Navigator.of(context).pop(true);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.tr('searchPropertySuccessfullyAddedMsg'))),
+        );
+      } else if (qid != null && qid.isNotEmpty) {
+        final resultId = qid;
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => SearchResultPage(
+              qid: resultId,
+              repository: widget.repository,
+              dealType: params.dealType,
+            ),
+          ),
+        );
+      } else {
+        Navigator.of(context).pop(true);
+      }
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -330,10 +393,7 @@ class _SearchQueryFormPageState extends State<SearchQueryFormPage> {
               decoration: _inputDecoration('${l10n.tr('postalCodeAndCity')} *').copyWith(
                 suffixIcon: const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 10),
-                  child: Text(
-                    '',
-                    style: TextStyle(fontFamily: _iconFont, fontSize: 20, color: Color(0xFF808080)),
-                  ),
+                  child: Icon(FilipIcons.locationPin, size: 20, color: Color(0xFF808080)),
                 ),
                 suffixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 40),
               ),
@@ -356,25 +416,14 @@ class _SearchQueryFormPageState extends State<SearchQueryFormPage> {
           decoration: _inputDecoration('${l10n.tr('city')} *'),
           validator: (v) => (v == null || v.trim().isEmpty) ? l10n.tr('requiredField') : null,
         ),
-        const SizedBox(height: 12),
-        TextFormField(
-          controller: _radiusCtrl,
-          keyboardType: TextInputType.number,
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          decoration: _inputDecoration('${l10n.tr('propertyRadius')} *').copyWith(
-            suffixText: 'KM',
-            suffixStyle: const TextStyle(fontFamily: 'Calibri', fontWeight: FontWeight.w600, color: Color(0xFF555555)),
-          ),
-          validator: (v) {
-            if (v == null || v.trim().isEmpty) return l10n.tr('requiredField');
-            final n = int.tryParse(v);
-            if (n == null || n <= 0) return l10n.tr('invalidValue');
-            return null;
-          },
+        const SizedBox(height: 20),
+        Text(
+          '${l10n.tr('propertyRadius')} (km) *',
+          style: const TextStyle(fontFamily: 'Calibri', fontSize: 13, color: Color(0xFF555555)),
         ),
         const SizedBox(height: 8),
         _buildRadiusPresets(),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         _buildDealTypeRadio(l10n),
         FormField<String>(
           initialValue: _dealType,
@@ -400,8 +449,10 @@ class _SearchQueryFormPageState extends State<SearchQueryFormPage> {
         ),
         const SizedBox(height: 12),
         TextFormField(
-          controller: _titleCtrl,
-          decoration: _inputDecoration('${l10n.tr('nameOfQuery')} *'),
+          controller: _queryTitleCtrl,
+          decoration: _inputDecoration('${l10n.tr('nameOfTheQuery')} *').copyWith(
+            hintText: l10n.tr('enterTheNameOfquery'),
+          ),
           validator: (v) => (v == null || v.trim().isEmpty) ? l10n.tr('requiredField') : null,
         ),
         const SizedBox(height: 12),
@@ -420,6 +471,10 @@ class _SearchQueryFormPageState extends State<SearchQueryFormPage> {
       iconFont: _iconFont,
       title: l10n.tr('propertyPriceAndMeasurement'),
       children: [
+        if (_dealType.isNotEmpty) ...[
+          _buildPriceCard(l10n),
+          const SizedBox(height: 12),
+        ],
         _buildRangeCard(
           iconCode: '',
           iconFont: _snIconFont,
@@ -434,6 +489,23 @@ class _SearchQueryFormPageState extends State<SearchQueryFormPage> {
             _maxLivingAreaCtrl.text = '800';
           }),
         ),
+        if (_propertyTypeCode == 'house') ...[
+          const SizedBox(height: 12),
+          _buildRangeCard(
+            iconCode: '',
+            iconFont: _snIconFont,
+            label: l10n.tr('estimatedLandArea').toUpperCase(),
+            minCtrl: _minLandAreaCtrl,
+            maxCtrl: _maxLandAreaCtrl,
+            minLabel: l10n.tr('minLandArea'),
+            maxLabel: l10n.tr('maxLandArea'),
+            hint: '${l10n.tr('optional')}; Upto 5000 m²',
+            onReset: () => setState(() {
+              _minLandAreaCtrl.text = '50';
+              _maxLandAreaCtrl.text = '5000';
+            }),
+          ),
+        ],
         const SizedBox(height: 12),
         _buildRangeCard(
           iconCode: '',
@@ -449,10 +521,6 @@ class _SearchQueryFormPageState extends State<SearchQueryFormPage> {
             _maxRoomsCtrl.text = '20';
           }),
         ),
-        if (_dealType.isNotEmpty) ...[
-          const SizedBox(height: 12),
-          _buildPriceCard(l10n),
-        ],
       ],
     );
   }
@@ -513,8 +581,8 @@ class _SearchQueryFormPageState extends State<SearchQueryFormPage> {
               ),
               const SizedBox(height: 8),
               _buildBoolDropdown(
-                iconCode: '',
-                iconFont: _snIconFont,
+                iconCode: '',
+                iconFont: _iconFont,
                 value: _isWheelchairAccessible,
                 onChanged: (v) => setState(() => _isWheelchairAccessible = v),
                 l10n: l10n,
@@ -524,8 +592,8 @@ class _SearchQueryFormPageState extends State<SearchQueryFormPage> {
                 const SizedBox(height: 12),
                 if (_isApartment)
                   _buildBoolDropdown(
-                    iconCode: '',
-                    iconFont: _snIconFont,
+                    iconCode: '',
+                    iconFont: _iconFont,
                     value: _hasLift,
                     onChanged: (v) => setState(() => _hasLift = v),
                     l10n: l10n,
@@ -533,8 +601,8 @@ class _SearchQueryFormPageState extends State<SearchQueryFormPage> {
                   )
                 else
                   _buildBoolDropdown(
-                    iconCode: '',
-                    iconFont: _snIconFont,
+                    iconCode: '',
+                    iconFont: _iconFont,
                     value: _hasParkingSpaces,
                     onChanged: (v) => setState(() => _hasParkingSpaces = v),
                     l10n: l10n,
@@ -593,37 +661,80 @@ class _SearchQueryFormPageState extends State<SearchQueryFormPage> {
 
   Widget _buildPriceCard(AppLocalizations l10n) {
     final isSale = _dealType.toLowerCase() == 'sale';
-    final label = isSale ? l10n.tr('salePrice') : l10n.tr('rentGross');
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(fontFamily: 'Calibri', fontSize: 13, color: Color(0xFF555555)),
-        ),
-        const SizedBox(height: 6),
-        Row(
-          children: [
-            Expanded(
-              child: TextFormField(
-                controller: _minPriceCtrl,
-                keyboardType: TextInputType.number,
-                decoration: _inputDecoration(l10n.tr('minPrice')),
+    final hint = '${l10n.tr('optional')}; Upto 10000 €';
+    final label = (isSale ? l10n.tr('salePrice') : l10n.tr('rentGross')).toUpperCase();
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFF6F6F6),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: const Color(0xFFD2D2D2)),
+      ),
+      padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Text('', style: TextStyle(fontFamily: _iconFont, fontSize: 20, color: Color(0xFF808080))),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(label, style: const TextStyle(fontFamily: 'Calibri', fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF555555))),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: TextFormField(
-                controller: _maxPriceCtrl,
-                keyboardType: TextInputType.number,
-                decoration: _inputDecoration(l10n.tr('maxPrice')),
+              GestureDetector(
+                onTap: () => setState(() { _minPriceCtrl.clear(); _maxPriceCtrl.clear(); }),
+                child: const Text('', style: TextStyle(fontFamily: _iconFont, fontSize: 20, color: AppColors.primaryRed)),
               ),
-            ),
-          ],
-        ),
-      ],
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l10n.tr('minPrice'), style: const TextStyle(fontFamily: 'Calibri', fontSize: 12, color: Color(0xFF888888))),
+                    const SizedBox(height: 4),
+                    TextFormField(
+                      controller: _minPriceCtrl,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      decoration: _rangeInputDecoration().copyWith(
+                        suffixText: '€',
+                        suffixStyle: const TextStyle(fontFamily: 'Calibri', fontWeight: FontWeight.w600, color: Color(0xFF555555)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l10n.tr('maxPrice'), style: const TextStyle(fontFamily: 'Calibri', fontSize: 12, color: Color(0xFF888888))),
+                    const SizedBox(height: 4),
+                    TextFormField(
+                      controller: _maxPriceCtrl,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      decoration: _rangeInputDecoration().copyWith(
+                        suffixText: '€',
+                        suffixStyle: const TextStyle(fontFamily: 'Calibri', fontWeight: FontWeight.w600, color: Color(0xFF555555)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(hint, style: const TextStyle(fontFamily: 'Calibri', fontSize: 11, color: Color(0xFF888888))),
+        ],
+      ),
     );
   }
+
 
   Widget _buildRangeCard({
     required String iconCode,
@@ -638,11 +749,11 @@ class _SearchQueryFormPageState extends State<SearchQueryFormPage> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFE0E0E0)),
+        color: const Color(0xFFF6F6F6),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: const Color(0xFFD2D2D2)),
       ),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -655,7 +766,7 @@ class _SearchQueryFormPageState extends State<SearchQueryFormPage> {
               ),
               GestureDetector(
                 onTap: onReset,
-                child: const Icon(Icons.refresh, color: AppColors.primaryRed, size: 22),
+                child: const Text('', style: TextStyle(fontFamily: _iconFont, fontSize: 20, color: AppColors.primaryRed)),
               ),
             ],
           ),
@@ -716,9 +827,6 @@ class _SearchQueryFormPageState extends State<SearchQueryFormPage> {
         if (label != null) ...[
           Row(
             children: [
-              if (iconCode.isNotEmpty)
-                Text(iconCode, style: TextStyle(fontFamily: iconFont, fontSize: 18, color: const Color(0xFF808080))),
-              if (iconCode.isNotEmpty) const SizedBox(width: 6),
               Text(label, style: const TextStyle(fontFamily: 'Calibri', fontSize: 13, color: Color(0xFF555555))),
             ],
           ),
@@ -727,7 +835,15 @@ class _SearchQueryFormPageState extends State<SearchQueryFormPage> {
         DropdownButtonFormField<bool?>(
           initialValue: value,
           dropdownColor: Colors.white,
-          decoration: _inputDecoration(''),
+          decoration: _inputDecoration('').copyWith(
+            prefixIcon: iconCode.isEmpty
+                ? null
+                : Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Text(iconCode, style: TextStyle(fontFamily: iconFont, fontSize: 20, color: const Color(0xFF808080))),
+                  ),
+            prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
+          ),
           items: [
             DropdownMenuItem(value: null, child: Text(l10n.tr('doesNotMatter'), style: _dropdownTextStyle)),
             DropdownMenuItem(value: true, child: Text(l10n.tr('yes'), style: _dropdownTextStyle)),
@@ -761,18 +877,41 @@ class _SearchQueryFormPageState extends State<SearchQueryFormPage> {
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
       child: _isSaving
           ? const Center(child: CircularProgressIndicator())
-          : ElevatedButton(
-              onPressed: _save,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryRed,
-                foregroundColor: Colors.white,
-                minimumSize: const Size(double.infinity, 52),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-              ),
-              child: Text(
-                l10n.tr('search').toUpperCase(),
-                style: const TextStyle(fontFamily: 'Calibri', fontSize: 16, fontWeight: FontWeight.w700),
-              ),
+          : AnimatedBuilder(
+              animation: Listenable.merge([
+                _postCodeCtrl,
+                _cityCtrl,
+                _radiusCtrl,
+                _queryTitleCtrl,
+                _minLivingAreaCtrl,
+                _maxLivingAreaCtrl,
+                _minLandAreaCtrl,
+                _maxLandAreaCtrl,
+                _minRoomsCtrl,
+                _maxRoomsCtrl,
+                _minBuildingYearCtrl,
+                _maxBuildingYearCtrl,
+                _minPriceCtrl,
+                _maxPriceCtrl,
+              ]),
+              builder: (context, _) {
+                final enabled = _canSearch;
+                return ElevatedButton(
+                  onPressed: enabled ? _save : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryRed,
+                    foregroundColor: Colors.white,
+                    disabledBackgroundColor: const Color(0xFFE6A4AC),
+                    disabledForegroundColor: Colors.white,
+                    minimumSize: const Size(double.infinity, 52),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                  ),
+                  child: Text(
+                    l10n.tr('search').toUpperCase(),
+                    style: const TextStyle(fontFamily: 'Calibri', fontSize: 16, fontWeight: FontWeight.w700),
+                  ),
+                );
+              },
             ),
     );
   }
