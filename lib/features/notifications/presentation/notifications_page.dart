@@ -15,6 +15,7 @@ import 'package:filip_at_flutter/features/notifications/data/notifications_repos
 import 'package:filip_at_flutter/features/profile/profile_repository.dart';
 import 'package:filip_at_flutter/features/survey/data/survey_address_repository.dart';
 import 'package:filip_at_flutter/features/notifications/presentation/contract_not_found_page.dart';
+import 'package:filip_at_flutter/features/real_estate/data/real_estate_repository.dart';
 import 'package:filip_at_flutter/features/real_estate/presentation/real_estate_page.dart';
 import 'package:filip_at_flutter/features/explorer/presentation/filip_explorer_page.dart';
 import 'package:filip_at_flutter/shared/theme/app_colors.dart';
@@ -37,6 +38,7 @@ class NotificationsPage extends StatefulWidget {
     required this.householdController,
     required this.driveRepository,
     required this.userSessionCache,
+    required this.realEstateRepository,
     this.profileRepository,
     this.surveyAddressRepository,
   });
@@ -50,6 +52,7 @@ class NotificationsPage extends StatefulWidget {
   final HouseholdMemberFilterController householdController;
   final DriveRepository driveRepository;
   final UserSessionCache userSessionCache;
+  final RealEstateRepository realEstateRepository;
   final ProfileRepository? profileRepository;
   final SurveyAddressRepository? surveyAddressRepository;
 
@@ -174,6 +177,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
           householdController: widget.householdController,
           driveRepository: widget.driveRepository,
           userSessionCache: widget.userSessionCache,
+          realEstateRepository: widget.realEstateRepository,
           profileRepository: widget.profileRepository,
           surveyAddressRepository: widget.surveyAddressRepository,
         ),
@@ -198,6 +202,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
         householdController: widget.householdController,
         driveRepository: widget.driveRepository,
         userSessionCache: widget.userSessionCache,
+        realEstateRepository: widget.realEstateRepository,
         profileRepository: widget.profileRepository,
         surveyAddressRepository: widget.surveyAddressRepository,
       ),
@@ -252,6 +257,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 householdController: widget.householdController,
                 driveRepository: widget.driveRepository,
                 userSessionCache: widget.userSessionCache,
+                realEstateRepository: widget.realEstateRepository,
                 profileRepository: widget.profileRepository,
                 surveyAddressRepository: widget.surveyAddressRepository,
               ),
@@ -259,7 +265,22 @@ class _NotificationsPageState extends State<NotificationsPage> {
           );
         },
         onContractsTap: () => _openContracts(),
-        onRealEstateTap: () => _openPage(const RealEstatePage()),
+        onRealEstateTap: () => _openPage(
+          RealEstatePage(
+            repository: widget.realEstateRepository,
+            dashboardRepository: widget.dashboardRepository,
+            contractsRepository: widget.contractsRepository,
+            notificationsRepository: widget.notificationsRepository,
+            authSessionController: widget.authSessionController,
+            appVersion: widget.appVersion,
+            syncNotificationService: widget.syncNotificationService,
+            householdController: widget.householdController,
+            driveRepository: widget.driveRepository,
+            userSessionCache: widget.userSessionCache,
+            profileRepository: widget.profileRepository,
+            surveyAddressRepository: widget.surveyAddressRepository,
+          ),
+        ),
         onMessagesTap: () => _openPage(const ChatPage()),
       ),
     );

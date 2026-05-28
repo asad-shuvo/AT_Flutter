@@ -27,6 +27,7 @@ import 'package:filip_at_flutter/features/profile/profile_repository.dart';
 import 'package:filip_at_flutter/features/survey/data/survey_address_repository.dart';
 import 'package:filip_at_flutter/shared/widgets/app_side_drawer.dart';
 import 'package:filip_at_flutter/features/profile/presentation/profile_page.dart';
+import 'package:filip_at_flutter/features/real_estate/data/real_estate_repository.dart';
 import 'package:filip_at_flutter/features/real_estate/presentation/real_estate_page.dart';
 import 'package:filip_at_flutter/features/settings/presentation/settings_page.dart';
 import 'package:filip_at_flutter/features/about/presentation/about_page.dart';
@@ -51,6 +52,7 @@ class DashboardPage extends StatefulWidget {
     required this.userSessionCache,
     required this.profileRepository,
     required this.appVersionRepository,
+    required this.realEstateRepository,
     this.surveyAddressRepository,
   });
 
@@ -65,6 +67,7 @@ class DashboardPage extends StatefulWidget {
   final UserSessionCache userSessionCache;
   final ProfileRepository profileRepository;
   final AppVersionRepository appVersionRepository;
+  final RealEstateRepository realEstateRepository;
   final SurveyAddressRepository? surveyAddressRepository;
 
   @override
@@ -230,6 +233,7 @@ class _DashboardPageState extends State<DashboardPage>
         householdController: widget.householdController,
         driveRepository: widget.driveRepository,
         userSessionCache: widget.userSessionCache,
+        realEstateRepository: widget.realEstateRepository,
         profileRepository: widget.profileRepository,
         surveyAddressRepository: widget.surveyAddressRepository,
       ),
@@ -318,6 +322,7 @@ class _DashboardPageState extends State<DashboardPage>
             householdController: widget.householdController,
             driveRepository: widget.driveRepository,
             userSessionCache: widget.userSessionCache,
+            realEstateRepository: widget.realEstateRepository,
             profileRepository: widget.profileRepository,
             surveyAddressRepository: widget.surveyAddressRepository,
           ),
@@ -334,11 +339,28 @@ class _DashboardPageState extends State<DashboardPage>
             householdController: widget.householdController,
             driveRepository: widget.driveRepository,
             userSessionCache: widget.userSessionCache,
+            realEstateRepository: widget.realEstateRepository,
             profileRepository: widget.profileRepository,
             surveyAddressRepository: widget.surveyAddressRepository,
           ),
         ),
-        onRealEstateTap: () => _openPage(context, const RealEstatePage()),
+        onRealEstateTap: () => _openPage(
+          context,
+          RealEstatePage(
+            repository: widget.realEstateRepository,
+            dashboardRepository: widget.dashboardRepository,
+            contractsRepository: widget.contractsRepository,
+            notificationsRepository: widget.notificationsRepository,
+            authSessionController: widget.authSessionController,
+            appVersion: widget.config.appVersion,
+            syncNotificationService: widget.syncNotificationService,
+            householdController: widget.householdController,
+            driveRepository: widget.driveRepository,
+            userSessionCache: widget.userSessionCache,
+            profileRepository: widget.profileRepository,
+            surveyAddressRepository: widget.surveyAddressRepository,
+          ),
+        ),
         onMessagesTap: () => _openPage(context, const ChatPage()),
       ),
     );
@@ -357,6 +379,7 @@ class _DashboardPageState extends State<DashboardPage>
           householdController: widget.householdController,
           driveRepository: widget.driveRepository,
           userSessionCache: widget.userSessionCache,
+          realEstateRepository: widget.realEstateRepository,
           profileRepository: widget.profileRepository,
           surveyAddressRepository: widget.surveyAddressRepository,
         ),

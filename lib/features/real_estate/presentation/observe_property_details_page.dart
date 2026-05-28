@@ -1,0 +1,812 @@
+import 'package:filip_at_flutter/app/localization/app_localizations.dart';
+import 'package:filip_at_flutter/features/real_estate/application/observation_controller.dart';
+import 'package:filip_at_flutter/features/real_estate/data/property_item.dart';
+import 'package:filip_at_flutter/features/real_estate/data/property_valuation_entry.dart';
+import 'package:filip_at_flutter/features/real_estate/data/real_estate_repository.dart';
+import 'package:filip_at_flutter/features/real_estate/presentation/property_form_page.dart';
+import 'package:filip_at_flutter/features/real_estate/presentation/dossier_web_view_page.dart';
+import 'package:filip_at_flutter/features/chat/presentation/chat_page.dart';
+import 'package:filip_at_flutter/features/dashboard/data/dashboard_models.dart';
+import 'package:filip_at_flutter/features/real_estate/presentation/widgets/contact_advisor_sheet.dart';
+import 'package:filip_at_flutter/features/real_estate/presentation/widgets/dossier_progress_sheet.dart';
+import 'package:filip_at_flutter/features/real_estate/presentation/widgets/price_line_chart.dart';
+import 'package:filip_at_flutter/features/real_estate/presentation/widgets/property_more_vert_sheet.dart';
+import 'package:flutter/material.dart';
+
+const _iconFont = 'filip_at_iconpack_29022024';
+
+class ObservePropertyDetailsPage extends StatefulWidget {
+  const ObservePropertyDetailsPage({
+    super.key,
+    required this.id,
+    required this.repository,
+    this.observationController,
+  });
+
+  final String id;
+  final RealEstateRepository repository;
+  final ObservationController? observationController;
+
+  @override
+  State<ObservePropertyDetailsPage> createState() =>
+      _ObservePropertyDetailsPageState();
+}
+
+class _ObservePropertyDetailsPageState
+    extends State<ObservePropertyDetailsPage> {
+  PropertyItem? _item;
+  List<PropertyValuationEntry> _history = [];
+  bool _isLoading = true;
+  bool _isHistoryLoading = false;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+    try {
+      final item = await widget.repository.fetchPropertyById(widget.id);
+      if (!mounted) return;
+      if (item == null) {
+        setState(() {
+          _isLoading = false;
+          _error = 'Property not found.';
+        });
+        return;
+      }
+      setState(() {
+        _item = item;
+        _isLoading = false;
+      });
+      _loadHistory(item);
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _error = e.toString();
+        });
+      }
+    }
+  }
+
+  Future<void> _loadHistory(PropertyItem item) async {
+    setState(() => _isHistoryLoading = true);
+    try {
+      final history = await widget.repository.fetchPropertyValuationHistory(
+        propertyId: item.itemId,
+      );
+      if (mounted) {
+        setState(() {
+          _history = history;
+          _isHistoryLoading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _isHistoryLoading = false);
+    }
+  }
+
+  Future<void> _onMoreVert() async {
+    final item = _item;
+    if (item == null) return;
+    final action = await showPropertyMoreVertSheet(
+      context: context,
+      item: item,
+      source: PropertyListSource.observation,
+    );
+    if (action == null || !mounted) return;
+    switch (action) {
+      case PropertyMoreVertAction.edit:
+        await _openEditForm(item);
+      case PropertyMoreVertAction.contactAdvisor:
+        await _showContactAdvisor();
+      case PropertyMoreVertAction.detailedView:
+        await _openDetailedView(item);
+      case PropertyMoreVertAction.requestDossier:
+        await _requestDossier(item);
+      case PropertyMoreVertAction.delete:
+        await _confirmDelete(item);
+      case PropertyMoreVertAction.addToObserve:
+        break;
+    }
+  }
+
+  Future<void> _showContactAdvisor() async {
+    final data = await widget.repository.fetchAdvisorInfo();
+    if (!mounted) return;
+    showContactAdvisorSheet(
+      context: context,
+      advisor: data != null && data.isAvailable
+          ? AdvisorInfo(
+              displayName: data.displayName ?? '',
+              title: context.l10n.tr('myFinancialAdvisor'),
+              profileImageUrl: data.profileImageUrl,
+              colorCode: Color(data.avatarColorValue),
+              email: data.email,
+              phone: data.phone,
+            )
+          : null,
+      onChatTap: () {
+        Navigator.of(context, rootNavigator: true).pop();
+        Navigator.of(context, rootNavigator: true).push(
+          MaterialPageRoute<void>(builder: (_) => const ChatPage()),
+        );
+      },
+    );
+  }
+
+  Future<void> _openEditForm(PropertyItem item) async {
+    final formData = await widget.repository.fetchPropertyFormData(item.itemId);
+    if (!mounted) return;
+    await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => PropertyFormPage(
+          source: PropertyListSource.observation,
+          repository: widget.repository,
+          initialData: formData,
+          onSaved: _load,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openDetailedView(PropertyItem item) async {
+    if (item.dossierId == null) {
+      _showSnackBar('No dossier available for this property.');
+      return;
+    }
+    try {
+      final url = await widget.repository.fetchDossierShareLink(item.dossierId!);
+      if (!mounted) return;
+      if (url == null || url.isEmpty) {
+        _showSnackBar('Could not load dossier link.');
+        return;
+      }
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(builder: (_) => DossierWebViewPage(url: url)),
+      );
+    } catch (_) {
+      if (mounted) _showSnackBar('Something went wrong. Please try again.');
+    }
+  }
+
+  Future<void> _requestDossier(PropertyItem item) async {
+    if (item.dossierId == null) {
+      _showSnackBar('No dossier available for this property.');
+      return;
+    }
+    final personId = await widget.repository.getPersonId();
+    if (personId == null || !mounted) return;
+    try {
+      final result = await widget.repository.requestDossierPdf(
+        dossierId: item.dossierId!,
+        personId: personId,
+      );
+      if (!mounted) return;
+      if (result.success || result.alreadyInProgress) {
+        if (result.alreadyInProgress) {
+          _showSnackBar('Another PDF generation is already in progress.');
+          await Future.delayed(const Duration(seconds: 4));
+          if (!mounted) return;
+        }
+        showDossierProgressSheet(context: context);
+      } else {
+        _showSnackBar('Something went wrong. Please try again.');
+      }
+    } catch (_) {
+      if (mounted) _showSnackBar('Something went wrong. Please try again.');
+    }
+  }
+
+  Future<void> _confirmDelete(PropertyItem item) async {
+    final confirmed = await showDeleteConfirmSheet(context);
+    if (!confirmed || !mounted) return;
+    try {
+      await widget.observationController?.deleteItem(item.itemId);
+      await widget.repository.deleteProperty(
+        propertyId: item.itemId,
+        deletedFrom: 'Observation',
+      );
+      if (mounted) Navigator.of(context).pop();
+    } catch (_) {
+      if (mounted) _showSnackBar('Something went wrong. Please try again.');
+    }
+  }
+
+  Future<void> _onMovePriceToggled(bool value) async {
+    final item = _item;
+    if (item == null) return;
+
+    if (value) {
+      final price = await _showSetMovePriceSheet();
+      if (price == null) return;
+      try {
+        await widget.repository.updateMakeMovePrice(
+          itemId: item.itemId,
+          price: price,
+          isGiven: true,
+        );
+        if (mounted) setState(() => _item = item.withMakeMovePrice(price));
+      } catch (_) {
+        if (mounted) _showSnackBar('Could not save wish price. Please try again.');
+      }
+    } else {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Remove Wish Price'),
+          content: const Text('Are you sure you want to remove your wish price?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: const Text(
+                'Remove',
+                style: TextStyle(color: Color(0xFFD82034)),
+              ),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true || !mounted) return;
+      try {
+        await widget.repository.updateMakeMovePrice(
+          itemId: item.itemId,
+          price: null,
+          isGiven: false,
+        );
+        if (mounted) setState(() => _item = item.withMakeMovePrice(null));
+      } catch (_) {
+        if (mounted) _showSnackBar('Could not remove wish price. Please try again.');
+      }
+    }
+  }
+
+  Future<double?> _showSetMovePriceSheet() {
+    final controller = TextEditingController();
+    return showModalBottomSheet<double>(
+      context: context,
+      useRootNavigator: true,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+      ),
+      builder: (sheetCtx) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(sheetCtx).viewInsets.bottom,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Set Wish Price',
+                style: TextStyle(
+                  fontFamily: 'Calibri',
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: Theme.of(sheetCtx).colorScheme.onSurface,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Enter the price at which you would consider selling.',
+                style: TextStyle(
+                  fontFamily: 'Calibri',
+                  fontSize: 13,
+                  color: Theme.of(sheetCtx).colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: controller,
+                keyboardType: TextInputType.number,
+                autofocus: true,
+                decoration: InputDecoration(
+                  labelText: 'Wish Price',
+                  prefixText: '€ ',
+                  border: const OutlineInputBorder(),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Theme.of(sheetCtx).colorScheme.primary,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(sheetCtx).pop(null),
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(
+                          color: Theme.of(sheetCtx).colorScheme.primary,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        minimumSize: const Size(double.infinity, 48),
+                      ),
+                      child: Text(
+                        'Cancel',
+                        style: TextStyle(
+                          fontFamily: 'Calibri',
+                          color: Theme.of(sheetCtx).colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: () {
+                        final val = double.tryParse(
+                          controller.text
+                              .replaceAll(',', '')
+                              .replaceAll(' ', ''),
+                        );
+                        Navigator.of(sheetCtx).pop(val);
+                      },
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Theme.of(sheetCtx).colorScheme.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        minimumSize: const Size(double.infinity, 48),
+                      ),
+                      child: const Text(
+                        'Save',
+                        style: TextStyle(fontFamily: 'Calibri'),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showSnackBar(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Scaffold(
+      backgroundColor: scheme.surfaceContainerLow,
+      body: SafeArea(
+        child: Column(
+          children: [
+            _PageHeader(
+              title: 'Observation Property',
+              onBack: () => Navigator.of(context).pop(),
+              onMoreVert: _item != null ? _onMoreVert : null,
+            ),
+            Expanded(child: _buildBody(scheme)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBody(ColorScheme scheme) {
+    if (_isLoading) {
+      return Center(
+        child: CircularProgressIndicator(color: scheme.primary),
+      );
+    }
+    if (_error != null || _item == null) {
+      return Center(
+        child: Text(
+          'Could not load property details.',
+          style: TextStyle(
+            fontFamily: 'Calibri',
+            fontSize: 14,
+            color: scheme.onSurfaceVariant,
+          ),
+        ),
+      );
+    }
+    return _ObservationContent(
+      item: _item!,
+      history: _history,
+      isHistoryLoading: _isHistoryLoading,
+      onMovePriceToggled: _onMovePriceToggled,
+    );
+  }
+}
+
+class _PageHeader extends StatelessWidget {
+  const _PageHeader({
+    required this.title,
+    required this.onBack,
+    this.onMoreVert,
+  });
+
+  final String title;
+  final VoidCallback onBack;
+  final VoidCallback? onMoreVert;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      color: scheme.surface,
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+      child: Row(
+        children: [
+          IconButton(
+            onPressed: onBack,
+            icon: Icon(Icons.arrow_back_ios_new, size: 20, color: scheme.onSurfaceVariant),
+          ),
+          Expanded(
+            child: Text(
+              title,
+              style: TextStyle(
+                fontFamily: 'Calibri',
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: scheme.onSurface,
+              ),
+            ),
+          ),
+          IconButton(
+            onPressed: onMoreVert,
+            icon: Icon(
+              Icons.more_vert,
+              size: 22,
+              color: onMoreVert != null ? scheme.onSurfaceVariant : scheme.outlineVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ObservationContent extends StatelessWidget {
+  const _ObservationContent({
+    required this.item,
+    required this.history,
+    required this.isHistoryLoading,
+    required this.onMovePriceToggled,
+  });
+
+  final PropertyItem item;
+  final List<PropertyValuationEntry> history;
+  final bool isHistoryLoading;
+  final Future<void> Function(bool) onMovePriceToggled;
+
+  bool get _isRent => item.dealType?.toLowerCase() == 'rent';
+
+  double? get _marketPrice {
+    if (history.length <= 5) return null;
+    final e = history[5];
+    return _isRent ? e.rentGross : e.salePrice;
+  }
+
+  bool get _isApartment => item.propertyType?.code?.toUpperCase() == 'APARTMENT';
+
+  static String _fmtCurrency(double? value) {
+    if (value == null || value == 0) return '–';
+    if (value >= 1e9) return '€ ${(value / 1e9).toStringAsFixed(2)}B.';
+    if (value >= 1e6) return '€ ${(value / 1e6).toStringAsFixed(2)}Mio.';
+    if (value >= 1e3) return '€ ${(value / 1e3).toStringAsFixed(2)}Tsd.';
+    return '€ ${value.toStringAsFixed(2)}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return SingleChildScrollView(
+      padding: EdgeInsets.only(
+        left: 4,
+        right: 4,
+        top: 12,
+        bottom: MediaQuery.of(context).padding.bottom + 24,
+      ),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: scheme.surface,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              item.title ?? '—',
+              style: TextStyle(
+                fontFamily: 'Calibri',
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: scheme.onSurface,
+              ),
+            ),
+            if (item.address != null || item.city != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                [item.address, item.city]
+                    .whereType<String>()
+                    .where((s) => s.isNotEmpty)
+                    .join(' '),
+                style: TextStyle(
+                  fontFamily: 'Calibri',
+                  fontSize: 13,
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+            const SizedBox(height: 12),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: SizedBox(
+                height: 220,
+                width: double.infinity,
+                child: item.imageUrl != null
+                    ? Image.network(
+                        item.imageUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => _imageFallback(scheme),
+                      )
+                    : _imageFallback(scheme),
+              ),
+            ),
+            const SizedBox(height: 16),
+            _InfoRow(
+              iconCode: '',
+              label: 'Current Market Price',
+              value: _fmtCurrency(_marketPrice),
+            ),
+            Divider(height: 24, thickness: 1, color: scheme.outlineVariant),
+            _InfoRow(
+              iconCode: '',
+              label: 'Purchase Price',
+              value: _fmtCurrency(item.purchasePrice),
+            ),
+            const SizedBox(height: 16),
+            _MovePriceSection(
+              item: item,
+              onToggled: onMovePriceToggled,
+              formatCurrency: _fmtCurrency,
+            ),
+            Divider(height: 24, thickness: 1, color: scheme.outlineVariant),
+            Text(
+              'Price History',
+              style: TextStyle(
+                fontFamily: 'Calibri',
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: scheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 12),
+            if (isHistoryLoading)
+              SizedBox(
+                height: 100,
+                child: Center(
+                  child: CircularProgressIndicator(
+                    color: scheme.primary,
+                    strokeWidth: 2,
+                  ),
+                ),
+              )
+            else
+              PriceLineChart(
+                entries: history,
+                isRent: _isRent,
+                isValuation: false,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _imageFallback(ColorScheme scheme) => Container(
+        color: scheme.primary.withValues(alpha: 0.10),
+        child: Icon(
+          _isApartment ? Icons.apartment_outlined : Icons.home_work_outlined,
+          size: 64,
+          color: scheme.primary,
+        ),
+      );
+}
+
+class _MovePriceSection extends StatelessWidget {
+  const _MovePriceSection({
+    required this.item,
+    required this.onToggled,
+    required this.formatCurrency,
+  });
+
+  final PropertyItem item;
+  final Future<void> Function(bool) onToggled;
+  final String Function(double?) formatCurrency;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final isOn = item.isMakeMeMovePriceGiven;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          color: scheme.surfaceContainer,
+          child: Row(
+            children: [
+              Text(
+                'SET WISH PRICE',
+                style: TextStyle(
+                  fontFamily: 'Calibri',
+                  fontSize: 12,
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                '',
+                style: TextStyle(
+                  fontFamily: _iconFont,
+                  fontSize: 14,
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+              const Spacer(),
+              Switch(
+                value: isOn,
+                onChanged: onToggled,
+                activeThumbColor: scheme.primary,
+                activeTrackColor: scheme.primaryContainer,
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              color: isOn ? scheme.primaryContainer : scheme.surfaceContainer,
+              child: Text(
+                '',
+                style: TextStyle(
+                  fontFamily: _iconFont,
+                  fontSize: 20,
+                  color: isOn ? scheme.primary : scheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: isOn
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          formatCurrency(item.makeMeMovePrice),
+                          style: TextStyle(
+                            fontFamily: 'Calibri',
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: scheme.onSurface,
+                          ),
+                        ),
+                        Text(
+                          'Your wish price',
+                          style: TextStyle(
+                            fontFamily: 'Calibri',
+                            fontSize: 12,
+                            color: scheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    )
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Turn On',
+                          style: TextStyle(
+                            fontFamily: 'Calibri',
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: scheme.onSurface,
+                          ),
+                        ),
+                        Text(
+                          'Get a notification alert when the market price matches your wish price.',
+                          style: TextStyle(
+                            fontFamily: 'Calibri',
+                            fontSize: 12,
+                            color: scheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _InfoRow extends StatelessWidget {
+  const _InfoRow({
+    required this.iconCode,
+    required this.label,
+    required this.value,
+  });
+
+  final String iconCode;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(10),
+          color: scheme.primaryContainer,
+          child: Text(
+            iconCode,
+            style: TextStyle(
+              fontFamily: _iconFont,
+              fontSize: 20,
+              color: scheme.primary,
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontFamily: 'Calibri',
+                fontSize: 13,
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+            Text(
+              value,
+              style: TextStyle(
+                fontFamily: 'Calibri',
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: scheme.onSurface,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}

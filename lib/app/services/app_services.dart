@@ -16,6 +16,7 @@ import 'package:filip_at_flutter/features/notifications/application/sync_notific
 import 'package:filip_at_flutter/features/drive/data/drive_repository.dart';
 import 'package:filip_at_flutter/features/profile/profile_repository.dart';
 import 'package:filip_at_flutter/features/self_signup/data/self_signup_repository.dart';
+import 'package:filip_at_flutter/features/real_estate/data/real_estate_repository.dart';
 import 'package:filip_at_flutter/features/survey/data/survey_address_repository.dart';
 
 class AppServices {
@@ -39,6 +40,7 @@ class AppServices {
     required this.profileRepository,
     required this.surveyAddressRepository,
     required this.appVersionRepository,
+    required this.realEstateRepository,
   });
 
   final ApiClient apiClient;
@@ -60,4 +62,5 @@ class AppServices {
   final ProfileRepository profileRepository;
   final SurveyAddressRepository surveyAddressRepository;
   final AppVersionRepository appVersionRepository;
+  final RealEstateRepository realEstateRepository;
 }

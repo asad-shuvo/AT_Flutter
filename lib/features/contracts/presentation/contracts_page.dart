@@ -14,6 +14,7 @@ import 'package:filip_at_flutter/features/profile/profile_repository.dart';
 import 'package:filip_at_flutter/features/survey/data/survey_address_repository.dart';
 import 'package:filip_at_flutter/features/notifications/presentation/notifications_page.dart';
 import 'package:filip_at_flutter/features/notifications/application/sync_notification_service.dart';
+import 'package:filip_at_flutter/features/real_estate/data/real_estate_repository.dart';
 import 'package:filip_at_flutter/features/real_estate/presentation/real_estate_page.dart';
 import 'package:filip_at_flutter/features/explorer/presentation/filip_explorer_page.dart';
 import 'package:filip_at_flutter/features/contracts/presentation/widgets/contract_delete_sheet.dart';
@@ -42,6 +43,7 @@ class ContractsPage extends StatefulWidget {
     required this.householdController,
     required this.driveRepository,
     required this.userSessionCache,
+    required this.realEstateRepository,
     this.profileRepository,
     this.surveyAddressRepository,
   });
@@ -55,6 +57,7 @@ class ContractsPage extends StatefulWidget {
   final HouseholdMemberFilterController householdController;
   final DriveRepository driveRepository;
   final UserSessionCache userSessionCache;
+  final RealEstateRepository realEstateRepository;
   final ProfileRepository? profileRepository;
   final SurveyAddressRepository? surveyAddressRepository;
 
@@ -138,6 +141,9 @@ class _ContractsPageState extends State<ContractsPage> {
           householdController: widget.householdController,
           driveRepository: widget.driveRepository,
           userSessionCache: widget.userSessionCache,
+          realEstateRepository: widget.realEstateRepository,
+          profileRepository: widget.profileRepository,
+          surveyAddressRepository: widget.surveyAddressRepository,
         ),
       ),
     );
@@ -228,6 +234,7 @@ class _ContractsPageState extends State<ContractsPage> {
         householdController: widget.householdController,
         driveRepository: widget.driveRepository,
         userSessionCache: widget.userSessionCache,
+        realEstateRepository: widget.realEstateRepository,
         profileRepository: widget.profileRepository,
         surveyAddressRepository: widget.surveyAddressRepository,
       ),
@@ -300,12 +307,30 @@ class _ContractsPageState extends State<ContractsPage> {
                 householdController: widget.householdController,
                 driveRepository: widget.driveRepository,
                 userSessionCache: widget.userSessionCache,
+                realEstateRepository: widget.realEstateRepository,
+                profileRepository: widget.profileRepository,
+                surveyAddressRepository: widget.surveyAddressRepository,
               ),
             ),
           );
         },
         onContractsTap: () {},
-        onRealEstateTap: () => _openPage(const RealEstatePage()),
+        onRealEstateTap: () => _openPage(
+          RealEstatePage(
+            repository: widget.realEstateRepository,
+            dashboardRepository: widget.dashboardRepository,
+            contractsRepository: widget.contractsRepository,
+            notificationsRepository: widget.notificationsRepository,
+            authSessionController: widget.authSessionController,
+            appVersion: widget.appVersion,
+            syncNotificationService: widget.syncNotificationService,
+            householdController: widget.householdController,
+            driveRepository: widget.driveRepository,
+            userSessionCache: widget.userSessionCache,
+            profileRepository: widget.profileRepository,
+            surveyAddressRepository: widget.surveyAddressRepository,
+          ),
+        ),
         onMessagesTap: () => _openPage(const ChatPage()),
       ),
     );

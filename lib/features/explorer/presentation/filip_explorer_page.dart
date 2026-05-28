@@ -14,6 +14,7 @@ import 'package:filip_at_flutter/features/profile/profile_repository.dart';
 import 'package:filip_at_flutter/features/survey/data/survey_address_repository.dart';
 import 'package:filip_at_flutter/features/notifications/presentation/notifications_page.dart';
 import 'package:filip_at_flutter/features/notifications/application/sync_notification_service.dart';
+import 'package:filip_at_flutter/features/real_estate/data/real_estate_repository.dart';
 import 'package:filip_at_flutter/features/real_estate/presentation/real_estate_page.dart';
 import 'package:filip_at_flutter/shared/theme/app_colors.dart';
 import 'package:filip_at_flutter/shared/widgets/app_bottom_nav.dart';
@@ -36,6 +37,7 @@ class FilipExplorerPage extends StatefulWidget {
     required this.householdController,
     required this.driveRepository,
     required this.userSessionCache,
+    required this.realEstateRepository,
     this.profileRepository,
     this.surveyAddressRepository,
   });
@@ -49,6 +51,7 @@ class FilipExplorerPage extends StatefulWidget {
   final HouseholdMemberFilterController householdController;
   final DriveRepository driveRepository;
   final UserSessionCache userSessionCache;
+  final RealEstateRepository realEstateRepository;
   final ProfileRepository? profileRepository;
   final SurveyAddressRepository? surveyAddressRepository;
 
@@ -90,6 +93,7 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
           householdController: widget.householdController,
           driveRepository: widget.driveRepository,
           userSessionCache: widget.userSessionCache,
+          realEstateRepository: widget.realEstateRepository,
           profileRepository: widget.profileRepository,
           surveyAddressRepository: widget.surveyAddressRepository,
         ),
@@ -130,6 +134,7 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
             householdController: widget.householdController,
             driveRepository: widget.driveRepository,
             userSessionCache: widget.userSessionCache,
+            realEstateRepository: widget.realEstateRepository,
             profileRepository: widget.profileRepository,
             surveyAddressRepository: widget.surveyAddressRepository,
           ),
@@ -139,7 +144,20 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
         title: l10n.tr('tns.filipExplorerCardRealEsateTitle'),
         description: l10n.tr('tns.filipExplorerCardRealEsateSubTitle'),
         icon: const IconData(0xE9B4, fontFamily: _filipIconFamily),
-        onTap: () => _openPage(const RealEstatePage()),
+        onTap: () => _openPage(RealEstatePage(
+              repository: widget.realEstateRepository,
+              dashboardRepository: widget.dashboardRepository,
+              contractsRepository: widget.contractsRepository,
+              notificationsRepository: widget.notificationsRepository,
+              authSessionController: widget.authSessionController,
+              appVersion: widget.appVersion,
+              syncNotificationService: widget.syncNotificationService,
+              householdController: widget.householdController,
+              driveRepository: widget.driveRepository,
+              userSessionCache: widget.userSessionCache,
+              profileRepository: widget.profileRepository,
+              surveyAddressRepository: widget.surveyAddressRepository,
+            )),
       ),
       _ExplorerSlideData(
         title: l10n.tr('tns.filipExplorerCardDriveTitle'),
@@ -155,6 +173,7 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
           authSessionController: widget.authSessionController,
           appVersion: widget.appVersion,
           syncNotificationService: widget.syncNotificationService,
+          realEstateRepository: widget.realEstateRepository,
           profileRepository: widget.profileRepository,
         )),
       ),
@@ -179,6 +198,7 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
         householdController: widget.householdController,
         driveRepository: widget.driveRepository,
         userSessionCache: widget.userSessionCache,
+        realEstateRepository: widget.realEstateRepository,
         profileRepository: widget.profileRepository,
         surveyAddressRepository: widget.surveyAddressRepository,
       ),
@@ -214,7 +234,20 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
                         children: [
                           _ExplorerTileGrid(
                             onMyRealEstateTap: () =>
-                                _openPage(const RealEstatePage()),
+                                _openPage(RealEstatePage(
+                              repository: widget.realEstateRepository,
+                              dashboardRepository: widget.dashboardRepository,
+                              contractsRepository: widget.contractsRepository,
+                              notificationsRepository: widget.notificationsRepository,
+                              authSessionController: widget.authSessionController,
+                              appVersion: widget.appVersion,
+                              syncNotificationService: widget.syncNotificationService,
+                              householdController: widget.householdController,
+                              driveRepository: widget.driveRepository,
+                              userSessionCache: widget.userSessionCache,
+                              profileRepository: widget.profileRepository,
+                              surveyAddressRepository: widget.surveyAddressRepository,
+                            )),
                             onDriveTap: () => _openPage(DocumentsPage(
                               driveRepository: widget.driveRepository,
                               householdController: widget.householdController,
@@ -225,6 +258,7 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
                               authSessionController: widget.authSessionController,
                               appVersion: widget.appVersion,
                               syncNotificationService: widget.syncNotificationService,
+                              realEstateRepository: widget.realEstateRepository,
                               profileRepository: widget.profileRepository,
                             )),
                             onContractsTap: () => _openPage(
@@ -241,6 +275,7 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
                                 householdController: widget.householdController,
                                 driveRepository: widget.driveRepository,
                                 userSessionCache: widget.userSessionCache,
+                                realEstateRepository: widget.realEstateRepository,
                                 profileRepository: widget.profileRepository,
                                 surveyAddressRepository: widget.surveyAddressRepository,
                               ),
@@ -299,11 +334,25 @@ class _FilipExplorerPageState extends State<FilipExplorerPage> {
             householdController: widget.householdController,
             driveRepository: widget.driveRepository,
             userSessionCache: widget.userSessionCache,
+            realEstateRepository: widget.realEstateRepository,
             profileRepository: widget.profileRepository,
             surveyAddressRepository: widget.surveyAddressRepository,
           ),
         ),
-        onRealEstateTap: () => _openPage(const RealEstatePage()),
+        onRealEstateTap: () => _openPage(RealEstatePage(
+              repository: widget.realEstateRepository,
+              dashboardRepository: widget.dashboardRepository,
+              contractsRepository: widget.contractsRepository,
+              notificationsRepository: widget.notificationsRepository,
+              authSessionController: widget.authSessionController,
+              appVersion: widget.appVersion,
+              syncNotificationService: widget.syncNotificationService,
+              householdController: widget.householdController,
+              driveRepository: widget.driveRepository,
+              userSessionCache: widget.userSessionCache,
+              profileRepository: widget.profileRepository,
+              surveyAddressRepository: widget.surveyAddressRepository,
+            )),
         onMessagesTap: () => _openPage(const ChatPage()),
       ),
     );

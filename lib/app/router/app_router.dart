@@ -111,6 +111,7 @@ class AppRouter {
             profileRepository: services.profileRepository,
             appVersionRepository: services.appVersionRepository,
             surveyAddressRepository: services.surveyAddressRepository,
+            realEstateRepository: services.realEstateRepository,
           ),
           settings: settings,
         );

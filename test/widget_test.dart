@@ -19,6 +19,8 @@ import 'package:filip_at_flutter/features/notifications/application/sync_notific
 import 'package:filip_at_flutter/features/notifications/application/fcm_service.dart';
 import 'package:filip_at_flutter/features/profile/profile_repository.dart';
 import 'package:filip_at_flutter/features/self_signup/data/self_signup_repository.dart';
+import 'package:filip_at_flutter/features/app_version/data/app_version_repository.dart';
+import 'package:filip_at_flutter/features/real_estate/data/real_estate_repository.dart';
 import 'package:filip_at_flutter/features/survey/data/survey_address_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
@@ -81,6 +83,7 @@ void main() {
       investmentPushNotificationKey: '033c1c1a-3b1c-4bd2-bf9a-dc8009f2de63',
       aggregatorUrl: 'https://msblocks.selisestage.com/api/aggregator/v4/Service-Aggregator/ServiceAggrigation/',
       mailServiceUrl: 'https://msblocks.selisestage.com/api/mailservice/v15/MailService',
+      priceHubbleUrl: 'https://msblocks.selisestage.com/api/real-estate-service/RealEstateWebService/',
     );
     final userSessionCache = UserSessionCache(
       apiClient: apiClient,
@@ -155,6 +158,15 @@ void main() {
       surveyAddressRepository: SurveyAddressRepository(
         apiClient: apiClient,
         userSessionCache: userSessionCache,
+      ),
+      appVersionRepository: AppVersionRepository(
+        apiClient: apiClient,
+        appVersion: '1.0.4',
+      ),
+      realEstateRepository: RealEstateRepository(
+        apiClient: apiClient,
+        userSessionCache: userSessionCache,
+        priceHubbleUrl: 'https://msblocks.selisestage.com/api/real-estate-service/RealEstateWebService/',
       ),
     );
 

@@ -18,6 +18,7 @@ import 'package:filip_at_flutter/features/auth/data/forgot_password_repository.d
 import 'package:filip_at_flutter/features/auth/data/login_sync_repository.dart';
 import 'package:filip_at_flutter/features/contracts/application/household_member_filter_controller.dart';
 import 'package:filip_at_flutter/features/contracts/data/contracts_repository.dart';
+import 'package:filip_at_flutter/features/real_estate/data/real_estate_repository.dart';
 import 'package:filip_at_flutter/features/dashboard/data/dashboard_repository.dart';
 import 'package:filip_at_flutter/features/notifications/data/notifications_repository.dart';
 import 'package:filip_at_flutter/features/notifications/application/fcm_service.dart';
@@ -177,6 +178,11 @@ Future<void> bootstrap(AppFlavor flavor) async {
     apiClient: apiClient,
     appVersion: config.appVersion,
   );
+  final realEstateRepository = RealEstateRepository(
+    apiClient: apiClient,
+    userSessionCache: userSessionCache,
+    priceHubbleUrl: config.priceHubbleUrl,
+  );
 
   final services = AppServices(
     apiClient: apiClient,
@@ -198,6 +204,7 @@ Future<void> bootstrap(AppFlavor flavor) async {
     profileRepository: profileRepository,
     surveyAddressRepository: surveyAddressRepository,
     appVersionRepository: appVersionRepository,
+    realEstateRepository: realEstateRepository,
   );
 
   // Wire auth state changes for FCM topic subscription and session cache invalidation

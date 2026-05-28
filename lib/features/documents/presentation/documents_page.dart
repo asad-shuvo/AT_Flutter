@@ -4,6 +4,7 @@ import 'package:filip_at_flutter/features/contracts/application/household_member
 import 'package:filip_at_flutter/features/contracts/data/contracts_repository.dart';
 import 'package:filip_at_flutter/features/dashboard/data/dashboard_repository.dart';
 import 'package:filip_at_flutter/features/drive/data/drive_repository.dart';
+import 'package:filip_at_flutter/features/real_estate/data/real_estate_repository.dart';
 import 'package:filip_at_flutter/features/profile/profile_repository.dart';
 import 'package:filip_at_flutter/features/drive/presentation/drive_page.dart';
 import 'package:filip_at_flutter/features/notifications/application/sync_notification_service.dart';
@@ -22,6 +23,7 @@ class DocumentsPage extends StatelessWidget {
     required this.authSessionController,
     required this.appVersion,
     required this.syncNotificationService,
+    required this.realEstateRepository,
     this.profileRepository,
   });
 
@@ -34,6 +36,7 @@ class DocumentsPage extends StatelessWidget {
   final AuthSessionController authSessionController;
   final String appVersion;
   final SyncNotificationService syncNotificationService;
+  final RealEstateRepository realEstateRepository;
   final ProfileRepository? profileRepository;
 
   @override
@@ -48,6 +51,7 @@ class DocumentsPage extends StatelessWidget {
       authSessionController: authSessionController,
       appVersion: appVersion,
       syncNotificationService: syncNotificationService,
+      realEstateRepository: realEstateRepository,
       profileRepository: profileRepository,
     );
   }

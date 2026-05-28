@@ -19,6 +19,7 @@ class AppEnvironment {
     required this.investmentPushNotificationKey,
     required this.aggregatorUrl,
     required this.mailServiceUrl,
+    required this.priceHubbleUrl,
   });
 
   factory AppEnvironment.fromFlavor(AppFlavor flavor) {
@@ -54,6 +55,7 @@ class AppEnvironment {
           investmentPushNotificationKey: '033c1c1a-3b1c-4bd2-bf9a-dc8009f2de63',
           aggregatorUrl: '$devBaseUrl/aggregator/v6/Service-Aggregator/ServiceAggrigation/',
           mailServiceUrl: '$devBaseUrl/mailservice/v12/MailService',
+          priceHubbleUrl: '$devBaseUrl/real-estate-service/RealEstateWebService/',
         );
       case AppFlavor.stg:
         return const AppEnvironment(
@@ -76,6 +78,7 @@ class AppEnvironment {
           investmentPushNotificationKey: '4594019c-5f57-467d-bfbb-f2b6f08dd94c',
           aggregatorUrl: '$stgBaseUrl/aggregator/v4/Service-Aggregator/ServiceAggrigation/',
           mailServiceUrl: '$stgBaseUrl/mailservice/v15/MailService',
+          priceHubbleUrl: '$stgBaseUrl/real-estate-service/RealEstateWebService/',
         );
       case AppFlavor.uat:
         return const AppEnvironment(
@@ -98,6 +101,7 @@ class AppEnvironment {
           investmentPushNotificationKey: '4594019c-5f57-467d-bfbb-f2b6f08dd94c',
           aggregatorUrl: '$uatBaseUrl/aggregator/v4/Service-Aggregator/ServiceAggrigation/',
           mailServiceUrl: '$uatBaseUrl/mailservice/v15/MailService',
+          priceHubbleUrl: '$uatBaseUrl/real-estate-service/RealEstateWebService/',
         );
       case AppFlavor.prod:
         return const AppEnvironment(
@@ -120,6 +124,7 @@ class AppEnvironment {
           investmentPushNotificationKey: '4594019c-5f57-467d-bfbb-f2b6f08dd94c',
           aggregatorUrl: '$prodBaseUrl/aggregator/v100/Service-Aggregator/ServiceAggrigation/',
           mailServiceUrl: '$prodBaseUrl/mailservice/v100/MailService',
+          priceHubbleUrl: '$prodBaseUrl/real-estate-service/RealEstateWebService/',
         );
     }
   }
@@ -141,4 +146,5 @@ class AppEnvironment {
   final String investmentPushNotificationKey;
   final String aggregatorUrl;
   final String mailServiceUrl;
+  final String priceHubbleUrl;
 }

@@ -7,6 +7,7 @@ import 'package:filip_at_flutter/features/contracts/data/contracts_repository.da
 import 'package:filip_at_flutter/features/dashboard/data/dashboard_models.dart';
 import 'package:filip_at_flutter/features/dashboard/data/dashboard_repository.dart';
 import 'package:filip_at_flutter/features/drive/data/drive_repository.dart';
+import 'package:filip_at_flutter/features/real_estate/data/real_estate_repository.dart';
 import 'package:filip_at_flutter/features/household/presentation/household_members_page.dart';
 import 'package:filip_at_flutter/features/notifications/application/sync_notification_service.dart';
 import 'package:filip_at_flutter/features/notifications/data/notifications_repository.dart';
@@ -35,6 +36,7 @@ class AppSideDrawer extends StatelessWidget {
     required this.householdController,
     required this.driveRepository,
     required this.userSessionCache,
+    required this.realEstateRepository,
     this.profileRepository,
     this.surveyAddressRepository,
   });
@@ -49,6 +51,7 @@ class AppSideDrawer extends StatelessWidget {
   final HouseholdMemberFilterController householdController;
   final DriveRepository driveRepository;
   final UserSessionCache userSessionCache;
+  final RealEstateRepository realEstateRepository;
   final ProfileRepository? profileRepository;
   final SurveyAddressRepository? surveyAddressRepository;
   static const String _legalUrl =
@@ -219,6 +222,7 @@ class AppSideDrawer extends StatelessWidget {
                           isBusiness: false,
                           driveRepository: driveRepository,
                           userSessionCache: userSessionCache,
+                          realEstateRepository: realEstateRepository,
                           profileRepository: profileRepository,
                         ),
                       ),
@@ -240,6 +244,7 @@ class AppSideDrawer extends StatelessWidget {
                           isBusiness: true,
                           driveRepository: driveRepository,
                           userSessionCache: userSessionCache,
+                          realEstateRepository: realEstateRepository,
                           profileRepository: profileRepository,
                         ),
                       ),
