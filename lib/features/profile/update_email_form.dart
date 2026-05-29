@@ -40,15 +40,15 @@ class _UpdateEmailFormState extends State<UpdateEmailForm> {
     final l10n = context.l10n;
     final email = _emailController.text.trim();
     if (email.isEmpty) {
-      setState(() => _localError = l10n.tr('tns.emailRequired'));
+      setState(() => _localError = l10n.tr('tns.emailError'));
       return;
     }
     if (!_isValidEmail(email)) {
-      setState(() => _localError = l10n.tr('tns.emailInvalid'));
+      setState(() => _localError = l10n.tr('tns.invalidEmail'));
       return;
     }
     if (email == widget.currentEmail) {
-      setState(() => _localError = l10n.tr('tns.emailUnchanged'));
+      setState(() => _localError = l10n.tr('tns.emailError'));
       return;
     }
     setState(() => _localError = null);
@@ -105,7 +105,7 @@ class _UpdateEmailFormState extends State<UpdateEmailForm> {
                           ),
                           const SizedBox(height: 28),
                           Text(
-                            l10n.tr('tns.updateEmailSubHeader'),
+                            l10n.tr('tns.changeEmailSubHeader'),
                             style: TextStyle(
                               fontFamily: 'Calibri',
                               fontSize: 16,

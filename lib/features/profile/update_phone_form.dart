@@ -53,12 +53,12 @@ class _UpdatePhoneFormState extends State<UpdatePhoneForm> {
     final l10n = context.l10n;
     final digits = _digitsController.text.trim();
     if (digits.length < 9 || digits.length > 14) {
-      setState(() => _localError = l10n.tr('tns.phoneInvalid'));
+      setState(() => _localError = l10n.tr('tns.invalidPhone'));
       return;
     }
     final full = _fullPhone;
     if (full == widget.currentPhone) {
-      setState(() => _localError = l10n.tr('tns.phoneUnchanged'));
+      setState(() => _localError = l10n.tr('tns.invalidPhone'));
       return;
     }
     setState(() => _localError = null);
@@ -132,7 +132,7 @@ class _UpdatePhoneFormState extends State<UpdatePhoneForm> {
                         ),
                         const SizedBox(height: 20),
                         Text(
-                          l10n.tr('tns.updatePhoneSubHeader'),
+                          l10n.tr('tns.changePhoneNumberSubHeader'),
                           style: TextStyle(
                             fontFamily: 'Calibri',
                             fontSize: 16,

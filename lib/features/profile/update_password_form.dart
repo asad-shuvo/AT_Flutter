@@ -53,19 +53,19 @@ class _UpdatePasswordFormState extends State<UpdatePasswordForm> {
     String? repeatErr;
 
     if (current.isEmpty) {
-      currentErr = l10n.tr('tns.currentPasswordRequired');
+      currentErr = l10n.tr('tns.enterCurrentPassword');
     } else if (!_passwordStrengthRegex.hasMatch(current)) {
-      currentErr = l10n.tr('tns.passwordStrengthError');
+      currentErr = l10n.tr('tns.newPasswordErrMessage');
     }
     if (newPw.isEmpty) {
-      newErr = l10n.tr('tns.newPasswordRequired');
+      newErr = l10n.tr('tns.enterNewPassword');
     } else if (!_passwordStrengthRegex.hasMatch(newPw)) {
-      newErr = l10n.tr('tns.passwordStrengthError');
+      newErr = l10n.tr('tns.newPasswordErrMessage');
     }
     if (repeat.isEmpty) {
-      repeatErr = l10n.tr('tns.repeatPasswordRequired');
+      repeatErr = l10n.tr('tns.repeatNewPassword');
     } else if (newPw != repeat) {
-      repeatErr = l10n.tr('tns.passwordNoMatch');
+      repeatErr = l10n.tr('tns.confirmPasswordErrMessage');
     }
 
     setState(() {
@@ -126,7 +126,7 @@ class _UpdatePasswordFormState extends State<UpdatePasswordForm> {
                             ),
                             const SizedBox(width: 10),
                             Text(
-                              l10n.tr('tns.changePasswordTitle'),
+                              l10n.tr('tns.changePassword'),
                               style: const TextStyle(
                                 fontFamily: 'Calibri',
                                 fontSize: 22 / 1.2,
@@ -169,7 +169,7 @@ class _UpdatePasswordFormState extends State<UpdatePasswordForm> {
                         const SizedBox(height: 8),
                         _PasswordField(
                           controller: _repeatPasswordController,
-                          hint: l10n.tr('tns.repeatNewPasswordHint'),
+                          hint: l10n.tr('tns.repeatNewPassword'),
                           showPassword: _showRepeat,
                           onToggle: () =>
                               setState(() => _showRepeat = !_showRepeat),

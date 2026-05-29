@@ -15,6 +15,7 @@ import 'package:filip_at_flutter/features/profile/update_phone_form.dart';
 import 'package:filip_at_flutter/features/profile/verification_code_sheet.dart';
 import 'package:filip_at_flutter/shared/icons/app_icon_packs.dart';
 import 'package:filip_at_flutter/shared/theme/app_colors.dart';
+import 'package:filip_at_flutter/features/profile/account_delete_bottom_sheet.dart';
 import 'package:filip_at_flutter/shared/utils/logout_utils.dart';
 import 'package:flutter/material.dart';
 
@@ -175,7 +176,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: SizedBox(
                       height: 48,
                       child: OutlinedButton(
-                        onPressed: () => _showPendingMessage(context),
+                        onPressed: () => _onDeleteAccountTap(context),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppColors.primaryRed,
                           side: const BorderSide(color: Color(0xFFD2D2D2)),
@@ -185,7 +186,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           backgroundColor: Colors.white,
                         ),
                         child: Text(
-                          l10n.tr('tns.deleteAccount'),
+                          l10n.tr('tns.deleteFilipAccount'),
                           style: const TextStyle(
                             fontFamily: 'Calibri',
                             fontSize: 16,
@@ -202,6 +203,19 @@ class _ProfilePageState extends State<ProfilePage> {
           );
         },
       ),
+    );
+  }
+
+  Future<void> _onDeleteAccountTap(BuildContext context) async {
+    final repository = widget.profileRepository;
+    if (repository == null) {
+      _showPendingMessage(context);
+      return;
+    }
+    await showAccountDeleteBottomSheet(
+      context,
+      repository: repository,
+      authSessionController: widget.authSessionController,
     );
   }
 

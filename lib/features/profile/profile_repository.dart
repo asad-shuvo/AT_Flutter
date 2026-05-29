@@ -630,6 +630,80 @@ class ProfileRepository {
     );
   }
 
+  // ─── Delete account ────────────────────────────────────────────────────────
+
+  /// Step 1 — fire-and-forget drop request.
+  /// NS: POST {SLSNBusiness}AccountCommand/DropRequest — no response check.
+  Future<void> dropRequest() async {
+    final user = await _sessionCache.resolve();
+    if (user == null) return;
+    await _apiClient.postJson(
+      url: '${_apiClient.slsnBusinessUrl}AccountCommand/DropRequest',
+      body: <String, dynamic>{
+        'PersonId': user.personId,
+        'UserId': user.userId,
+      },
+      headers: <String, String>{
+        'Authorization': 'bearer ${user.accessToken}',
+        'Origin': _apiClient.originUrl,
+      },
+    );
+  }
+
+  /// Step 2 — main deletion call (and step 3 with challenge if required).
+  /// NS: POST {SLSNBusiness}SlSnCommand/DeletePersonRelatedData
+  /// Returns true on success. Handles challenge-response internally.
+  Future<bool> deletePersonRelatedData() async {
+    final user = await _sessionCache.resolve();
+    if (user == null) return false;
+    final headers = <String, String>{
+      'Authorization': 'bearer ${user.accessToken}',
+      'Origin': _apiClient.originUrl,
+    };
+    final baseBody = <String, dynamic>{
+      'Pnr': user.customerId,
+      'PersonId': user.personId,
+    };
+
+    final res1 = await _apiClient.postJson(
+      url: '${_apiClient.slsnBusinessUrl}SlSnCommand/DeletePersonRelatedData',
+      body: baseBody,
+      headers: headers,
+    );
+    final body1 = res1['body'] as Map<String, dynamic>? ?? {};
+    final errors1 = body1['Errors'] as Map<String, dynamic>?;
+
+    if (errors1?['IsValid'] == true) return true;
+
+    // Extract challenge key + code from error list.
+    final errorList = errors1?['Errors'] as List<dynamic>? ?? const [];
+    String? challengeKey;
+    String? challengeCode;
+    for (final e in errorList) {
+      if (e is! Map) continue;
+      final propName = e['PropertyName']?.toString() ?? '';
+      final msg = e['ErrorMessage']?.toString() ?? '';
+      if (propName == 'ChallangeKey') challengeKey = msg;
+      if (propName == 'Code') challengeCode = msg;
+    }
+
+    if (challengeKey == null || challengeCode == null) return false;
+
+    // Step 3 — retry with challenge response.
+    final res2 = await _apiClient.postJson(
+      url: '${_apiClient.slsnBusinessUrl}SlSnCommand/DeletePersonRelatedData',
+      body: <String, dynamic>{
+        ...baseBody,
+        'MessageCorrelationId': challengeKey,
+        'Code': challengeCode,
+      },
+      headers: headers,
+    );
+    final body2 = res2['body'] as Map<String, dynamic>? ?? {};
+    final errors2 = body2['Errors'] as Map<String, dynamic>?;
+    return errors2?['IsValid'] == true;
+  }
+
   Future<Map<String, String>> _authorizedHeaders() async {
     final user = await _requireUser();
     return <String, String>{
