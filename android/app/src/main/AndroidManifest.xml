@@ -25,6 +25,29 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+
+            <!-- Deep link: reset-password-verification — mirrors NS AndroidManifest -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="https"/>
+                <!-- stage -->
+                <data android:host="sln-at.selisestage.com"
+                      android:pathPrefix="/login/reset-password-verification"/>
+                <!-- uat -->
+                <data android:host="uat-sln-at.selise.biz"
+                      android:pathPrefix="/login/reset-password-verification"/>
+                <!-- uat-aks -->
+                <data android:host="sln-at.seliseuat.com"
+                      android:pathPrefix="/login/reset-password-verification"/>
+                <!-- prod -->
+                <data android:host="www.filip.at"
+                      android:pathPrefix="/login/reset-password-verification"/>
+                <!-- prod-aks -->
+                <data android:host="shadow-slnat.selise.biz"
+                      android:pathPrefix="/login/reset-password-verification"/>
+            </intent-filter>
         </activity>
         <!-- Google Maps API key — replace with your actual key -->
         <meta-data

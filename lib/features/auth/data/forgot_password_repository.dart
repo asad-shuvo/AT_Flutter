@@ -135,6 +135,56 @@ class ForgotPasswordRepository {
     return RecoverAccountResult.error;
   }
 
+  // ─── Deep-link reset-password flow ────────────────────────────────────────
+
+  /// Validates the activation code from the deep-link URL.
+  /// NS: GET {Security}Authentication/ActivateAccountCodeCheck?ActivateAccountCode={code}
+  /// Returns `recoverAccountCode` (to pass to [resetPasswordWithCode]) or null if invalid.
+  Future<String?> checkActivationCode(String activationCode) async {
+    await _ensureAnonymousToken();
+    final url = Uri.parse(
+      '${_securityBaseUrl}Authentication/ActivateAccountCodeCheck',
+    ).replace(
+      queryParameters: <String, String>{'ActivateAccountCode': activationCode},
+    );
+    final response = await _apiClient.getJson(
+      url: url.toString(),
+      headers: _headers,
+    );
+    final statusCode = response['statusCode'] as int? ?? 0;
+    if (statusCode < 200 || statusCode >= 300) return null;
+    final body = response['body'] as Map<String, dynamic>? ?? {};
+    final bodyStatusCode = body['StatusCode'] as int? ?? -1;
+    final codeValid = body['CodeValid'] == true;
+    if (bodyStatusCode == 0 && codeValid) {
+      return body['RecoverAccountCode'] as String? ?? activationCode;
+    }
+    return null;
+  }
+
+  /// Resets the password using the recovery code from [checkActivationCode].
+  /// NS: POST {Security}SecurityCommand/ResetPassword
+  ///     Body: {NewPassword, RecoverAccountCode}
+  Future<bool> resetPasswordWithCode({
+    required String newPassword,
+    required String recoverAccountCode,
+  }) async {
+    await _ensureAnonymousToken();
+    final response = await _apiClient.postJson(
+      url: '${_securityBaseUrl}SecurityCommand/ResetPassword',
+      body: <String, dynamic>{
+        'NewPassword': newPassword,
+        'RecoverAccountCode': recoverAccountCode,
+      },
+      headers: _headers,
+    );
+    final statusCode = response['statusCode'] as int? ?? 0;
+    if (statusCode < 200 || statusCode >= 300) return false;
+    final body = response['body'] as Map<String, dynamic>? ?? {};
+    final errors = body['Errors'] as Map<String, dynamic>?;
+    return errors?['IsValid'] == true;
+  }
+
   String get _securityBaseUrl {
     final base = _apiClient.baseUrl;
     if (base.contains('seliselocal')) {
