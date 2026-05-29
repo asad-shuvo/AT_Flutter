@@ -7,6 +7,7 @@ import 'package:filip_at_flutter/features/auth/application/user_session_cache.da
 import 'package:filip_at_flutter/features/auth/data/auth_repository.dart';
 import 'package:filip_at_flutter/features/auth/data/forgot_password_repository.dart';
 import 'package:filip_at_flutter/features/auth/data/login_sync_repository.dart';
+import 'package:filip_at_flutter/features/chat/data/chat_repository.dart';
 import 'package:filip_at_flutter/features/contracts/application/household_member_filter_controller.dart';
 import 'package:filip_at_flutter/features/contracts/data/contracts_repository.dart';
 import 'package:filip_at_flutter/features/dashboard/data/dashboard_repository.dart';
@@ -20,7 +21,7 @@ import 'package:filip_at_flutter/features/real_estate/data/real_estate_repositor
 import 'package:filip_at_flutter/features/survey/data/survey_address_repository.dart';
 
 class AppServices {
-  const AppServices({
+  AppServices({
     required this.apiClient,
     required this.secureStorageService,
     required this.authRepository,
@@ -41,7 +42,18 @@ class AppServices {
     required this.surveyAddressRepository,
     required this.appVersionRepository,
     required this.realEstateRepository,
-  });
+    required this.chatRepository,
+  }) {
+    _instance = this;
+  }
+
+  // Global singleton — set once by bootstrap, read by ChatPage and any widget
+  // that needs services without constructor threading.
+  static AppServices? _instance;
+  static AppServices get instance {
+    assert(_instance != null, 'AppServices not yet initialised');
+    return _instance!;
+  }
 
   final ApiClient apiClient;
   final SecureStorageService secureStorageService;
@@ -63,4 +75,5 @@ class AppServices {
   final SurveyAddressRepository surveyAddressRepository;
   final AppVersionRepository appVersionRepository;
   final RealEstateRepository realEstateRepository;
+  final ChatRepository chatRepository;
 }

@@ -20,6 +20,7 @@ class ApiClient {
     required this.dmsServiceUrl,
     required this.aggregatorUrl,
     required this.mailServiceUrl,
+    required this.messagingServiceUrl,
   });
 
   final String baseUrl;
@@ -34,6 +35,7 @@ class ApiClient {
   final String dmsServiceUrl;
   final String aggregatorUrl;
   final String mailServiceUrl;
+  final String messagingServiceUrl;
 
   // Returns the new access token after a successful refresh, or null to skip retry.
   Future<String?> Function()? _onUnauthorized;
@@ -157,6 +159,40 @@ class ApiClient {
       }
     }
     return result;
+  }
+
+  /// POST with a pre-encoded JSON string body — required when the server
+  /// expects a JSON array (List) rather than a JSON object (Map).
+  Future<Map<String, dynamic>> postJsonRaw({
+    required String url,
+    required String rawBody,
+    Map<String, String> headers = const <String, String>{},
+  }) async {
+    final client = HttpClient();
+    client.connectionTimeout = _requestTimeout;
+    try {
+      final request = await client.postUrl(Uri.parse(url));
+      final bodyBytes = utf8.encode(rawBody);
+      request.headers.set(HttpHeaders.contentTypeHeader, 'application/json');
+      request.headers.set(HttpHeaders.contentLengthHeader, bodyBytes.length);
+      for (final entry in headers.entries) {
+        request.headers.set(entry.key, entry.value);
+      }
+      request.add(bodyBytes);
+      final response = await request.close().timeout(_requestTimeout);
+      final responseBody =
+          await response.transform(utf8.decoder).join().timeout(_requestTimeout);
+      final dynamic decoded =
+          responseBody.isEmpty ? <String, dynamic>{} : jsonDecode(responseBody);
+      final Map<String, dynamic> bodyMap = decoded is Map
+          ? Map<String, dynamic>.from(decoded)
+          : <String, dynamic>{'_list': decoded};
+      return <String, dynamic>{'statusCode': response.statusCode, 'body': bodyMap};
+    } catch (_) {
+      rethrow;
+    } finally {
+      client.close(force: true);
+    }
   }
 
   // ── Internal request executors ──────────────────────────────────────────

@@ -19,6 +19,7 @@ class AppEnvironment {
     required this.investmentPushNotificationKey,
     required this.aggregatorUrl,
     required this.mailServiceUrl,
+    required this.messagingServiceUrl,
     required this.priceHubbleUrl,
   });
 
@@ -39,10 +40,8 @@ class AppEnvironment {
           apiBaseUrl: devBaseUrl,
           tokenUrl: '$devBaseUrl/identity/v20/identity/token',
           dataCoreUrl: '$devBaseUrl/pds/v1/AppSuiteDataCore/',
-          snQueryUrl:
-              '$devBaseUrl/business-slnquery/selectnetworkqueryservice/',
-          slsnBusinessUrl:
-              '$devBaseUrl/business-sln/SelectNetworkBusinessService/',
+          snQueryUrl: '$devBaseUrl/business-slnquery/selectnetworkqueryservice/',
+          slsnBusinessUrl: '$devBaseUrl/business-sln/SelectNetworkBusinessService/',
           notificationUrl: '$devBaseUrl/notification/v3',
           dfsBaseUrl: 'http://pms-swisslife-frontend-dev.additiv.com/',
           originUrl: devOriginUrl,
@@ -55,6 +54,7 @@ class AppEnvironment {
           investmentPushNotificationKey: '033c1c1a-3b1c-4bd2-bf9a-dc8009f2de63',
           aggregatorUrl: '$devBaseUrl/aggregator/v6/Service-Aggregator/ServiceAggrigation/',
           mailServiceUrl: '$devBaseUrl/mailservice/v12/MailService',
+          messagingServiceUrl: '$devBaseUrl/messagingservice/v15/MessagingService',
           priceHubbleUrl: '$devBaseUrl/real-estate-service/RealEstateWebService/',
         );
       case AppFlavor.stg:
@@ -62,10 +62,8 @@ class AppEnvironment {
           apiBaseUrl: stgBaseUrl,
           tokenUrl: '$stgBaseUrl/identity/v25/identity/token',
           dataCoreUrl: '$stgBaseUrl/pds/v1/AppSuiteDataCore/',
-          snQueryUrl:
-              '$stgBaseUrl/business-slnquery/selectnetworkqueryservice/',
-          slsnBusinessUrl:
-              '$stgBaseUrl/business-sln/SelectNetworkBusinessService/',
+          snQueryUrl: '$stgBaseUrl/business-slnquery/selectnetworkqueryservice/',
+          slsnBusinessUrl: '$stgBaseUrl/business-sln/SelectNetworkBusinessService/',
           notificationUrl: '$stgBaseUrl/notification/v3',
           dfsBaseUrl: 'http://pms-swisslife-frontend-test.additiv.com/',
           originUrl: stgOriginUrl,
@@ -78,6 +76,7 @@ class AppEnvironment {
           investmentPushNotificationKey: '4594019c-5f57-467d-bfbb-f2b6f08dd94c',
           aggregatorUrl: '$stgBaseUrl/aggregator/v4/Service-Aggregator/ServiceAggrigation/',
           mailServiceUrl: '$stgBaseUrl/mailservice/v15/MailService',
+          messagingServiceUrl: '$stgBaseUrl/messagingservice/v20/MessagingService',
           priceHubbleUrl: '$stgBaseUrl/real-estate-service/RealEstateWebService/',
         );
       case AppFlavor.uat:
@@ -85,10 +84,8 @@ class AppEnvironment {
           apiBaseUrl: uatBaseUrl,
           tokenUrl: '$uatBaseUrl/identity/v25/identity/token',
           dataCoreUrl: '$uatBaseUrl/pds/v1/AppSuiteDataCore/',
-          snQueryUrl:
-              '$uatBaseUrl/business-slnquery/selectnetworkqueryservice/',
-          slsnBusinessUrl:
-              '$uatBaseUrl/business-sln/SelectNetworkBusinessService/',
+          snQueryUrl: '$uatBaseUrl/business-slnquery/selectnetworkqueryservice/',
+          slsnBusinessUrl: '$uatBaseUrl/business-sln/SelectNetworkBusinessService/',
           notificationUrl: '$uatBaseUrl/notification/v3',
           dfsBaseUrl: 'https://stagefilip.swisslife-select.at/',
           originUrl: uatOriginUrl,
@@ -101,6 +98,7 @@ class AppEnvironment {
           investmentPushNotificationKey: '4594019c-5f57-467d-bfbb-f2b6f08dd94c',
           aggregatorUrl: '$uatBaseUrl/aggregator/v4/Service-Aggregator/ServiceAggrigation/',
           mailServiceUrl: '$uatBaseUrl/mailservice/v15/MailService',
+          messagingServiceUrl: '$uatBaseUrl/messagingservice/v20/MessagingService',
           priceHubbleUrl: '$uatBaseUrl/real-estate-service/RealEstateWebService/',
         );
       case AppFlavor.prod:
@@ -108,10 +106,8 @@ class AppEnvironment {
           apiBaseUrl: prodBaseUrl,
           tokenUrl: '$prodBaseUrl/identity/v100/identity/token',
           dataCoreUrl: '$prodBaseUrl/pds/v100/AppSuiteDataCore/',
-          snQueryUrl:
-              '$prodBaseUrl/business-slnquery/selectnetworkqueryservice/',
-          slsnBusinessUrl:
-              '$prodBaseUrl/business-sln/SelectNetworkBusinessService/',
+          snQueryUrl: '$prodBaseUrl/business-slnquery/selectnetworkqueryservice/',
+          slsnBusinessUrl: '$prodBaseUrl/business-sln/SelectNetworkBusinessService/',
           notificationUrl: '$prodBaseUrl/notification/v100',
           dfsBaseUrl: 'https://filip.swisslife-select.at/',
           originUrl: prodOriginUrl,
@@ -124,6 +120,7 @@ class AppEnvironment {
           investmentPushNotificationKey: '4594019c-5f57-467d-bfbb-f2b6f08dd94c',
           aggregatorUrl: '$prodBaseUrl/aggregator/v100/Service-Aggregator/ServiceAggrigation/',
           mailServiceUrl: '$prodBaseUrl/mailservice/v100/MailService',
+          messagingServiceUrl: '$prodBaseUrl/messagingservice/v100/MessagingService',
           priceHubbleUrl: '$prodBaseUrl/real-estate-service/RealEstateWebService/',
         );
     }
@@ -146,5 +143,6 @@ class AppEnvironment {
   final String investmentPushNotificationKey;
   final String aggregatorUrl;
   final String mailServiceUrl;
+  final String messagingServiceUrl;
   final String priceHubbleUrl;
 }

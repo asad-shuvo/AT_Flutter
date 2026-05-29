@@ -76,6 +76,7 @@ flutter:
     - assets/images/login/
     - assets/images/onboarding/
     - assets/images/dashboard/
+    - assets/images/chat/
     - assets/i18n/
 
   fonts:

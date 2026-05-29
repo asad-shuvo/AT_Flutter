@@ -6,7 +6,9 @@
       "Read(//d/Mobile Repo/old/l3-angular-sln-mobileat/src/**)",
       "Bash(Get-ChildItem -Path \"d:\\\\Mobile Repo\\\\old\\\\l3-angular-sln-mobileat\\\\src\\\\app\\\\app-real-estate\\\\components\\\\search-property\\\\search-property-command\")",
       "Bash(Select-Object Name)",
-      "Bash(awk 'NR==555||NR==566||NR==575{printf \"L%d: \",NR; print}' \"d:/Mobile Repo/old/AT_Flutter/lib/features/real_estate/presentation/search_query_form_page.dart\")"
+      "Bash(awk 'NR==555||NR==566||NR==575{printf \"L%d: \",NR; print}' \"d:/Mobile Repo/old/AT_Flutter/lib/features/real_estate/presentation/search_query_form_page.dart\")",
+      "Bash(Get-ChildItem -Path \"d:\\\\Mobile Repo\\\\old\\\\AT_Flutter\\\\lib\" -Recurse -Directory)",
+      "Bash(Sort-Object)"
     ]
   }
 }

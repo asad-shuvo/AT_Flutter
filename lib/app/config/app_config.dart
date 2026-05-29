@@ -23,6 +23,7 @@ class AppConfig {
     required this.investmentPushNotificationKey,
     required this.aggregatorUrl,
     required this.mailServiceUrl,
+    required this.messagingServiceUrl,
     required this.priceHubbleUrl,
   });
 
@@ -49,6 +50,7 @@ class AppConfig {
       investmentPushNotificationKey: environment.investmentPushNotificationKey,
       aggregatorUrl: environment.aggregatorUrl,
       mailServiceUrl: environment.mailServiceUrl,
+      messagingServiceUrl: environment.messagingServiceUrl,
       priceHubbleUrl: environment.priceHubbleUrl,
     );
   }
@@ -72,6 +74,7 @@ class AppConfig {
   final String investmentPushNotificationKey;
   final String aggregatorUrl;
   final String mailServiceUrl;
+  final String messagingServiceUrl;
   final String priceHubbleUrl;
 
   bool get isProduction => flavor == AppFlavor.prod;

@@ -27,6 +27,7 @@ import 'package:filip_at_flutter/app/router/app_router.dart';
 import 'package:filip_at_flutter/features/drive/data/drive_repository.dart';
 import 'package:filip_at_flutter/features/profile/profile_repository.dart';
 import 'package:filip_at_flutter/features/self_signup/data/self_signup_repository.dart';
+import 'package:filip_at_flutter/features/chat/data/chat_repository.dart';
 import 'package:filip_at_flutter/features/survey/data/survey_address_repository.dart';
 import 'package:flutter/material.dart';
 
@@ -58,6 +59,7 @@ Future<void> bootstrap(AppFlavor flavor) async {
     dmsServiceUrl: config.dmsServiceUrl,
     aggregatorUrl: config.aggregatorUrl,
     mailServiceUrl: config.mailServiceUrl,
+    messagingServiceUrl: config.messagingServiceUrl,
   );
   final secureStorageService = await SecureStorageService.create();
   final authRepository = AuthRepository(
@@ -183,6 +185,10 @@ Future<void> bootstrap(AppFlavor flavor) async {
     userSessionCache: userSessionCache,
     priceHubbleUrl: config.priceHubbleUrl,
   );
+  final chatRepository = ChatRepository(
+    apiClient: apiClient,
+    userSessionCache: userSessionCache,
+  );
 
   final services = AppServices(
     apiClient: apiClient,
@@ -205,6 +211,7 @@ Future<void> bootstrap(AppFlavor flavor) async {
     surveyAddressRepository: surveyAddressRepository,
     appVersionRepository: appVersionRepository,
     realEstateRepository: realEstateRepository,
+    chatRepository: chatRepository,
   );
 
   // Wire auth state changes for FCM topic subscription and session cache invalidation
